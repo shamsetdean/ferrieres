@@ -538,10 +538,18 @@ function fDist(km) {
 
 /* ── PHOTOS ── */
 function loadPhotos() {
+  // Ne charger que les photos en base64 ajoutées par l'admin
+  // Ignorer les anciens chemins relatifs (bulle-tennis.jpg, photos/...) 
+  // qui sont des résidus de versions précédentes
   BATIMENTS.forEach(function(b) {
     try {
       var s = localStorage.getItem('fp_' + b.id);
-      if (s) S.photos[b.id] = s;
+      if (s && s.indexOf('data:') === 0) {
+        S.photos[b.id] = s;
+      } else if (s) {
+        // Supprimer les anciennes valeurs incorrectes
+        localStorage.removeItem('fp_' + b.id);
+      }
     } catch(e) {}
   });
 }
@@ -955,6 +963,17 @@ for (var ni = 0; ni < navBtns.length; ni++) {
 }
 
 /* ── INIT ── */
+// Migration : nettoyer les résidus de localStorage d'anciennes versions
+(function() {
+  try {
+    BATIMENTS.forEach(function(b) {
+      var s = localStorage.getItem('fp_' + b.id);
+      if (s && s.indexOf('data:') !== 0) {
+        localStorage.removeItem('fp_' + b.id);
+      }
+    });
+  } catch(e) {}
+})();
 loadPhotos();
 initMap();
 </script>
