@@ -918,7 +918,7 @@ function requestLocation() {
 function initMap() {
   state.map = new maptilersdk.Map({
     container: 'map',
-    style: 'https://api.maptiler.com/maps/streets/style.json?key=AhQ10drEx79exZrx0qNv',
+    style: 'https://api.maptiler.com/maps/dataviz-light/style.json?key=AhQ10drEx79exZrx0qNv',
     center: [2.7093, 48.8262],
     zoom: 14,
     pitch: 0,
@@ -927,6 +927,42 @@ function initMap() {
   });
 
   state.map.on('load', () => {
+    // Masquer tous les layers de points d'intérêt OSM (commerces, restaurants, etc.)
+    // Ne garder que le fond cartographique épuré
+    const layersToHide = [
+      'poi',
+      'poi-level-1', 'poi-level-2', 'poi-level-3',
+      'poi_z14', 'poi_z15', 'poi_z16',
+      'place-of-worship', 'place-of-worship-name',
+      'shop', 'shop-name',
+      'amenity', 'amenity-name',
+      'building-name',
+      'road-label', 'road-label-small',
+      'transit-label',
+      'airport-label',
+      'waterway-label',
+    ];
+    layersToHide.forEach(id => {
+      if (state.map.getLayer(id)) {
+        state.map.setLayoutProperty(id, 'visibility', 'none');
+      }
+    });
+    // Masquer dynamiquement tout layer contenant 'poi' ou 'shop' ou 'label'
+    state.map.getStyle().layers.forEach(layer => {
+      const id = layer.id.toLowerCase();
+      if (
+        id.includes('poi') ||
+        id.includes('shop') ||
+        id.includes('amenity') ||
+        id.includes('transit') ||
+        id.includes('airport') ||
+        id.includes('place-of-worship') ||
+        id.includes('building-name')
+      ) {
+        state.map.setLayoutProperty(layer.id, 'visibility', 'none');
+      }
+    });
+
     // Source GeoJSON
     // Seuls les bâtiments avec GPS exact sont affichés sur la carte
     state.map.addSource('batiments', {
@@ -1071,11 +1107,12 @@ $('btn-locate').addEventListener('click', requestLocation);
 $('badge-close').addEventListener('click', () => $('location-badge').classList.remove('visible'));
 
 /* --- Service Worker --- */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  });
-}
+// Enregistrement désactivé en développement — activer uniquement sur domaine racine
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('./sw.js').catch(() => {});
+//   });
+// }
 
 /* --- Accès admin discret : tap long (1.5s) sur le titre --- */
 let adminTapTimer = null;
