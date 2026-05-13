@@ -820,11 +820,16 @@ function openFiche(id) {
 
   // Champs info
   const fields = [
-    b.adresse   && b.adresse   !== '—' ? { k: 'pin',   lbl: 'Adresse',     val: b.adresse }   : null,
-    b.horaires  && b.horaires  !== '—' ? { k: 'clock', lbl: 'Horaires',    val: b.horaires }  : null,
-    b.telephone && b.telephone !== '—' ? { k: 'phone', lbl: 'Téléphone',   val: b.telephone } : null,
-    b.description                      ? { k: 'info',  lbl: 'Description', val: b.description }: null,
-    b.annee    && b.annee      !== '—' ? { k: 'cal',   lbl: 'Période',     val: b.annee }      : null
+    b.adresse       && b.adresse       !== '—' ? { k: 'pin',   lbl: 'Adresse',      val: b.adresse }       : null,
+    b.capacite      && b.capacite      !== '—' ? { k: 'info',  lbl: 'Capacité',      val: b.capacite }      : null,
+    b.horaires      && b.horaires      !== '—' ? { k: 'clock', lbl: 'Horaires',      val: b.horaires }      : null,
+    b.telephone     && b.telephone     !== '—' ? { k: 'phone', lbl: 'Téléphone',     val: b.telephone }     : null,
+    b.description                              ? { k: 'info',  lbl: 'Description',   val: b.description }   : null,
+    b.activites     && b.activites     !== '—' ? { k: 'info',  lbl: 'Activités',     val: b.activites }     : null,
+    b.equipements   && b.equipements   !== '—' ? { k: 'info',  lbl: 'Équipements',   val: b.equipements }   : null,
+    b.accessibilite && b.accessibilite !== '—' ? { k: 'info',  lbl: 'Accessibilité', val: b.accessibilite } : null,
+    b.etat          && b.etat          !== '—' ? { k: 'info',  lbl: 'État général',  val: b.etat }          : null,
+    b.travaux_prevus && b.travaux_prevus !== '—' && b.travaux_prevus !== 'RAS' ? { k: 'cal', lbl: 'Travaux à prévoir', val: b.travaux_prevus } : null
   ].filter(Boolean);
 
   const rowsHTML = '<div class="fiche-rows">'
