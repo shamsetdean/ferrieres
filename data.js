@@ -19,7 +19,7 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: '—',
     travaux_prevus: '—',
-    photo: 'photos/mairie-annexe.jpg',
+    photo: './photos/mairie-annexe.jpg',
     lat: 48.82157462254268,
     lng: 2.7045034945885544
   },
@@ -39,7 +39,7 @@ const BATIMENTS = [
     etat: 'Moyen',
     travaux_recents: 'Aucun',
     travaux_prevus: 'Mur',
-    photo: 'photos/salle-saint-remy.jpg',
+    photo: './photos/salle-saint-remy.jpg',
     lat: 48.82112062643225,
     lng: 2.7037958312694776
   },
@@ -59,7 +59,7 @@ const BATIMENTS = [
     etat: 'Moyen',
     travaux_recents: 'Wi-Fi',
     travaux_prevus: 'En totalité',
-    photo: 'photos/salle-fetes.jpg',
+    photo: './photos/salle-fetes.jpg',
     lat: 48.82224738111118,
     lng: 2.703495604599944
   },
@@ -119,8 +119,8 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: 'Cuisine',
     travaux_prevus: '—',
-    photo: 'photos/salle-mariages.jpg',
-    lat: 48.82139198504133,
+    photo: './photos/salle-mariages.jpg',
+    lat: 48.82129198504133,
     lng: 2.7047645063731216
   },
   {
@@ -139,7 +139,7 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: 'RAS',
     travaux_prevus: 'RAS',
-    photo: 'photos/maison-nature.jpg',
+    photo: './photos/maison-nature.jpg',
     lat: 48.81854716539286,
     lng: 2.721547044824098
   },
@@ -159,7 +159,7 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: 'Éclairage LED et serrure',
     travaux_prevus: 'Changement de la bulle',
-    photo: 'photos/bulle-tennis.jpg',
+    photo: './photos/bulle-tennis.jpg',
     lat: 48.819888023494,
     lng: 2.6949069456523755
   },
@@ -179,7 +179,7 @@ const BATIMENTS = [
     etat: 'RAS / Bon état',
     travaux_recents: 'Cuisine',
     travaux_prevus: 'Éclairage',
-    photo: 'photos/service-technique-1.jpg',
+    photo: './photos/service-technique-1.jpg',
     lat: 48.82592639926443,
     lng: 2.7163507979906174
   },
@@ -199,7 +199,7 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: 'Cuisine',
     travaux_prevus: '—',
-    photo: 'photos/salle-vinci.jpg',
+    photo: './photos/salle-vinci.jpg',
     lat: 48.82578342705441,
     lng: 2.703882512036084
   },
@@ -219,7 +219,7 @@ const BATIMENTS = [
     etat: 'Moyen',
     travaux_recents: 'Aucun',
     travaux_prevus: 'Aucun',
-    photo: 'photos/kiosque.jpg',
+    photo: './photos/kiosque.jpg',
     lat: 48.82071152305836,
     lng: 2.7034540782217116
   },
@@ -239,7 +239,7 @@ const BATIMENTS = [
     etat: '—',
     travaux_recents: '—',
     travaux_prevus: '—',
-    photo: 'photos/lavoir.jpg',
+    photo: './photos/lavoir.jpg',
     lat: 48.822159310761165,
     lng: 2.699754626238832
   },
@@ -259,7 +259,7 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: '—',
     travaux_prevus: '—',
-    photo: 'photos/presbytere.jpg',
+    photo: './photos/presbytere.jpg',
     lat: 48.82111040446145,
     lng: 2.704497749017735
   },
@@ -299,7 +299,7 @@ const BATIMENTS = [
     etat: '—',
     travaux_recents: '—',
     travaux_prevus: '—',
-    photo: 'photos/appt-urgence.jpg',
+    photo: './photos/appt-urgence.jpg',
     lat: 48.821894516339746,
     lng: 2.703837128674898
   },
@@ -319,7 +319,7 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: 'Pompe à chaleur',
     travaux_prevus: '—',
-    photo: 'photos/dojo.jpg',
+    photo: './photos/dojo.jpg',
     lat: 48.82321853695472,
     lng: 2.699041197568539
   },
@@ -339,7 +339,7 @@ const BATIMENTS = [
     etat: 'Moyen',
     travaux_recents: 'Aucun',
     travaux_prevus: 'Aucun',
-    photo: 'photos/meal-repas.jpg',
+    photo: './photos/meal-repas.jpg',
     lat: 48.821208526478905,
     lng: 2.7038969084203717
   },
@@ -359,7 +359,7 @@ const BATIMENTS = [
     etat: '—',
     travaux_recents: '—',
     travaux_prevus: '—',
-    photo: 'photos/poste.jpg',
+    photo: './photos/poste.jpg',
     lat: 48.82096804126956,
     lng: 2.7056198557389313
   },
@@ -379,7 +379,7 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: '—',
     travaux_prevus: '—',
-    photo: 'photos/chateau-eau.jpg',
+    photo: './photos/chateau-eau.jpg',
     lat: 48.82146351197768,
     lng: 2.7237055348700334
   }
