@@ -1,1485 +1,1513 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Ferrières-en-Brie</title>
-  <meta name="theme-color" content="#1A2540">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.0/maptiler-sdk.css" rel="stylesheet">
-  <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.0/maptiler-sdk.umd.min.js"></script>
-  <script src="./data.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#1E3A5F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Ferrières-en-Brie — Patrimoine</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.0/maptiler-sdk.css" rel="stylesheet">
+<script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.0/maptiler-sdk.umd.min.js"></script>
+<script src="./data.js"></script>
 
-  <style>
-    /* ── VARIABLES ─────────────────────────────── */
-    :root {
-      --bg:        #F5F3EE;
-      --surface:   #FFFFFF;
-      --navy:      #1A2540;
-      --navy-90:   rgba(26,37,64,0.92);
-      --gold:      #C8933A;
-      --gold-light:#FBF2E3;
-      --text:      #111827;
-      --muted:     #6B7280;
-      --border:    #E5E0D5;
-      --radius-sm: 10px;
-      --radius:    16px;
-      --radius-lg: 22px;
-      --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
-      --shadow:    0 4px 20px rgba(0,0,0,0.12);
-      --shadow-lg: 0 8px 40px rgba(0,0,0,0.18);
-      --font:      'Plus Jakarta Sans', sans-serif;
-      --nav-h:     72px;
-      --hdr-h:     60px;
-    }
+<style>
+/* ════════════════════════════════════════════════
+   TOKENS
+════════════════════════════════════════════════ */
+:root {
+  --c-navy:    #1E3A5F;
+  --c-navy70:  rgba(30,58,95,.7);
+  --c-navy90:  rgba(30,58,95,.92);
+  --c-gold:    #C8933A;
+  --c-bg:      #F4F2EC;
+  --c-surface: #FFFFFF;
+  --c-text:    #111827;
+  --c-muted:   #6B7280;
+  --c-border:  #E4DFD4;
+  --c-green:   #4ADE80;
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  22px;
+  --sh-sm: 0 2px 8px rgba(0,0,0,.08);
+  --sh-md: 0 4px 20px rgba(0,0,0,.13);
+  --sh-lg: 0 8px 40px rgba(0,0,0,.2);
+  --nav-h: 68px;
+  --hdr-h: 58px;
+  --ease:  cubic-bezier(.32,.72,0,1);
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-display: 'DM Serif Display', Georgia, serif;
+}
 
-    /* ── RESET ─────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: var(--font); color: var(--text); -webkit-font-smoothing: antialiased; }
+/* ════════════════════════════════════════════════
+   RESET + BASE
+════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--c-bg);
+  font-family:var(--font-body);color:var(--c-text);
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;}
 
-    /* ── MAP ───────────────────────────────────── */
-    #map {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
+/* ════════════════════════════════════════════════
+   KEYFRAMES
+════════════════════════════════════════════════ */
+@keyframes pulse-ring {
+  0%   { transform:scale(1);  opacity:.7; }
+  100% { transform:scale(2.4);opacity:0;  }
+}
+@keyframes pulse-glow {
+  0%,100% { box-shadow:0 2px 8px rgba(0,0,0,.25); }
+  50%      { box-shadow:0 2px 8px rgba(0,0,0,.25),0 0 0 6px rgba(200,147,58,.35); }
+}
+@keyframes fade-in-up {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0);    }
+}
+@keyframes slide-in-left {
+  from { transform:translateX(-100%); }
+  to   { transform:translateX(0);     }
+}
+@keyframes spin {
+  to { transform:rotate(360deg); }
+}
 
-    /* ── HEADER ────────────────────────────────── */
-    #app-header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: var(--hdr-h);
-      background: var(--navy-90);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      z-index: 100;
-    }
-    #app-header h1 {
-      font-size: 18px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -0.3px;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    #app-header h1 span {
-      display: block;
-      font-size: 10px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.55);
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-    }
-    .hdr-btn {
-      width: 40px; height: 40px;
-      border: none; background: rgba(255,255,255,0.12);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: #fff;
-      transition: background 0.2s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .hdr-btn:active { background: rgba(255,255,255,0.22); }
-    .hdr-btn svg { width: 20px; height: 20px; }
-    #admin-indicator {
-      width: 8px; height: 8px;
-      background: var(--gold);
-      border-radius: 50%;
-      position: absolute;
-      top: 10px; right: 64px;
-      display: none;
-    }
+/* ════════════════════════════════════════════════
+   MARKER ANIMATIONS
+════════════════════════════════════════════════ */
+.map-marker {
+  position:relative;
+  width:36px;height:36px;
+  border-radius:50%;
+  border:3px solid #fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  animation:pulse-glow 3s ease-in-out infinite;
+  transition:transform .15s;
+}
+.map-marker:active { transform:scale(1.25); }
+.map-marker .marker-icon {
+  width:16px;height:16px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.map-marker .marker-icon svg { width:13px;height:13px;stroke:#fff;fill:none; }
+.map-marker .pulse-ring {
+  position:absolute;inset:-4px;
+  border-radius:50%;
+  border:2px solid;
+  animation:pulse-ring 2.2s ease-out infinite;
+  pointer-events:none;
+}
+/* Stagger: different buildings pulse at different times */
+.map-marker:nth-child(3n)   .pulse-ring { animation-delay:.4s; }
+.map-marker:nth-child(3n+1) .pulse-ring { animation-delay:.8s; }
+.map-marker:nth-child(3n+2) .pulse-ring { animation-delay:0s;  }
 
-    /* ── FILTER BAR ────────────────────────────── */
-    #filter-bar {
-      position: fixed;
-      top: var(--hdr-h); left: 0; right: 0;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      gap: 8px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      z-index: 99;
-      background: linear-gradient(180deg, rgba(26,37,64,0.7) 0%, rgba(26,37,64,0) 100%);
-    }
-    #filter-bar::-webkit-scrollbar { display: none; }
-    .filter-pill {
-      flex-shrink: 0;
-      height: 32px;
-      padding: 0 14px;
-      border-radius: 999px;
-      border: 1.5px solid rgba(255,255,255,0.4);
-      background: rgba(0,0,0,0.35);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      color: rgba(255,255,255,0.9);
-      font-size: 13px;
-      font-weight: 600;
-      font-family: var(--font);
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex; align-items: center; gap: 6px;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .filter-pill.active {
-      background: #fff;
-      border-color: #fff;
-      color: var(--navy);
-    }
-    .filter-pill .pill-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
+/* ════════════════════════════════════════════════
+   MAP
+════════════════════════════════════════════════ */
+#map {
+  position:fixed;inset:0;
+  width:100%;height:100%;
+  z-index:0;
+}
 
-    /* ── FAB LOCATE ────────────────────────────── */
-    #fab-locate {
-      position: fixed;
-      right: 16px;
-      bottom: calc(var(--nav-h) + 220px);
-      width: 52px; height: 52px;
-      border-radius: 50%;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-      border: none;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      z-index: 90;
-      color: var(--navy);
-      transition: transform 0.15s, box-shadow 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #fab-locate:active { transform: scale(0.94); box-shadow: var(--shadow-sm); }
-    #fab-locate svg { width: 22px; height: 22px; }
-    #fab-locate.active { color: var(--gold); }
+/* ════════════════════════════════════════════════
+   HEADER
+════════════════════════════════════════════════ */
+#app-header {
+  position:fixed;top:0;left:0;right:0;
+  height:var(--hdr-h);
+  display:flex;align-items:center;
+  padding:0 12px;gap:10px;
+  background:var(--c-navy90);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  z-index:200;
+  transition:background .3s;
+}
+#app-header.scrolled { background:var(--c-navy); }
+#btn-hamburger {
+  width:42px;height:42px;border-radius:50%;
+  background:rgba(255,255,255,.12);
+  border:none;color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;cursor:pointer;flex-shrink:0;
+  transition:background .2s;
+}
+#btn-hamburger:active { background:rgba(255,255,255,.22); }
+#btn-hamburger .bar {
+  width:18px;height:2px;background:#fff;border-radius:2px;
+  transition:transform .3s var(--ease),opacity .3s,width .3s;
+  transform-origin:center;
+}
+#btn-hamburger.open .bar:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+#btn-hamburger.open .bar:nth-child(2){ opacity:0;width:0; }
+#btn-hamburger.open .bar:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
 
-    /* ── BOTTOM SHEET ──────────────────────────── */
-    #sheet {
-      position: fixed;
-      left: 0; right: 0;
-      bottom: var(--nav-h);
-      background: var(--surface);
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      box-shadow: var(--shadow-lg);
-      z-index: 80;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      transition: height 0.38s cubic-bezier(0.32, 0.72, 0, 1);
-      height: 200px;
-    }
-    #sheet.list-mode  { height: 55vh; }
-    #sheet.detail-mode { height: calc(100vh - var(--hdr-h) - var(--nav-h) - 8px); }
+#hdr-title {
+  flex:1;min-width:0;
+}
+#hdr-title h1 {
+  font-family:var(--font-display);
+  font-size:17px;font-weight:400;
+  color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:.2px;
+  user-select:none;-webkit-user-select:none;
+}
+#hdr-title p {
+  font-size:10px;font-weight:500;color:rgba(255,255,255,.5);
+  letter-spacing:.8px;text-transform:uppercase;margin-top:1px;
+}
+#hdr-right { display:flex;gap:8px;align-items:center; }
+.hdr-btn {
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(255,255,255,.12);border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#fff;transition:background .2s;
+  flex-shrink:0;
+}
+.hdr-btn:active { background:rgba(255,255,255,.24); }
+.hdr-btn svg { width:20px;height:20px; }
+#admin-dot {
+  width:8px;height:8px;border-radius:50%;background:var(--c-gold);
+  display:none;position:absolute;top:10px;right:60px;z-index:201;
+}
 
-    .sheet-handle {
-      width: 100%;
-      padding: 12px 0 8px;
-      display: flex;
-      justify-content: center;
-      flex-shrink: 0;
-      cursor: pointer;
-    }
-    .sheet-handle-bar {
-      width: 36px; height: 4px;
-      background: var(--border);
-      border-radius: 999px;
-    }
+/* ════════════════════════════════════════════════
+   DRAWER (hamburger menu)
+════════════════════════════════════════════════ */
+#drawer-overlay {
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:300;opacity:0;pointer-events:none;
+  transition:opacity .32s;
+}
+#drawer-overlay.open { opacity:1;pointer-events:auto; }
 
-    /* ── BUILDING LIST ─────────────────────────── */
-    #view-list {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      overflow: hidden;
-    }
-    #list-header {
-      padding: 0 16px 12px;
-      flex-shrink: 0;
-    }
-    #list-header h2 {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: -0.3px;
-    }
-    #list-header p {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-    #buildings-list {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 0 12px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    #buildings-list::-webkit-scrollbar { display: none; }
+#drawer {
+  position:fixed;top:0;left:0;bottom:0;
+  width:min(300px,85vw);
+  background:var(--c-surface);
+  z-index:301;
+  transform:translateX(-100%);
+  transition:transform .35s var(--ease);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+#drawer.open { transform:translateX(0); }
 
-    .building-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 14px 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      transition: all 0.18s;
-      -webkit-tap-highlight-color: transparent;
-      min-height: 64px;
-    }
-    .building-card:active {
-      background: var(--bg);
-      transform: scale(0.98);
-    }
-    .card-icon {
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .card-icon svg { width: 20px; height: 20px; }
-    .card-info { flex: 1; min-width: 0; }
-    .card-name {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .card-cat {
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 500;
-      margin-top: 2px;
-    }
-    .card-dist {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .card-chevron { color: var(--border); flex-shrink: 0; }
-    .card-chevron svg { width: 16px; height: 16px; }
+#drawer-head {
+  background:var(--c-navy);
+  padding:24px 20px 20px;
+  padding-top:calc(24px + env(safe-area-inset-top,0px));
+  flex-shrink:0;
+}
+#drawer-head h2 {
+  font-family:var(--font-display);
+  font-size:22px;font-weight:400;color:#fff;letter-spacing:.2px;
+}
+#drawer-head p { font-size:12px;color:rgba(255,255,255,.5);margin-top:3px; }
 
-    /* ── BUILDING DETAIL ───────────────────────── */
-    #view-detail {
-      display: none;
-      flex-direction: column;
-      flex: 1;
-      overflow: hidden;
-    }
-    #view-detail.active {
-      display: flex;
-    }
-    .detail-header {
-      display: flex;
-      align-items: center;
-      padding: 0 16px 12px;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-    #btn-back {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      border: 1.5px solid var(--border);
-      background: transparent;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      color: var(--text);
-      flex-shrink: 0;
-      transition: background 0.18s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #btn-back:active { background: var(--bg); }
-    #btn-back svg { width: 20px; height: 20px; }
-    .detail-title { flex: 1; min-width: 0; }
-    .detail-title h2 {
-      font-size: 19px;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: -0.4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .detail-title .detail-cat {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      margin-top: 4px;
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-    }
-    .detail-cat .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-    }
+#drawer-body { flex:1;overflow-y:auto;padding:12px 0; }
+#drawer-body::-webkit-scrollbar { display:none; }
 
-    #detail-scroll {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 0 16px 24px;
-    }
-    #detail-scroll::-webkit-scrollbar { display: none; }
+.drawer-section-label {
+  font-size:10px;font-weight:700;color:var(--c-muted);
+  text-transform:uppercase;letter-spacing:.8px;
+  padding:16px 20px 6px;
+}
+.drawer-nav-item {
+  display:flex;align-items:center;gap:12px;
+  padding:13px 20px;cursor:pointer;
+  font-size:15px;font-weight:600;color:var(--c-text);
+  transition:background .15s;border:none;background:transparent;
+  width:100%;text-align:left;font-family:var(--font-body);
+}
+.drawer-nav-item:active,.drawer-nav-item:hover { background:var(--c-bg); }
+.drawer-nav-item.active { color:var(--c-navy); }
+.drawer-nav-item svg { width:18px;height:18px;flex-shrink:0;color:var(--c-muted); }
+.drawer-nav-item.active svg { color:var(--c-navy); }
+.drawer-divider { height:1px;background:var(--c-border);margin:8px 0; }
 
-    /* Photo block */
-    .photo-block {
-      width: 100%;
-      height: 180px;
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 16px;
-      position: relative;
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-    }
-    .photo-block img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .photo-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .photo-placeholder svg { width: 36px; height: 36px; color: #C8C3B8; }
-    .photo-placeholder p {
-      font-size: 13px;
-      color: #C8C3B8;
-      font-weight: 500;
-    }
-    /* Admin photo button */
-    .photo-admin-btn {
-      position: absolute;
-      bottom: 12px; right: 12px;
-      height: 38px;
-      padding: 0 14px;
-      background: var(--navy);
-      color: #fff;
-      border: none;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
-      font-family: var(--font);
-      display: none;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .photo-admin-btn svg { width: 16px; height: 16px; }
-    body.admin-mode .photo-admin-btn { display: flex; }
+.drawer-filter-item {
+  display:flex;align-items:center;gap:10px;
+  padding:11px 20px;cursor:pointer;
+  font-size:14px;font-weight:500;color:var(--c-text);
+  border:none;background:transparent;width:100%;text-align:left;
+  font-family:var(--font-body);transition:background .15s;
+}
+.drawer-filter-item:active,.drawer-filter-item:hover { background:var(--c-bg); }
+.drawer-filter-item.active { font-weight:700;color:var(--c-navy); }
+.drawer-cat-dot { width:9px;height:9px;border-radius:50%;flex-shrink:0; }
+.drawer-count {
+  margin-left:auto;font-size:12px;color:var(--c-muted);
+  background:var(--c-bg);padding:2px 8px;border-radius:999px;
+}
 
-    /* Info rows */
-    .info-section {
-      background: var(--bg);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 12px;
-    }
-    .info-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 13px 14px;
-      border-bottom: 1px solid var(--border);
-    }
-    .info-row:last-child { border-bottom: none; }
-    .info-row-icon {
-      width: 34px; height: 34px;
-      border-radius: 10px;
-      background: var(--surface);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      color: var(--muted);
-    }
-    .info-row-icon svg { width: 16px; height: 16px; }
-    .info-row-content { flex: 1; padding-top: 2px; }
-    .info-row-label {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 2px;
-    }
-    .info-row-value {
-      font-size: 15px;
-      color: var(--text);
-      font-weight: 500;
-      line-height: 1.4;
-    }
-    .info-row-value.unavailable { color: var(--muted); font-style: italic; font-size: 14px; }
+#drawer-foot {
+  padding:16px 20px;
+  padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--c-border);
+  flex-shrink:0;
+}
+#drawer-admin-btn {
+  width:100%;height:44px;border-radius:var(--r-sm);
+  background:var(--c-navy);color:#fff;
+  border:none;font-size:14px;font-weight:600;
+  font-family:var(--font-body);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+#drawer-admin-btn svg { width:16px;height:16px; }
+#drawer-logout-btn {
+  width:100%;height:40px;border-radius:var(--r-sm);
+  background:transparent;color:#DC2626;
+  border:1.5px solid #DC2626;font-size:13px;font-weight:600;
+  font-family:var(--font-body);cursor:pointer;margin-top:8px;
+  display:none;
+}
+body.admin-mode #drawer-logout-btn { display:block; }
 
-    /* AR button in detail */
-    #btn-ar-nav {
-      width: 100%;
-      height: 52px;
-      background: var(--navy);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 15px;
-      font-weight: 700;
-      font-family: var(--font);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-      margin-top: 4px;
-      transition: opacity 0.18s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #btn-ar-nav:active { opacity: 0.85; }
-    #btn-ar-nav svg { width: 20px; height: 20px; }
+/* ════════════════════════════════════════════════
+   FILTER BAR (mobile — above sheet)
+════════════════════════════════════════════════ */
+#filter-bar {
+  position:fixed;
+  top:var(--hdr-h);left:0;right:0;height:48px;
+  display:flex;align-items:center;
+  padding:0 10px;gap:7px;
+  overflow-x:auto;overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  z-index:190;
+  background:linear-gradient(180deg,rgba(30,58,95,.65) 0%,transparent 100%);
+}
+#filter-bar::-webkit-scrollbar { display:none; }
+.fpill {
+  flex-shrink:0;height:30px;padding:0 13px;
+  border-radius:999px;
+  border:1.5px solid rgba(255,255,255,.35);
+  background:rgba(0,0,0,.32);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  color:rgba(255,255,255,.9);
+  font-size:12px;font-weight:700;
+  font-family:var(--font-body);cursor:pointer;
+  display:flex;align-items:center;gap:5px;
+  transition:all .18s;white-space:nowrap;
+}
+.fpill.active { background:#fff;border-color:#fff;color:var(--c-navy); }
+.fpill .fdot { width:6px;height:6px;border-radius:50%;flex-shrink:0; }
 
-    /* ── BOTTOM NAV ────────────────────────────── */
-    #bottom-nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: var(--nav-h);
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: stretch;
-      z-index: 100;
-    }
-    .nav-btn {
-      flex: 1;
-      border: none;
-      background: transparent;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      cursor: pointer;
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 600;
-      font-family: var(--font);
-      letter-spacing: 0.3px;
-      transition: color 0.18s;
-      padding-bottom: env(safe-area-inset-bottom, 0);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .nav-btn svg { width: 22px; height: 22px; }
-    .nav-btn.active { color: var(--navy); }
-    .nav-btn.active svg { stroke-width: 2.5; }
+/* ════════════════════════════════════════════════
+   FAB LOCATE
+════════════════════════════════════════════════ */
+#fab-locate {
+  position:fixed;right:14px;
+  bottom:calc(var(--nav-h) + 224px);
+  width:50px;height:50px;border-radius:50%;
+  background:var(--c-surface);box-shadow:var(--sh-md);
+  border:none;color:var(--c-navy);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:180;
+  transition:transform .15s,box-shadow .15s,color .2s;
+}
+#fab-locate:active { transform:scale(.93);box-shadow:var(--sh-sm); }
+#fab-locate.active { color:var(--c-gold); }
+#fab-locate svg { width:22px;height:22px; }
 
-    /* ── ABOUT VIEW ────────────────────────────── */
-    #view-about {
-      position: fixed;
-      top: var(--hdr-h);
-      left: 0; right: 0;
-      bottom: var(--nav-h);
-      background: var(--bg);
-      z-index: 85;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 24px 16px;
-      display: none;
-    }
-    #view-about.active { display: block; }
-    .about-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 12px;
-    }
-    .about-card h3 {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    .about-card p {
-      font-size: 15px;
-      line-height: 1.6;
-      color: var(--muted);
-    }
-    .about-stat {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .stat-box {
-      flex: 1;
-      background: var(--bg);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-      text-align: center;
-    }
-    .stat-box .stat-n {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--navy);
-    }
-    .stat-box .stat-l {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 500;
-      margin-top: 2px;
-    }
+/* ════════════════════════════════════════════════
+   BOTTOM SHEET
+════════════════════════════════════════════════ */
+#sheet {
+  position:fixed;left:0;right:0;bottom:var(--nav-h);
+  background:var(--c-surface);
+  border-radius:var(--r-lg) var(--r-lg) 0 0;
+  box-shadow:var(--sh-lg);
+  z-index:170;
+  display:flex;flex-direction:column;overflow:hidden;
+  /* Default: peek */
+  height:72px;
+  transition:height .38s var(--ease);
+  will-change:height;
+}
+#sheet.sh-list   { height:52vh; }
+#sheet.sh-detail { height:calc(100vh - var(--hdr-h) - var(--nav-h) - 6px); }
 
-    /* ── LOCATION BADGE ────────────────────────── */
-    #location-badge {
-      position: fixed;
-      top: calc(var(--hdr-h) + 60px);
-      left: 50%;
-      transform: translateX(-50%) translateY(-10px);
-      background: var(--navy-90);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      z-index: 95;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s, transform 0.3s;
-      white-space: nowrap;
-    }
-    #location-badge.visible {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    #location-badge svg { width: 14px; height: 14px; color: #4ADE80; }
+.sh-handle {
+  width:100%;padding:10px 0 6px;
+  display:flex;justify-content:center;cursor:pointer;
+  flex-shrink:0;touch-action:none;
+}
+.sh-handle-bar {
+  width:36px;height:4px;background:var(--c-border);border-radius:99px;
+}
 
-    /* ── ADMIN MODAL ───────────────────────────── */
-    #admin-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    #admin-overlay.active { display: flex; }
-    #admin-modal {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      padding: 28px 24px;
-      width: 100%;
-      max-width: 360px;
-    }
-    #admin-modal h3 {
-      font-size: 18px;
-      font-weight: 800;
-      margin-bottom: 6px;
-    }
-    #admin-modal p { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
-    #admin-pwd {
-      width: 100%;
-      height: 52px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 0 14px;
-      font-size: 16px;
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    #admin-pwd:focus { border-color: var(--navy); }
-    #admin-pwd-error {
-      font-size: 13px;
-      color: #DC2626;
-      margin-top: 6px;
-      min-height: 18px;
-    }
-    .modal-btns {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .modal-btn {
-      flex: 1;
-      height: 50px;
-      border-radius: var(--radius-sm);
-      border: none;
-      font-size: 15px;
-      font-weight: 700;
-      font-family: var(--font);
-      cursor: pointer;
-      transition: opacity 0.18s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .modal-btn:active { opacity: 0.8; }
-    .modal-btn.secondary { background: var(--bg); color: var(--text); }
-    .modal-btn.primary { background: var(--navy); color: #fff; }
-    #btn-logout {
-      width: 100%;
-      height: 48px;
-      border-radius: var(--radius-sm);
-      border: 1.5px solid #DC2626;
-      background: transparent;
-      color: #DC2626;
-      font-size: 14px;
-      font-weight: 600;
-      font-family: var(--font);
-      cursor: pointer;
-      margin-top: 12px;
-      display: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body.admin-mode #btn-logout { display: block; }
+/* ────── LIST VIEW ────── */
+#vl { flex:1;display:flex;flex-direction:column;overflow:hidden; }
+#vl-head { padding:0 16px 10px;flex-shrink:0; }
+#vl-head h2 { font-family:var(--font-display);font-size:20px;font-weight:400;letter-spacing:.2px; }
+#vl-head p  { font-size:12px;color:var(--c-muted);margin-top:2px; }
+#vl-list {
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:0 12px 8px;display:flex;flex-direction:column;gap:7px;
+}
+#vl-list::-webkit-scrollbar { display:none; }
 
-    /* ── TOAST ─────────────────────────────────── */
-    #toast {
-      position: fixed;
-      bottom: calc(var(--nav-h) + 16px);
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--text);
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 600;
-      z-index: 300;
-      opacity: 0;
-      transition: all 0.3s;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-    #toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+/* Cards */
+.bcard {
+  background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:var(--r-md);padding:13px 12px;
+  display:flex;align-items:center;gap:11px;
+  cursor:pointer;min-height:60px;
+  transition:background .15s,transform .12s;
+  animation:fade-in-up .25s var(--ease) both;
+}
+.bcard:active { background:var(--c-bg);transform:scale(.98); }
+.bcard .cico {
+  width:42px;height:42px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.bcard .cico svg { width:18px;height:18px; }
+.bcard .cinf { flex:1;min-width:0; }
+.bcard .cname {
+  font-size:14px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.bcard .ccat { font-size:11px;color:var(--c-muted);font-weight:500;margin-top:2px; }
+.bcard .cdist { font-size:11px;font-weight:600;color:var(--c-muted);white-space:nowrap;flex-shrink:0; }
+.bcard .cchev { color:var(--c-border);flex-shrink:0; }
+.bcard .cchev svg { width:15px;height:15px; }
 
-    /* ── NO RESULTS ────────────────────────────── */
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      color: var(--muted);
-      gap: 10px;
-    }
-    .empty-state svg { width: 36px; height: 36px; opacity: 0.4; }
-    .empty-state p { font-size: 15px; font-weight: 500; }
+.empty-st {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 20px;color:var(--c-muted);gap:10px;
+}
+.empty-st svg { width:32px;height:32px;opacity:.35; }
+.empty-st p { font-size:14px;font-weight:500; }
 
-    /* hidden input for photo */
-    #photo-input { display: none; }
-  </style>
+/* ────── DETAIL VIEW ────── */
+#vd { display:none;flex-direction:column;flex:1;overflow:hidden; }
+#vd.active { display:flex; }
+.vd-head { display:flex;align-items:center;gap:10px;padding:0 14px 10px;flex-shrink:0; }
+#btn-back {
+  width:38px;height:38px;border-radius:50%;
+  border:1.5px solid var(--c-border);background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--c-text);flex-shrink:0;
+  transition:background .15s;
+}
+#btn-back:active { background:var(--c-bg); }
+#btn-back svg { width:18px;height:18px; }
+.vd-ttl { flex:1;min-width:0; }
+.vd-ttl h2 {
+  font-family:var(--font-display);font-size:18px;font-weight:400;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.2px;
+}
+.vd-badge {
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 9px;border-radius:999px;
+  font-size:10px;font-weight:700;letter-spacing:.3px;margin-top:3px;
+}
+
+#vd-scroll {
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:0 14px 24px;
+}
+#vd-scroll::-webkit-scrollbar { display:none; }
+
+/* ── PHOTO BLOCK ── */
+.ph-block {
+  width:100%;height:190px;border-radius:var(--r-md);
+  overflow:hidden;margin-bottom:14px;
+  position:relative;background:var(--c-bg);
+  border:1.5px solid var(--c-border);
+}
+/* state 1 — placeholder (no photo) */
+.ph-placeholder {
+  width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;
+}
+.ph-placeholder svg { width:38px;height:38px;color:#C8C3B8; }
+.ph-placeholder span { font-size:13px;color:#C8C3B8;font-weight:500; }
+/* state 2 — loading spinner */
+.ph-loading {
+  width:100%;height:100%;
+  display:none;align-items:center;justify-content:center;
+}
+.ph-spinner {
+  width:28px;height:28px;border-radius:50%;
+  border:3px solid var(--c-border);border-top-color:var(--c-navy);
+  animation:spin .7s linear infinite;
+}
+/* state 3 — image */
+#ph-img {
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:none;
+}
+/* admin upload btn */
+.ph-admin-btn {
+  position:absolute;bottom:10px;right:10px;
+  height:36px;padding:0 14px;
+  background:var(--c-navy);color:#fff;border:none;border-radius:99px;
+  font-size:12px;font-weight:700;font-family:var(--font-body);
+  display:none;align-items:center;gap:6px;cursor:pointer;
+}
+.ph-admin-btn svg { width:14px;height:14px; }
+body.admin-mode .ph-admin-btn { display:flex; }
+
+/* ── INFO ROWS ── */
+.info-sec {
+  background:var(--c-bg);border-radius:var(--r-md);
+  overflow:hidden;margin-bottom:10px;
+}
+.info-row {
+  display:flex;align-items:flex-start;gap:10px;
+  padding:12px 14px;border-bottom:1px solid var(--c-border);
+}
+.info-row:last-child { border-bottom:none; }
+.info-row-ico {
+  width:32px;height:32px;border-radius:9px;
+  background:var(--c-surface);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:var(--c-muted);
+}
+.info-row-ico svg { width:15px;height:15px; }
+.info-row-body { flex:1;padding-top:1px; }
+.info-row-lbl {
+  font-size:10px;color:var(--c-muted);font-weight:700;
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px;
+}
+.info-row-val { font-size:14px;color:var(--c-text);font-weight:500;line-height:1.45; }
+.info-row-val.na { color:var(--c-muted);font-style:italic;font-size:13px; }
+
+/* AR nav btn */
+#btn-ar-nav {
+  width:100%;height:50px;
+  background:var(--c-navy);color:#fff;border:none;border-radius:var(--r-md);
+  font-size:14px;font-weight:700;font-family:var(--font-body);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  cursor:pointer;margin-top:2px;transition:opacity .15s;
+}
+#btn-ar-nav:active { opacity:.85; }
+#btn-ar-nav svg { width:18px;height:18px; }
+
+/* ════════════════════════════════════════════════
+   BOTTOM NAV (mobile only)
+════════════════════════════════════════════════ */
+#bottom-nav {
+  position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);
+  background:var(--c-surface);border-top:1px solid var(--c-border);
+  display:flex;align-items:stretch;z-index:200;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.nbtn {
+  flex:1;border:none;background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;
+  font-size:9px;font-weight:700;font-family:var(--font-body);
+  letter-spacing:.3px;text-transform:uppercase;
+  color:var(--c-muted);transition:color .18s;
+}
+.nbtn svg { width:22px;height:22px; }
+.nbtn.active { color:var(--c-navy); }
+.nbtn.active svg { stroke-width:2.5; }
+
+/* ════════════════════════════════════════════════
+   ABOUT VIEW
+════════════════════════════════════════════════ */
+#view-about {
+  position:fixed;top:var(--hdr-h);left:0;right:0;bottom:var(--nav-h);
+  background:var(--c-bg);z-index:165;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;padding:20px 14px;
+  display:none;
+}
+#view-about.active { display:block; }
+.acard {
+  background:var(--c-surface);border:1.5px solid var(--c-border);
+  border-radius:var(--r-md);padding:18px;margin-bottom:10px;
+}
+.acard h3 { font-family:var(--font-display);font-size:17px;font-weight:400;margin-bottom:7px; }
+.acard p  { font-size:14px;line-height:1.65;color:var(--c-muted); }
+.stat-row { display:flex;gap:8px;margin-top:12px; }
+.stat-box {
+  flex:1;background:var(--c-bg);border-radius:var(--r-sm);padding:10px;text-align:center;
+}
+.stat-n { font-family:var(--font-display);font-size:26px;color:var(--c-navy); }
+.stat-l { font-size:10px;color:var(--c-muted);font-weight:600;margin-top:2px; }
+
+/* ════════════════════════════════════════════════
+   LOCATION BADGE
+════════════════════════════════════════════════ */
+#loc-badge {
+  position:fixed;top:calc(var(--hdr-h) + 56px);left:50%;
+  transform:translateX(-50%) translateY(-8px);
+  background:var(--c-navy90);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  color:#fff;padding:7px 15px;border-radius:99px;
+  font-size:12px;font-weight:600;
+  display:flex;align-items:center;gap:6px;
+  z-index:185;opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .3s;white-space:nowrap;
+}
+#loc-badge.show { opacity:1;transform:translateX(-50%) translateY(0); }
+#loc-badge svg { width:10px;height:10px; }
+
+/* ════════════════════════════════════════════════
+   ADMIN MODAL
+════════════════════════════════════════════════ */
+#adm-overlay {
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:500;display:none;align-items:center;justify-content:center;padding:20px;
+}
+#adm-overlay.open { display:flex; }
+#adm-box {
+  background:var(--c-surface);border-radius:var(--r-lg);
+  padding:26px 22px;width:100%;max-width:340px;
+}
+#adm-box h3 { font-family:var(--font-display);font-size:20px;font-weight:400;margin-bottom:5px; }
+#adm-box p  { font-size:13px;color:var(--c-muted);margin-bottom:18px;line-height:1.5; }
+#adm-pwd {
+  width:100%;height:50px;border:1.5px solid var(--c-border);border-radius:var(--r-sm);
+  padding:0 14px;font-size:16px;font-family:var(--font-body);
+  background:var(--c-bg);color:var(--c-text);outline:none;
+  transition:border-color .2s;
+}
+#adm-pwd:focus { border-color:var(--c-navy); }
+#adm-err { font-size:12px;color:#DC2626;min-height:16px;margin-top:5px; }
+.adm-btns { display:flex;gap:8px;margin-top:14px; }
+.adm-btn {
+  flex:1;height:48px;border-radius:var(--r-sm);border:none;
+  font-size:14px;font-weight:700;font-family:var(--font-body);cursor:pointer;
+  transition:opacity .15s;
+}
+.adm-btn:active { opacity:.8; }
+.adm-btn.sec { background:var(--c-bg);color:var(--c-text); }
+.adm-btn.pri { background:var(--c-navy);color:#fff; }
+
+/* ════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════ */
+#toast {
+  position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;
+  transform:translateX(-50%) translateY(16px);
+  background:var(--c-text);color:#fff;
+  padding:10px 18px;border-radius:99px;
+  font-size:13px;font-weight:600;z-index:600;
+  opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;
+}
+#toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE — TABLET (≥768px)
+════════════════════════════════════════════════ */
+@media(min-width:768px){
+  #app-header { padding:0 20px;gap:14px; }
+  #hdr-title h1 { font-size:19px; }
+  #sheet.sh-list   { height:45vh; }
+  #sheet.sh-detail { height:calc(100vh - var(--hdr-h) - var(--nav-h) - 6px); }
+  .bcard { min-height:66px;padding:14px; }
+  .ph-block { height:220px; }
+}
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE — DESKTOP (≥1024px)
+════════════════════════════════════════════════ */
+@media(min-width:1024px){
+  /* Sidebar replaces bottom sheet + nav */
+  #bottom-nav { display:none; }
+  #filter-bar { display:none; }
+  #sheet { display:none !important; }
+  #view-about { display:none !important; }
+  #fab-locate { bottom:24px;right:24px; }
+  #loc-badge  { top:calc(var(--hdr-h) + 20px); }
+
+  #sidebar {
+    display:flex;
+  }
+}
+
+#sidebar {
+  display:none;
+  position:fixed;top:var(--hdr-h);left:0;bottom:0;
+  width:340px;background:var(--c-surface);
+  border-right:1px solid var(--c-border);
+  z-index:160;flex-direction:column;overflow:hidden;
+  box-shadow:2px 0 16px rgba(0,0,0,.06);
+}
+#sb-filter {
+  padding:14px 14px 0;display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;
+}
+.sb-pill {
+  height:28px;padding:0 12px;border-radius:99px;
+  border:1.5px solid var(--c-border);background:transparent;
+  font-size:11px;font-weight:700;color:var(--c-muted);
+  font-family:var(--font-body);cursor:pointer;
+  display:flex;align-items:center;gap:5px;transition:all .15s;
+}
+.sb-pill.active { background:var(--c-navy);border-color:var(--c-navy);color:#fff; }
+.sb-pill .spdot { width:6px;height:6px;border-radius:50%; }
+#sb-list-wrap { flex:1;overflow-y:auto;padding:10px 10px;display:flex;flex-direction:column;gap:6px; }
+#sb-list-wrap::-webkit-scrollbar { display:none; }
+#sb-head { padding:14px 14px 4px;flex-shrink:0; }
+#sb-head h2 { font-family:var(--font-display);font-size:19px;font-weight:400; }
+#sb-head p  { font-size:12px;color:var(--c-muted);margin-top:2px; }
+
+/* Desktop detail panel */
+#dp {
+  display:none;
+  position:fixed;top:var(--hdr-h);left:340px;bottom:0;
+  width:320px;background:var(--c-surface);
+  border-right:1px solid var(--c-border);
+  z-index:161;flex-direction:column;overflow:hidden;
+  box-shadow:2px 0 12px rgba(0,0,0,.06);
+  animation:slide-in-left .3s var(--ease);
+}
+#dp.open { display:flex; }
+#dp-scroll { flex:1;overflow-y:auto;padding:14px; }
+#dp-scroll::-webkit-scrollbar { display:none; }
+#dp-head { display:flex;align-items:center;gap:10px;padding:0 14px 10px;flex-shrink:0; }
+#btn-dp-back {
+  width:36px;height:36px;border-radius:50%;
+  border:1.5px solid var(--c-border);background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--c-text);flex-shrink:0;
+}
+#btn-dp-back:active { background:var(--c-bg); }
+#btn-dp-back svg { width:16px;height:16px; }
+#dp-ttl { flex:1;min-width:0; }
+#dp-ttl h2 { font-family:var(--font-display);font-size:17px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+#dp-badge { display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-top:3px; }
+#dp-ph-block { width:100%;height:170px;border-radius:var(--r-md);overflow:hidden;margin-bottom:12px;position:relative;background:var(--c-bg);border:1.5px solid var(--c-border); }
+#dp-ph-img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none; }
+.dp-ph-ph { width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px; }
+.dp-ph-ph svg { width:32px;height:32px;color:#C8C3B8; }
+.dp-ph-ph span { font-size:12px;color:#C8C3B8;font-weight:500; }
+.dp-ph-admin { position:absolute;bottom:8px;right:8px;height:32px;padding:0 12px;background:var(--c-navy);color:#fff;border:none;border-radius:99px;font-size:11px;font-weight:700;font-family:var(--font-body);display:none;align-items:center;gap:5px;cursor:pointer; }
+.dp-ph-admin svg { width:12px;height:12px; }
+body.admin-mode .dp-ph-admin { display:flex; }
+#btn-dp-ar-nav { width:100%;height:46px;background:var(--c-navy);color:#fff;border:none;border-radius:var(--r-md);font-size:13px;font-weight:700;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;margin-top:10px;transition:opacity .15s; }
+#btn-dp-ar-nav svg { width:16px;height:16px; }
+
+/* Adjust map for sidebar */
+@media(min-width:1024px){
+  #map { left:340px; }
+  #app-header { left:340px; }
+  #drawer { display:none !important; }
+  #drawer-overlay { display:none !important; }
+  #btn-hamburger { display:none; }
+  #admin-dot { right:20px; }
+  .dp-open #map { left:660px; }
+  .dp-open #app-header { left:660px; }
+}
+
+/* hidden */
+#photo-input { display:none; }
+</style>
 </head>
 <body>
 
-  <!-- MAP -->
-  <div id="map"></div>
+<!-- ════ MAP ════ -->
+<div id="map"></div>
 
-  <!-- HEADER -->
-  <header id="app-header">
-    <div>
-      <h1 id="app-title">Ferrières-en-Brie<span>Patrimoine communal</span></h1>
+<!-- ════ SIDEBAR (desktop) ════ -->
+<div id="sidebar">
+  <div id="sb-head">
+    <h2>Bâtiments publics</h2>
+    <p id="sb-count">20 lieux répertoriés</p>
+  </div>
+  <div id="sb-filter"></div>
+  <div id="sb-list-wrap"></div>
+</div>
+
+<!-- ════ DETAIL PANEL (desktop) ════ -->
+<div id="dp">
+  <div id="dp-head">
+    <button id="btn-dp-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+    </button>
+    <div id="dp-ttl">
+      <h2 id="dp-name">—</h2>
+      <div id="dp-badge"></div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <div id="admin-indicator"></div>
-      <button class="hdr-btn" id="btn-ar-header" title="Vue AR" onclick="window.location.href='ar.html'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+  </div>
+  <div id="dp-scroll">
+    <div id="dp-ph-block">
+      <div class="dp-ph-ph" id="dp-ph-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        <span>Photo à venir</span>
+      </div>
+      <img id="dp-ph-img" alt="photo">
+      <button class="dp-ph-admin" id="dp-ph-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        Photo
       </button>
     </div>
-  </header>
+    <div id="dp-info"></div>
+    <button id="btn-dp-ar-nav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      Naviguer (Vue AR)
+    </button>
+  </div>
+</div>
 
-  <!-- FILTER BAR -->
-  <div id="filter-bar"></div>
-
-  <!-- FAB LOCATE -->
-  <button id="fab-locate" title="Ma position">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>
+<!-- ════ HEADER ════ -->
+<header id="app-header">
+  <button id="btn-hamburger" aria-label="Menu">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
   </button>
-
-  <!-- LOCATION BADGE -->
-  <div id="location-badge">
-    <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg>
-    <span id="location-text">Localisation en cours...</span>
+  <div id="hdr-title">
+    <h1 id="app-title">Ferrières-en-Brie</h1>
+    <p>Patrimoine communal</p>
   </div>
-
-  <!-- BOTTOM SHEET -->
-  <div id="sheet" class="list-mode">
-
-    <div class="sheet-handle" id="sheet-handle">
-      <div class="sheet-handle-bar"></div>
-    </div>
-
-    <!-- LIST VIEW -->
-    <div id="view-list">
-      <div id="list-header">
-        <h2>Bâtiments publics</h2>
-        <p id="list-count">20 lieux répertoriés</p>
-      </div>
-      <div id="buildings-list"></div>
-    </div>
-
-    <!-- DETAIL VIEW -->
-    <div id="view-detail">
-      <div class="detail-header">
-        <button id="btn-back">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-        </button>
-        <div class="detail-title">
-          <h2 id="detail-name">Nom</h2>
-          <div class="detail-cat" id="detail-cat"></div>
-        </div>
-      </div>
-      <div id="detail-scroll">
-        <!-- Photo -->
-        <div class="photo-block" id="detail-photo-block">
-          <div class="photo-placeholder" id="photo-placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-            <p>Photo à venir</p>
-          </div>
-          <img id="detail-photo-img" src="" alt="Photo du bâtiment" style="display:none;">
-          <button class="photo-admin-btn" id="btn-add-photo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-            Ajouter une photo
-          </button>
-        </div>
-
-        <!-- Info rows -->
-        <div class="info-section" id="detail-info"></div>
-
-        <!-- AR Button -->
-        <button id="btn-ar-nav">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-          Naviguer vers ce lieu
-        </button>
-      </div>
-    </div>
-
+  <div id="hdr-right">
+    <div id="admin-dot"></div>
+    <a href="ar.html" class="hdr-btn" title="Vue AR" style="text-decoration:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+    </a>
   </div>
+</header>
 
-  <!-- ABOUT VIEW -->
-  <div id="view-about">
-    <div class="about-card">
-      <h3>Ferrières-en-Brie</h3>
-      <p>Cartographie interactive du patrimoine communal. Retrouvez l'ensemble des bâtiments publics de la commune avec leurs informations.</p>
-      <div class="about-stat">
-        <div class="stat-box">
-          <div class="stat-n">20</div>
-          <div class="stat-l">Bâtiments</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-n">7</div>
-          <div class="stat-l">Catégories</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-n">AR</div>
-          <div class="stat-l">Réalité augm.</div>
-        </div>
-      </div>
-    </div>
-    <div class="about-card">
-      <h3>Confidentialité</h3>
-      <p>Les photos sont enregistrées uniquement sur cet appareil. La géolocalisation n'est jamais transmise à un serveur. Aucune donnée personnelle n'est collectée.</p>
-    </div>
-    <div class="about-card">
-      <h3>Administration</h3>
-      <p>Accès réservé au gestionnaire du contenu.</p>
-      <button id="btn-open-admin" style="margin-top:14px;width:100%;height:48px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;color:var(--text);">Mode administrateur</button>
-      <button id="btn-logout">Quitter le mode admin</button>
-    </div>
-    <div class="about-card">
-      <h3>Version</h3>
-      <p>Ferrières-en-Brie Patrimoine v2.0<br>Données : Commune de Ferrières-en-Brie</p>
-    </div>
+<!-- ════ DRAWER ════ -->
+<div id="drawer-overlay"></div>
+<nav id="drawer" role="navigation" aria-label="Menu principal">
+  <div id="drawer-head">
+    <h2>Ferrières-en-Brie</h2>
+    <p>Patrimoine communal</p>
   </div>
-
-  <!-- BOTTOM NAV -->
-  <nav id="bottom-nav">
-    <button class="nav-btn active" id="nav-carte" onclick="switchTab('carte')">
+  <div id="drawer-body">
+    <div class="drawer-section-label">Navigation</div>
+    <button class="drawer-nav-item active" id="dn-carte" onclick="dNav('carte')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
       Carte
     </button>
-    <button class="nav-btn" id="nav-liste" onclick="switchTab('liste')">
+    <button class="drawer-nav-item" id="dn-liste" onclick="dNav('liste')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
-      Liste
+      Liste des bâtiments
     </button>
-    <button class="nav-btn" id="nav-about" onclick="switchTab('about')">
+    <button class="drawer-nav-item" id="dn-ar" onclick="closeDrawer();window.location.href='ar.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+      Vue réalité augmentée
+    </button>
+    <button class="drawer-nav-item" id="dn-about" onclick="dNav('about')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
       À propos
     </button>
-  </nav>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section-label">Catégories</div>
+    <div id="drawer-cats"></div>
+  </div>
+  <div id="drawer-foot">
+    <button id="drawer-admin-btn" onclick="openAdminModal();closeDrawer()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Mode administrateur
+    </button>
+    <button id="drawer-logout-btn" onclick="logout()">Quitter le mode admin</button>
+  </div>
+</nav>
 
-  <!-- ADMIN MODAL -->
-  <div id="admin-overlay">
-    <div id="admin-modal">
-      <h3>Accès administrateur</h3>
-      <p>Saisissez le mot de passe pour gérer les photos et les informations.</p>
-      <input type="password" id="admin-pwd" placeholder="Mot de passe" autocomplete="off">
-      <div id="admin-pwd-error"></div>
-      <div class="modal-btns">
-        <button class="modal-btn secondary" onclick="closeAdminModal()">Annuler</button>
-        <button class="modal-btn primary" onclick="submitAdmin()">Confirmer</button>
+<!-- ════ FILTER BAR (mobile) ════ -->
+<div id="filter-bar"></div>
+
+<!-- ════ FAB ════ -->
+<button id="fab-locate" title="Ma position">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>
+</button>
+
+<!-- ════ LOC BADGE ════ -->
+<div id="loc-badge">
+  <svg viewBox="0 0 24 24" fill="currentColor" style="color:#4ADE80"><circle cx="12" cy="12" r="8"/></svg>
+  <span id="loc-text">Position obtenue</span>
+</div>
+
+<!-- ════ BOTTOM SHEET (mobile) ════ -->
+<div id="sheet" class="sh-list">
+  <div class="sh-handle" id="sh-handle">
+    <div class="sh-handle-bar"></div>
+  </div>
+  <!-- List -->
+  <div id="vl">
+    <div id="vl-head">
+      <h2>Bâtiments publics</h2>
+      <p id="vl-count">20 lieux répertoriés</p>
+    </div>
+    <div id="vl-list"></div>
+  </div>
+  <!-- Detail -->
+  <div id="vd">
+    <div class="vd-head">
+      <button id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      </button>
+      <div class="vd-ttl">
+        <h2 id="vd-name">—</h2>
+        <div class="vd-badge" id="vd-badge"></div>
       </div>
     </div>
+    <div id="vd-scroll">
+      <!-- Photo -->
+      <div class="ph-block">
+        <div class="ph-placeholder" id="ph-ph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+          <span>Photo à venir</span>
+        </div>
+        <div class="ph-loading" id="ph-loading"><div class="ph-spinner"></div></div>
+        <img id="ph-img" alt="Photo du bâtiment">
+        <button class="ph-admin-btn" id="ph-admin-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+          Ajouter photo
+        </button>
+      </div>
+      <div id="vd-info" class="info-sec"></div>
+      <button id="btn-ar-nav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        Naviguer (Vue AR)
+      </button>
+    </div>
   </div>
+</div>
 
-  <!-- Photo input -->
-  <input type="file" id="photo-input" accept="image/*" capture="environment">
+<!-- ════ BOTTOM NAV ════ -->
+<nav id="bottom-nav">
+  <button class="nbtn active" id="nb-carte" onclick="switchTab('carte')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+    Carte
+  </button>
+  <button class="nbtn" id="nb-liste" onclick="switchTab('liste')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+    Liste
+  </button>
+  <button class="nbtn" id="nb-about" onclick="switchTab('about')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    À propos
+  </button>
+</nav>
 
-  <!-- TOAST -->
-  <div id="toast"></div>
+<!-- ════ ABOUT VIEW ════ -->
+<div id="view-about">
+  <div class="acard">
+    <h3>Ferrières-en-Brie</h3>
+    <p>Cartographie interactive du patrimoine bâti de la commune. Retrouvez tous les bâtiments publics avec leurs informations.</p>
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-n">20</div><div class="stat-l">Bâtiments</div></div>
+      <div class="stat-box"><div class="stat-n">7</div><div class="stat-l">Catégories</div></div>
+      <div class="stat-box"><div class="stat-n">AR</div><div class="stat-l">Réalité augm.</div></div>
+    </div>
+  </div>
+  <div class="acard">
+    <h3>Photos</h3>
+    <p>Les photos sont affichées dès qu'elles sont intégrées par l'administrateur. Elles sont visibles pour tous les visiteurs une fois ajoutées via l'interface admin ou directement dans le fichier data.js.</p>
+  </div>
+  <div class="acard">
+    <h3>Confidentialité</h3>
+    <p>Aucune donnée personnelle n'est collectée. La géolocalisation reste sur votre appareil. Les photos ajoutées via l'admin sont stockées localement sur l'appareil utilisé.</p>
+  </div>
+  <div class="acard">
+    <h3>Version</h3>
+    <p>Ferrières-en-Brie Patrimoine v3.0 · Commune de Ferrières-en-Brie</p>
+  </div>
+</div>
 
-  <script>
-  // ── ADMIN HASH ────────────────────────────────────────────────────
-  // SHA-256 of "admin" — change this value to secure your installation
-  // Generate yours at: https://emn178.github.io/online-tools/sha256.html
-  var ADMIN_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
+<!-- ════ ADMIN MODAL ════ -->
+<div id="adm-overlay">
+  <div id="adm-box">
+    <h3>Accès administrateur</h3>
+    <p>Saisissez le mot de passe pour gérer les photos et les informations des bâtiments.</p>
+    <input type="password" id="adm-pwd" placeholder="Mot de passe" autocomplete="off">
+    <div id="adm-err"></div>
+    <div class="adm-btns">
+      <button class="adm-btn sec" onclick="closeAdminModal()">Annuler</button>
+      <button class="adm-btn pri" onclick="submitAdmin()">Confirmer</button>
+    </div>
+  </div>
+</div>
 
-  // ── STATE ─────────────────────────────────────────────────────────
-  var S = {
-    map: null,
-    markers: {},
-    userMarker: null,
-    userLat: null,
-    userLng: null,
-    currentFilter: "all",
-    currentBuilding: null,
-    isAdmin: false,
-    photos: {},
-    tab: "carte",
-    adminPressTimer: null
-  };
+<!-- Photo file input -->
+<input type="file" id="photo-input" accept="image/*" capture="environment">
 
-  // ── UTILS ─────────────────────────────────────────────────────────
-  function haversine(lat1, lng1, lat2, lng2) {
-    var R = 6371000;
-    var dLat = (lat2 - lat1) * Math.PI / 180;
-    var dLng = (lng2 - lng1) * Math.PI / 180;
-    var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
-            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-            Math.sin(dLng/2)*Math.sin(dLng/2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  }
+<!-- Toast -->
+<div id="toast"></div>
 
-  function formatDist(m) {
-    if (m < 1000) return Math.round(m) + " m";
-    return (m/1000).toFixed(1) + " km";
-  }
+<!-- ════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════ -->
+<script>
+// SHA-256 of "admin" — change via: https://emn178.github.io/online-tools/sha256.html
+var ADMIN_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
+var DESKTOP = window.matchMedia("(min-width:1024px)");
 
-  function showToast(msg) {
-    var t = document.getElementById("toast");
-    t.textContent = msg;
-    t.classList.add("show");
-    setTimeout(function() { t.classList.remove("show"); }, 2800);
-  }
+// ── SVG ICON PATHS ──────────────────────────────────────────────
+var SVG = {
+  pin:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+  info:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
+  wrench:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+  bldg:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/></svg>',
+  chev:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  music: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+  sport: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93a10 10 0 0 1 14.14 0"/></svg>',
+  leaf:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+  drop:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/></svg>'
+};
 
-  function getCatColor(cat) {
-    var c = CATEGORIES[cat];
-    return c ? c.color : "#6B7280";
-  }
+function catIcon(cat) {
+  var m = { administration:SVG.bldg, culture:SVG.music, sport:SVG.sport, nature:SVG.leaf, technique:SVG.wrench, social:SVG.heart, infrastructure:SVG.drop };
+  return m[cat] || SVG.bldg;
+}
 
-  function getCatLabel(cat) {
-    var c = CATEGORIES[cat];
-    return c ? c.label : cat;
-  }
+// ── STATE ──────────────────────────────────────────────────────
+var S = {
+  map: null, markers: {}, userMarker: null,
+  lat: null, lng: null,
+  filter: "all",
+  current: null,   // current building object
+  isAdmin: false,
+  photos: {},      // localStorage base64
+  tab: "carte",
+  photoTarget: null, // which panel to refresh on photo upload
+  pressTimer: null
+};
 
-  // ── ICONS (inline SVG) ────────────────────────────────────────────
-  var ICONS = {
-    building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>',
-    music: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
-    sport: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93a10 10 0 0 1 14.14 0"/><path d="M4.93 19.07a10 10 0 0 0 14.14 0"/></svg>',
-    leaf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
-    wrench: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
-    heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
-    droplets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg>',
-    chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
-    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
-    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
-  };
+// ── UTILS ──────────────────────────────────────────────────────
+function haversine(la1,ln1,la2,ln2){
+  var R=6371000,dLa=(la2-la1)*Math.PI/180,dLn=(ln2-ln1)*Math.PI/180;
+  var a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLn/2)*Math.sin(dLn/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function fmtDist(m){ return m<1000?Math.round(m)+"m":(m/1000).toFixed(1)+"km"; }
+function rgba(hex,a){
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return "rgba("+r+","+g+","+b+","+a+")";
+}
+function getCat(c){ return CATEGORIES[c]||{label:c,color:"#475569"}; }
 
-  function catIcon(cat) {
-    var map = {
-      administration: ICONS.building,
-      culture: ICONS.music,
-      sport: ICONS.sport,
-      nature: ICONS.leaf,
-      technique: ICONS.wrench,
-      social: ICONS.heart,
-      infrastructure: ICONS.droplets
-    };
-    return map[cat] || ICONS.building;
-  }
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(function(){t.classList.remove("show");},2800);
+}
 
-  // ── PHOTO STORAGE ─────────────────────────────────────────────────
-  function loadPhotos() {
-    // Clean localStorage of invalid entries first
-    var keys = [];
-    try {
-      for (var i = 0; i < localStorage.length; i++) {
-        keys.push(localStorage.key(i));
-      }
-    } catch(e) { return; }
-    for (var j = 0; j < keys.length; j++) {
-      var k = keys[j];
-      if (k && k.indexOf("photo_") === 0) {
-        try {
-          var v = localStorage.getItem(k);
-          // Only accept base64 photos (added by admin via camera)
-          if (v && v.indexOf("data:image") === 0) {
-            var bid = k.replace("photo_", "");
-            S.photos[bid] = v;
-          } else {
-            // Remove legacy/invalid paths
-            localStorage.removeItem(k);
-          }
-        } catch(e) {}
+// ── PHOTOS: priority logic ─────────────────────────────────────
+// 1. localStorage base64 (admin uploaded on this device)
+// 2. data.js photoData (embedded, visible to all)
+// 3. null → placeholder
+
+function loadLocalPhotos(){
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.indexOf("ph_")===0){
+        var v=localStorage.getItem(k);
+        if(v&&v.indexOf("data:image")===0){ S.photos[k.slice(3)]=v; }
+        else { localStorage.removeItem(k); }
       }
     }
-  }
+  }catch(e){}
+}
 
-  function savePhoto(buildingId, dataUrl) {
-    if (!dataUrl || dataUrl.indexOf("data:image") !== 0) return;
-    try {
-      localStorage.setItem("photo_" + buildingId, dataUrl);
-      S.photos[buildingId] = dataUrl;
-    } catch(e) {
-      showToast("Stockage indisponible");
+function getPhoto(b){
+  // Priority: localStorage > data.js photoData
+  if(S.photos[b.id]) return S.photos[b.id];
+  if(b.photoData&&b.photoData.indexOf("data:image")===0) return b.photoData;
+  return null;
+}
+
+function saveLocalPhoto(bid,dataUrl){
+  if(!dataUrl||dataUrl.indexOf("data:image")!==0)return;
+  try{ localStorage.setItem("ph_"+bid,dataUrl); S.photos[bid]=dataUrl; }catch(e){ showToast("Stockage indisponible"); }
+}
+
+// ── PHOTO DISPLAY: mobile sheet ────────────────────────────────
+function renderPhoto(b){
+  var phData=getPhoto(b);
+  var img=document.getElementById("ph-img");
+  var ph=document.getElementById("ph-ph");
+  var ld=document.getElementById("ph-loading");
+
+  img.style.display="none"; ph.style.display="flex"; ld.style.display="none";
+
+  if(!phData){ return; } // show placeholder
+
+  ph.style.display="none"; ld.style.display="flex";
+  var tmp=new Image();
+  tmp.onload=function(){ img.src=phData; img.style.display="block"; ld.style.display="none"; };
+  tmp.onerror=function(){ ph.style.display="flex"; ld.style.display="none"; };
+  tmp.src=phData;
+}
+
+// ── PHOTO DISPLAY: desktop panel ──────────────────────────────
+function renderDpPhoto(b){
+  var phData=getPhoto(b);
+  var img=document.getElementById("dp-ph-img");
+  var ph=document.getElementById("dp-ph-placeholder");
+  img.style.display="none"; ph.style.display="flex";
+  if(!phData)return;
+  ph.style.display="none";
+  img.src=phData; img.style.display="block";
+}
+
+// ── MAP INIT ───────────────────────────────────────────────────
+function initMap(){
+  maptilersdk.config.apiKey=MAPTILER_KEY;
+  S.map=new maptilersdk.Map({
+    container:"map",
+    style:"https://api.maptiler.com/maps/dataviz-light/style.json?key="+MAPTILER_KEY,
+    center:[2.7055,48.8215],zoom:13.8,
+    attributionControl:false,navigationControl:false
+  });
+  S.map.on("load",function(){
+    // Remove POI layers
+    var layers=S.map.getStyle().layers||[];
+    for(var i=0;i<layers.length;i++){
+      var lid=layers[i].id.toLowerCase();
+      if(lid.indexOf("poi")>=0||lid.indexOf("label")>=0||lid.indexOf("symbol")>=0){
+        try{S.map.setLayoutProperty(layers[i].id,"visibility","none");}catch(e){}
+      }
     }
-  }
+    addMarkers();
+  });
+  S.map.on("click",function(){ if(!DESKTOP.matches&&S.current){ closeDetail(); } });
+}
 
-  // ── MAP INIT ──────────────────────────────────────────────────────
-  function initMap() {
-    maptilersdk.config.apiKey = MAPTILER_KEY;
+// ── MARKERS with PULSE animation ──────────────────────────────
+function addMarkers(){
+  var style=document.createElement("style");
+  style.textContent="";
+  document.head.appendChild(style);
 
-    S.map = new maptilersdk.Map({
-      container: "map",
-      style: "https://api.maptiler.com/maps/dataviz-light/style.json?key=" + MAPTILER_KEY,
-      center: [2.7055, 48.8215],
-      zoom: 13.5,
-      attributionControl: false,
-      navigationControl: false
-    });
+  for(var i=0;i<BATIMENTS.length;i++){
+    (function(b,idx){
+      if(!b.lat||!b.lng)return;
+      var cat=getCat(b.categorie);
+      var color=cat.color;
+      var delay=(idx%5)*0.4;
 
-    S.map.on("load", function() {
-      // Hide POI layers to keep map clean
-      var layers = S.map.getStyle().layers;
-      if (layers) {
-        for (var i = 0; i < layers.length; i++) {
-          var l = layers[i];
-          if (l.id) {
-            var lid = l.id.toLowerCase();
-            if (lid.indexOf("poi") >= 0 || lid.indexOf("icon") >= 0 ||
-                lid.indexOf("label") >= 0 || lid.indexOf("symbol") >= 0) {
-              try { S.map.setLayoutProperty(l.id, "visibility", "none"); } catch(e) {}
-            }
-          }
+      var el=document.createElement("div");
+      el.className="map-marker";
+      el.style.background=color;
+      el.setAttribute("data-id",b.id);
+
+      // Pulse ring
+      var ring=document.createElement("div");
+      ring.className="pulse-ring";
+      ring.style.borderColor=color;
+      ring.style.animationDelay=delay+"s";
+      el.appendChild(ring);
+
+      // Icon
+      var ico=document.createElement("div");
+      ico.className="marker-icon";
+      ico.innerHTML=catIcon(b.categorie);
+      el.appendChild(ico);
+
+      el.addEventListener("click",function(e){
+        e.stopPropagation();
+        openDetail(b.id);
+        if(!DESKTOP.matches){
+          document.getElementById("sheet").classList.add("sh-detail");
+          document.getElementById("sheet").classList.remove("sh-list");
         }
-      }
-      addMarkers();
-    });
-
-    S.map.on("click", function() {
-      // Click on empty map → close detail, show list
-      if (S.currentBuilding) {
-        closeDetail();
-      }
-    });
-  }
-
-  // ── MARKERS ───────────────────────────────────────────────────────
-  function addMarkers() {
-    for (var i = 0; i < BATIMENTS.length; i++) {
-      (function(b) {
-        if (!b.lat || !b.lng) return;
-
-        var color = getCatColor(b.categorie);
-
-        // Create marker element
-        var el = document.createElement("div");
-        el.style.cssText = [
-          "width:36px",
-          "height:36px",
-          "border-radius:50%",
-          "background:" + color,
-          "border:3px solid #fff",
-          "box-shadow:0 2px 8px rgba(0,0,0,0.25)",
-          "display:flex",
-          "align-items:center",
-          "justify-content:center",
-          "cursor:pointer",
-          "transition:transform 0.15s"
-        ].join(";");
-
-        var inner = document.createElement("div");
-        inner.style.cssText = "width:16px;height:16px;color:#fff;display:flex;align-items:center;justify-content:center;";
-        inner.innerHTML = catIcon(b.categorie);
-        var svgEl = inner.querySelector("svg");
-        if (svgEl) {
-          svgEl.style.width = "14px";
-          svgEl.style.height = "14px";
-          svgEl.style.stroke = "#fff";
-        }
-        el.appendChild(inner);
-
-        el.addEventListener("touchstart", function() {
-          el.style.transform = "scale(1.2)";
-        });
-        el.addEventListener("touchend", function() {
-          el.style.transform = "scale(1)";
-        });
-        el.addEventListener("click", function(e) {
-          e.stopPropagation();
-          openDetail(b.id);
-        });
-
-        var marker = new maptilersdk.Marker({ element: el })
-          .setLngLat([b.lng, b.lat])
-          .addTo(S.map);
-
-        S.markers[b.id] = { marker: marker, el: el };
-      })(BATIMENTS[i]);
-    }
-  }
-
-  function updateMarkersVisibility() {
-    for (var i = 0; i < BATIMENTS.length; i++) {
-      var b = BATIMENTS[i];
-      var m = S.markers[b.id];
-      if (!m) continue;
-      var visible = (S.currentFilter === "all" || b.categorie === S.currentFilter);
-      m.el.style.display = visible ? "flex" : "none";
-    }
-  }
-
-  // ── FILTERS ───────────────────────────────────────────────────────
-  function buildFilters() {
-    var bar = document.getElementById("filter-bar");
-    var html = "";
-
-    html += '<button class="filter-pill active" data-cat="all" onclick="setFilter(this,\'all\')">Tous</button>';
-
-    var cats = Object.keys(CATEGORIES);
-    for (var i = 0; i < cats.length; i++) {
-      var cat = cats[i];
-      var hasBat = false;
-      for (var j = 0; j < BATIMENTS.length; j++) {
-        if (BATIMENTS[j].categorie === cat) { hasBat = true; break; }
-      }
-      if (!hasBat) continue;
-      var color = getCatColor(cat);
-      var label = getCatLabel(cat);
-      html += '<button class="filter-pill" data-cat="' + cat + '" onclick="setFilter(this,\'' + cat + '\')">' +
-              '<span class="pill-dot" style="background:' + color + '"></span>' +
-              label + '</button>';
-    }
-
-    bar.innerHTML = html;
-  }
-
-  function setFilter(el, cat) {
-    S.currentFilter = cat;
-    var pills = document.querySelectorAll(".filter-pill");
-    for (var i = 0; i < pills.length; i++) {
-      pills[i].classList.remove("active");
-    }
-    el.classList.add("active");
-    updateMarkersVisibility();
-    buildList();
-  }
-
-  // ── BUILD LIST ────────────────────────────────────────────────────
-  function buildList() {
-    var container = document.getElementById("buildings-list");
-    var countEl = document.getElementById("list-count");
-
-    var filtered = [];
-    for (var i = 0; i < BATIMENTS.length; i++) {
-      var b = BATIMENTS[i];
-      if (S.currentFilter === "all" || b.categorie === S.currentFilter) {
-        filtered.push(b);
-      }
-    }
-
-    // Sort by distance if known
-    if (S.userLat !== null) {
-      filtered.sort(function(a, b) {
-        return haversine(S.userLat, S.userLng, a.lat, a.lng) -
-               haversine(S.userLat, S.userLng, b.lat, b.lng);
       });
-    }
 
-    countEl.textContent = filtered.length + " lieu" + (filtered.length > 1 ? "x" : "") + " répertorié" + (filtered.length > 1 ? "s" : "");
+      var m=new maptilersdk.Marker({element:el}).setLngLat([b.lng,b.lat]).addTo(S.map);
+      S.markers[b.id]={marker:m,el:el};
+    })(BATIMENTS[i],i);
+  }
+}
 
-    if (filtered.length === 0) {
-      container.innerHTML = '<div class="empty-state">' + ICONS.info + '<p>Aucun bâtiment dans cette catégorie</p></div>';
-      return;
-    }
+function updateMarkers(){
+  for(var i=0;i<BATIMENTS.length;i++){
+    var b=BATIMENTS[i], m=S.markers[b.id];
+    if(!m)continue;
+    var vis=(S.filter==="all"||b.categorie===S.filter);
+    m.el.style.display=vis?"flex":"none";
+  }
+}
 
-    var html = "";
-    for (var j = 0; j < filtered.length; j++) {
-      var b = filtered[j];
-      var color = getCatColor(b.categorie);
-      var catLabel = getCatLabel(b.categorie);
-      var dist = "";
-      if (S.userLat !== null) {
-        dist = '<span class="card-dist">' + formatDist(haversine(S.userLat, S.userLng, b.lat, b.lng)) + '</span>';
-      }
+// ── FILTERS ───────────────────────────────────────────────────
+function buildFilters(){
+  // Mobile filter bar
+  var bar=document.getElementById("filter-bar");
+  var drCats=document.getElementById("drawer-cats");
+  var sbFil=document.getElementById("sb-filter");
+  var html="",drHtml="",sbHtml="";
 
-      html += '<div class="building-card" onclick="openDetail(\'' + b.id + '\')">' +
-              '<div class="card-icon" style="background:' + hexToRgba(color, 0.12) + '">' +
-              '<span style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:' + color + '">' +
-              catIcon(b.categorie).replace('<svg', '<svg style="width:18px;height:18px;"') +
-              '</span></div>' +
-              '<div class="card-info">' +
-              '<div class="card-name">' + b.nom + '</div>' +
-              '<div class="card-cat">' + catLabel + '</div>' +
-              '</div>' +
-              dist +
-              '<span class="card-chevron">' + ICONS.chevron + '</span>' +
-              '</div>';
-    }
+  html+='<button class="fpill active" onclick="setFilter(this,\'all\')">Tous</button>';
+  sbHtml+='<button class="sb-pill active" onclick="setSbFilter(this,\'all\')">Tous</button>';
 
-    container.innerHTML = html;
+  drHtml+='<button class="drawer-filter-item active" onclick="setFilter(null,\'all\');closeDrawer()">Toutes les catégories</button>';
+
+  var cats=Object.keys(CATEGORIES);
+  for(var i=0;i<cats.length;i++){
+    var cat=cats[i];
+    var catObj=getCat(cat);
+    var cnt=0;
+    for(var j=0;j<BATIMENTS.length;j++){ if(BATIMENTS[j].categorie===cat)cnt++; }
+    if(!cnt)continue;
+    html+='<button class="fpill" data-cat="'+cat+'" onclick="setFilter(this,\''+cat+'\')"><span class="fdot" style="background:'+catObj.color+'"></span>'+catObj.label+'</button>';
+    sbHtml+='<button class="sb-pill" data-cat="'+cat+'" onclick="setSbFilter(this,\''+cat+'\')"><span class="spdot" style="background:'+catObj.color+'"></span>'+catObj.label+'</button>';
+    drHtml+='<button class="drawer-filter-item" data-dcat="'+cat+'" onclick="setFilter(null,\''+cat+'\');closeDrawer()"><span class="drawer-cat-dot" style="background:'+catObj.color+'"></span>'+catObj.label+'<span class="drawer-count">'+cnt+'</span></button>';
   }
 
-  function hexToRgba(hex, alpha) {
-    var r = parseInt(hex.slice(1,3),16);
-    var g = parseInt(hex.slice(3,5),16);
-    var b = parseInt(hex.slice(5,7),16);
-    return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
-  }
+  bar.innerHTML=html;
+  drCats.innerHTML=drHtml;
+  sbFil.innerHTML=sbHtml;
+}
 
-  // ── DETAIL VIEW ───────────────────────────────────────────────────
-  function openDetail(id) {
-    var b = null;
-    for (var i = 0; i < BATIMENTS.length; i++) {
-      if (BATIMENTS[i].id === id) { b = BATIMENTS[i]; break; }
-    }
-    if (!b) return;
-    S.currentBuilding = b;
-
-    // Center map
-    if (b.lat && b.lng && S.map) {
-      S.map.flyTo({ center: [b.lng, b.lat], zoom: 16, duration: 600 });
-    }
-
-    // Name & category
-    document.getElementById("detail-name").textContent = b.nom;
-    var color = getCatColor(b.categorie);
-    var catEl = document.getElementById("detail-cat");
-    catEl.style.background = hexToRgba(color, 0.12);
-    catEl.style.color = color;
-    catEl.innerHTML = '<span class="dot" style="background:' + color + '"></span>' + getCatLabel(b.categorie);
-
-    // Photo
-    var img = document.getElementById("detail-photo-img");
-    var placeholder = document.getElementById("photo-placeholder");
-    var photoData = S.photos[b.id] || null;
-
-    if (photoData && photoData.indexOf("data:image") === 0) {
-      img.src = photoData;
-      img.style.display = "block";
-      placeholder.style.display = "none";
-    } else {
-      img.src = "";
-      img.style.display = "none";
-      placeholder.style.display = "flex";
-    }
-
-    // Admin photo button
-    document.getElementById("btn-add-photo").onclick = function() {
-      document.getElementById("photo-input").click();
-    };
-
-    // Info rows
-    var rows = [
-      { label: "Catégorie", value: getCatLabel(b.categorie), icon: ICONS.building },
-      { label: "Adresse", value: b.adresse || null, icon: ICONS.pin },
-      { label: "Description", value: b.description || null, icon: ICONS.info },
-      { label: "Capacité", value: b.capacite || null, icon: ICONS.info },
-      { label: "Accessibilité PMR", value: b.pmr || null, icon: ICONS.info },
-      { label: "Équipements", value: b.equipements || null, icon: ICONS.wrench },
-      { label: "État général", value: b.etat || null, icon: ICONS.info }
-    ];
-
-    var infoHtml = "";
-    for (var r = 0; r < rows.length; r++) {
-      var row = rows[r];
-      if (row.value === null || row.value === undefined) continue;
-      infoHtml += '<div class="info-row">' +
-        '<div class="info-row-icon">' + row.icon.replace('<svg', '<svg style="width:16px;height:16px;"') + '</div>' +
-        '<div class="info-row-content">' +
-        '<div class="info-row-label">' + row.label + '</div>' +
-        '<div class="info-row-value">' + row.value + '</div>' +
-        '</div></div>';
-    }
-    if (!infoHtml) {
-      infoHtml = '<div class="info-row"><div class="info-row-content"><div class="info-row-value unavailable">Informations détaillées non disponibles</div></div></div>';
-    }
-    document.getElementById("detail-info").innerHTML = infoHtml;
-
-    // AR nav button
-    document.getElementById("btn-ar-nav").onclick = function() {
-      window.location.href = "ar.html?id=" + b.id;
-    };
-
-    // Show detail view
-    document.getElementById("view-list").style.display = "none";
-    var vd = document.getElementById("view-detail");
-    vd.classList.add("active");
-    vd.style.display = "flex";
-
-    // Expand sheet
-    var sheet = document.getElementById("sheet");
-    sheet.classList.remove("list-mode");
-    sheet.classList.add("detail-mode");
-  }
-
-  function closeDetail() {
-    S.currentBuilding = null;
-    document.getElementById("view-detail").classList.remove("active");
-    document.getElementById("view-detail").style.display = "none";
-    document.getElementById("view-list").style.display = "flex";
-
-    var sheet = document.getElementById("sheet");
-    sheet.classList.remove("detail-mode");
-    sheet.classList.add("list-mode");
-  }
-
-  document.getElementById("btn-back").onclick = closeDetail;
-
-  // ── PHOTO INPUT ───────────────────────────────────────────────────
-  document.getElementById("photo-input").addEventListener("change", function(e) {
-    if (!S.currentBuilding) return;
-    var file = e.target.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-      savePhoto(S.currentBuilding.id, ev.target.result);
-      // Refresh photo in view
-      var img = document.getElementById("detail-photo-img");
-      var placeholder = document.getElementById("photo-placeholder");
-      img.src = ev.target.result;
-      img.style.display = "block";
-      placeholder.style.display = "none";
-      showToast("Photo enregistrée");
-    };
-    reader.readAsDataURL(file);
-    this.value = "";
+function setFilter(el,cat){
+  S.filter=cat;
+  // Update mobile pills
+  document.querySelectorAll(".fpill").forEach(function(p){ p.classList.remove("active"); });
+  document.querySelectorAll(".drawer-filter-item").forEach(function(p){ p.classList.remove("active"); });
+  if(el) el.classList.add("active");
+  // Also sync drawer
+  document.querySelectorAll(".drawer-filter-item").forEach(function(p){
+    if((cat==="all"&&!p.dataset.dcat)||(p.dataset.dcat===cat)) p.classList.add("active");
   });
-
-  // ── GEOLOCATION ───────────────────────────────────────────────────
-  document.getElementById("fab-locate").onclick = function() {
-    if (!navigator.geolocation) {
-      showToast("Géolocalisation non disponible");
-      return;
-    }
-    var btn = document.getElementById("fab-locate");
-    btn.classList.add("active");
-
-    navigator.geolocation.getCurrentPosition(function(pos) {
-      S.userLat = pos.coords.latitude;
-      S.userLng = pos.coords.longitude;
-
-      // Add/update user marker
-      if (S.userMarker) S.userMarker.remove();
-      var el = document.createElement("div");
-      el.style.cssText = "width:18px;height:18px;border-radius:50%;background:#2563EB;border:3px solid #fff;box-shadow:0 2px 8px rgba(37,99,235,0.4);";
-      S.userMarker = new maptilersdk.Marker({ element: el })
-        .setLngLat([S.userLng, S.userLat])
-        .addTo(S.map);
-
-      S.map.flyTo({ center: [S.userLng, S.userLat], zoom: 15, duration: 800 });
-
-      // Show badge
-      var badge = document.getElementById("location-badge");
-      document.getElementById("location-text").textContent = "Position obtenue";
-      badge.classList.add("visible");
-      setTimeout(function() { badge.classList.remove("visible"); }, 3000);
-
-      buildList();
-    }, function(err) {
-      btn.classList.remove("active");
-      showToast("Position non disponible");
-    }, { enableHighAccuracy: true, timeout: 8000 });
-  };
-
-  // ── TABS ──────────────────────────────────────────────────────────
-  function switchTab(tab) {
-    S.tab = tab;
-
-    // Update nav
-    document.getElementById("nav-carte").classList.remove("active");
-    document.getElementById("nav-liste").classList.remove("active");
-    document.getElementById("nav-about").classList.remove("active");
-    document.getElementById("nav-" + (tab === "about" ? "about" : (tab === "liste" ? "liste" : "carte"))).classList.add("active");
-
-    var aboutEl = document.getElementById("view-about");
-    var sheet = document.getElementById("sheet");
-
-    if (tab === "about") {
-      aboutEl.classList.add("active");
-      sheet.style.display = "none";
-    } else if (tab === "liste") {
-      aboutEl.classList.remove("active");
-      sheet.style.display = "flex";
-      closeDetail();
-      sheet.classList.remove("detail-mode");
-      sheet.classList.add("list-mode");
-      // Expand to full in list tab
-      sheet.style.height = "calc(100vh - var(--hdr-h) - var(--nav-h) - 8px)";
-    } else {
-      aboutEl.classList.remove("active");
-      sheet.style.display = "flex";
-      sheet.style.height = "";
-      if (!S.currentBuilding) {
-        sheet.classList.remove("detail-mode");
-        sheet.classList.add("list-mode");
-      }
-    }
-  }
-
-  // ── SHEET DRAG HANDLE ─────────────────────────────────────────────
-  (function() {
-    var handle = document.getElementById("sheet-handle");
-    var sheet = document.getElementById("sheet");
-    var startY = 0;
-    var startH = 0;
-
-    handle.addEventListener("touchstart", function(e) {
-      startY = e.touches[0].clientY;
-      startH = sheet.offsetHeight;
-    }, { passive: true });
-
-    handle.addEventListener("touchend", function(e) {
-      var dy = startY - e.changedTouches[0].clientY;
-      if (dy > 30) {
-        // Swipe up → expand
-        if (S.currentBuilding) {
-          sheet.classList.add("detail-mode");
-          sheet.classList.remove("list-mode");
-        } else {
-          sheet.style.height = "calc(100vh - var(--hdr-h) - var(--nav-h) - 8px)";
-        }
-      } else if (dy < -30) {
-        // Swipe down → collapse
-        sheet.style.height = "";
-        if (!S.currentBuilding) {
-          sheet.classList.remove("detail-mode");
-          sheet.classList.add("list-mode");
-        } else {
-          closeDetail();
-        }
-      }
-    }, { passive: true });
-  })();
-
-  // ── ADMIN ─────────────────────────────────────────────────────────
-  async function hashPwd(pwd) {
-    var enc = new TextEncoder();
-    var data = enc.encode(pwd);
-    var buf = await crypto.subtle.digest("SHA-256", data);
-    return Array.from(new Uint8Array(buf))
-      .map(function(b) { return b.toString(16).padStart(2, "0"); })
-      .join("");
-  }
-
-  // Long press on title → show admin button hint
-  var titleEl = document.getElementById("app-title");
-  titleEl.addEventListener("touchstart", function() {
-    S.adminPressTimer = setTimeout(function() {
-      document.getElementById("admin-overlay").classList.add("active");
-    }, 1500);
-  });
-  titleEl.addEventListener("touchend", function() {
-    clearTimeout(S.adminPressTimer);
-  });
-
-  document.getElementById("btn-open-admin").onclick = function() {
-    document.getElementById("admin-overlay").classList.add("active");
-  };
-
-  function closeAdminModal() {
-    document.getElementById("admin-overlay").classList.remove("active");
-    document.getElementById("admin-pwd").value = "";
-    document.getElementById("admin-pwd-error").textContent = "";
-  }
-
-  async function submitAdmin() {
-    var pwd = document.getElementById("admin-pwd").value;
-    if (!pwd) return;
-    var hash = await hashPwd(pwd);
-    if (hash === ADMIN_HASH) {
-      S.isAdmin = true;
-      document.body.classList.add("admin-mode");
-      document.getElementById("admin-indicator").style.display = "block";
-      closeAdminModal();
-      showToast("Mode administrateur activé");
-    } else {
-      document.getElementById("admin-pwd-error").textContent = "Mot de passe incorrect.";
-      document.getElementById("admin-pwd").value = "";
-    }
-  }
-
-  document.getElementById("btn-logout").onclick = function() {
-    S.isAdmin = false;
-    document.body.classList.remove("admin-mode");
-    document.getElementById("admin-indicator").style.display = "none";
-    showToast("Session admin terminée");
-  };
-
-  document.getElementById("admin-pwd").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") submitAdmin();
-  });
-
-  document.getElementById("admin-overlay").addEventListener("click", function(e) {
-    if (e.target === this) closeAdminModal();
-  });
-
-  // ── INIT ──────────────────────────────────────────────────────────
-  window.setFilter = setFilter;
-  window.openDetail = openDetail;
-  window.switchTab = switchTab;
-  window.closeAdminModal = closeAdminModal;
-  window.submitAdmin = submitAdmin;
-
-  loadPhotos();
-  buildFilters();
+  updateMarkers();
   buildList();
-  initMap();
+  buildSbList();
+}
 
-  </script>
+function setSbFilter(el,cat){
+  S.filter=cat;
+  document.querySelectorAll(".sb-pill").forEach(function(p){p.classList.remove("active");});
+  el.classList.add("active");
+  updateMarkers();
+  buildSbList();
+}
+
+// ── LIST BUILD (mobile) ────────────────────────────────────────
+function buildList(){
+  var cont=document.getElementById("vl-list");
+  var cnt=document.getElementById("vl-count");
+  var filtered=getFiltered();
+  cnt.textContent=filtered.length+" lieu"+(filtered.length>1?"x":"")+" répertorié"+(filtered.length>1?"s":"");
+  if(!filtered.length){
+    cont.innerHTML='<div class="empty-st">'+SVG.info+'<p>Aucun bâtiment dans cette catégorie</p></div>';
+    return;
+  }
+  var h="";
+  for(var i=0;i<filtered.length;i++){
+    var b=filtered[i], cat=getCat(b.categorie);
+    var dist=S.lat!==null?'<span class="cdist">'+fmtDist(haversine(S.lat,S.lng,b.lat,b.lng))+'</span>':"";
+    h+='<div class="bcard" onclick="openDetail(\''+b.id+'\')">' +
+      '<div class="cico" style="background:'+rgba(cat.color,.1)+'">'+
+        '<span style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:'+cat.color+'">'+
+          catIcon(b.categorie).replace('<svg','<svg style="width:18px;height:18px;stroke:'+cat.color+'"')+'</span></div>'+
+      '<div class="cinf"><div class="cname">'+b.nom+'</div><div class="ccat">'+cat.label+'</div></div>'+
+      dist+'<span class="cchev">'+SVG.chev+'</span></div>';
+  }
+  cont.innerHTML=h;
+}
+
+// ── LIST BUILD (desktop sidebar) ──────────────────────────────
+function buildSbList(){
+  var wrap=document.getElementById("sb-list-wrap");
+  var cnt=document.getElementById("sb-count");
+  var filtered=getFiltered();
+  cnt.textContent=filtered.length+" lieu"+(filtered.length>1?"x":"")+" répertorié"+(filtered.length>1?"s":"");
+  if(!filtered.length){
+    wrap.innerHTML='<div class="empty-st">'+SVG.info+'<p>Aucun résultat</p></div>';
+    return;
+  }
+  var h="";
+  for(var i=0;i<filtered.length;i++){
+    var b=filtered[i],cat=getCat(b.categorie);
+    var dist=S.lat!==null?'<span class="cdist">'+fmtDist(haversine(S.lat,S.lng,b.lat,b.lng))+'</span>':"";
+    h+='<div class="bcard" onclick="openDetail(\''+b.id+'\')">' +
+      '<div class="cico" style="background:'+rgba(cat.color,.1)+'">'+
+        '<span style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:'+cat.color+'">'+
+          catIcon(b.categorie).replace('<svg','<svg style="width:18px;height:18px;stroke:'+cat.color+'"')+'</span></div>'+
+      '<div class="cinf"><div class="cname">'+b.nom+'</div><div class="ccat">'+cat.label+'</div></div>'+
+      dist+'<span class="cchev">'+SVG.chev+'</span></div>';
+  }
+  wrap.innerHTML=h;
+}
+
+function getFiltered(){
+  var out=[];
+  for(var i=0;i<BATIMENTS.length;i++){
+    var b=BATIMENTS[i];
+    if(S.filter==="all"||b.categorie===S.filter) out.push(b);
+  }
+  if(S.lat!==null){
+    out.sort(function(a,b){ return haversine(S.lat,S.lng,a.lat,a.lng)-haversine(S.lat,S.lng,b.lat,b.lng); });
+  }
+  return out;
+}
+
+// ── DETAIL OPEN ───────────────────────────────────────────────
+function openDetail(id){
+  var b=null;
+  for(var i=0;i<BATIMENTS.length;i++){ if(BATIMENTS[i].id===id){b=BATIMENTS[i];break;} }
+  if(!b)return;
+  S.current=b;
+
+  if(b.lat&&b.lng&&S.map){
+    var zoom=DESKTOP.matches?15.5:15;
+    S.map.flyTo({center:[b.lng,b.lat],zoom:zoom,duration:600});
+  }
+
+  if(DESKTOP.matches){ openDp(b); }
+  else               { openVd(b); }
+}
+
+// Mobile detail
+function openVd(b){
+  var cat=getCat(b.categorie);
+  document.getElementById("vd-name").textContent=b.nom;
+  var badge=document.getElementById("vd-badge");
+  badge.style.background=rgba(cat.color,.12);badge.style.color=cat.color;
+  badge.innerHTML='<span style="width:6px;height:6px;border-radius:50%;background:'+cat.color+';display:inline-block;"></span>'+cat.label;
+
+  renderPhoto(b);
+  document.getElementById("ph-admin-btn").onclick=function(){ S.photoTarget="mobile"; document.getElementById("photo-input").click(); };
+  document.getElementById("vd-info").innerHTML=buildInfoRows(b);
+  document.getElementById("btn-ar-nav").onclick=function(){ window.location.href="ar.html?id="+b.id; };
+
+  document.getElementById("vl").style.display="none";
+  document.getElementById("vd").classList.add("active");
+  var sheet=document.getElementById("sheet");
+  sheet.classList.remove("sh-list");
+  sheet.classList.add("sh-detail");
+}
+
+// Desktop detail panel
+function openDp(b){
+  var cat=getCat(b.categorie);
+  document.getElementById("dp-name").textContent=b.nom;
+  var badge=document.getElementById("dp-badge");
+  badge.style.background=rgba(cat.color,.12);badge.style.color=cat.color;
+  badge.textContent=cat.label;
+  renderDpPhoto(b);
+  document.getElementById("dp-ph-btn").onclick=function(){ S.photoTarget="desktop"; document.getElementById("photo-input").click(); };
+  document.getElementById("dp-info").innerHTML=buildInfoRows(b);
+  document.getElementById("btn-dp-ar-nav").onclick=function(){ window.location.href="ar.html?id="+b.id; };
+  document.getElementById("dp").classList.add("open");
+  document.body.classList.add("dp-open");
+  // Trigger map resize
+  if(S.map) setTimeout(function(){S.map.resize();},350);
+}
+
+function buildInfoRows(b){
+  var rows=[
+    {l:"Catégorie",v:getCat(b.categorie).label,i:SVG.bldg},
+    {l:"Adresse",  v:b.adresse,                i:SVG.pin},
+    {l:"Description",v:b.description,          i:SVG.info},
+    {l:"Capacité", v:b.capacite,               i:SVG.info},
+    {l:"Accessibilité PMR",v:b.pmr,            i:SVG.bldg},
+    {l:"Équipements",v:b.equipements,          i:SVG.wrench},
+    {l:"État général",v:b.etat,               i:SVG.info}
+  ];
+  var h="";
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    if(!r.v)continue;
+    h+='<div class="info-row">'+
+      '<div class="info-row-ico">'+r.i.replace('<svg','<svg style="width:15px;height:15px;"')+'</div>'+
+      '<div class="info-row-body">'+
+        '<div class="info-row-lbl">'+r.l+'</div>'+
+        '<div class="info-row-val">'+r.v+'</div>'+
+      '</div></div>';
+  }
+  return h||'<div class="info-row"><div class="info-row-body"><div class="info-row-val na">Informations non disponibles</div></div></div>';
+}
+
+// ── CLOSE DETAIL ──────────────────────────────────────────────
+function closeDetail(){
+  S.current=null;
+  // Mobile
+  document.getElementById("vd").classList.remove("active");
+  document.getElementById("vl").style.display="flex";
+  var sheet=document.getElementById("sheet");
+  sheet.classList.remove("sh-detail");
+  sheet.classList.add("sh-list");
+  // Desktop
+  document.getElementById("dp").classList.remove("open");
+  document.body.classList.remove("dp-open");
+  if(S.map) setTimeout(function(){S.map.resize();},350);
+}
+
+document.getElementById("btn-back").onclick=closeDetail;
+document.getElementById("btn-dp-back").onclick=closeDetail;
+
+// ── PHOTO UPLOAD ──────────────────────────────────────────────
+document.getElementById("photo-input").addEventListener("change",function(e){
+  if(!S.current)return;
+  var file=e.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    saveLocalPhoto(S.current.id,ev.target.result);
+    if(S.photoTarget==="desktop"){ renderDpPhoto(S.current); }
+    else { renderPhoto(S.current); }
+    showToast("Photo enregistrée");
+  };
+  reader.readAsDataURL(file);
+  this.value="";
+});
+
+// ── GEOLOCATION ───────────────────────────────────────────────
+document.getElementById("fab-locate").onclick=function(){
+  if(!navigator.geolocation){showToast("Géolocalisation non disponible");return;}
+  var btn=this; btn.classList.add("active");
+  navigator.geolocation.getCurrentPosition(function(pos){
+    S.lat=pos.coords.latitude; S.lng=pos.coords.longitude;
+    if(S.userMarker) S.userMarker.remove();
+    var el=document.createElement("div");
+    el.style.cssText="width:16px;height:16px;border-radius:50%;background:#2563EB;border:3px solid #fff;box-shadow:0 2px 10px rgba(37,99,235,.5);";
+    S.userMarker=new maptilersdk.Marker({element:el}).setLngLat([S.lng,S.lat]).addTo(S.map);
+    S.map.flyTo({center:[S.lng,S.lat],zoom:15,duration:800});
+    var badge=document.getElementById("loc-badge");
+    badge.classList.add("show");
+    setTimeout(function(){badge.classList.remove("show");},3000);
+    buildList(); buildSbList();
+  },function(){ btn.classList.remove("active"); showToast("Position indisponible"); },{enableHighAccuracy:true,timeout:8000});
+};
+
+// ── HAMBURGER / DRAWER ────────────────────────────────────────
+document.getElementById("btn-hamburger").onclick=toggleDrawer;
+document.getElementById("drawer-overlay").onclick=closeDrawer;
+
+function toggleDrawer(){
+  var isOpen=document.getElementById("drawer").classList.contains("open");
+  if(isOpen) closeDrawer(); else openDrawer();
+}
+function openDrawer(){
+  document.getElementById("drawer").classList.add("open");
+  document.getElementById("drawer-overlay").classList.add("open");
+  document.getElementById("btn-hamburger").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeDrawer(){
+  document.getElementById("drawer").classList.remove("open");
+  document.getElementById("drawer-overlay").classList.remove("open");
+  document.getElementById("btn-hamburger").classList.remove("open");
+  document.body.style.overflow="";
+}
+
+function dNav(tab){ closeDrawer(); switchTab(tab); }
+
+// ── TABS (mobile) ─────────────────────────────────────────────
+function switchTab(tab){
+  S.tab=tab;
+  ["carte","liste","about"].forEach(function(t){
+    document.getElementById("nb-"+t).classList.remove("active");
+    document.getElementById("dn-"+t)&&document.getElementById("dn-"+t).classList.remove("active");
+  });
+  var nb=document.getElementById("nb-"+tab);
+  if(nb) nb.classList.add("active");
+  var dn=document.getElementById("dn-"+tab);
+  if(dn) dn.classList.add("active");
+
+  var about=document.getElementById("view-about");
+  var sheet=document.getElementById("sheet");
+
+  if(tab==="about"){
+    about.classList.add("active");
+    sheet.style.display="none";
+  } else if(tab==="liste"){
+    about.classList.remove("active");
+    sheet.style.display="flex";
+    closeDetail();
+    sheet.style.height="calc(100vh - "+getComputedStyle(document.documentElement).getPropertyValue("--hdr-h")+" - "+getComputedStyle(document.documentElement).getPropertyValue("--nav-h")+" - 6px)";
+  } else {
+    about.classList.remove("active");
+    sheet.style.display="flex";
+    sheet.style.height="";
+    if(!S.current){ sheet.classList.remove("sh-detail"); sheet.classList.add("sh-list"); }
+  }
+}
+
+// ── SHEET DRAG ────────────────────────────────────────────────
+(function(){
+  var handle=document.getElementById("sh-handle");
+  var sheet=document.getElementById("sheet");
+  var sy=0;
+  handle.addEventListener("touchstart",function(e){sy=e.touches[0].clientY;},{passive:true});
+  handle.addEventListener("touchend",function(e){
+    var dy=sy-e.changedTouches[0].clientY;
+    if(dy>40){
+      if(S.current){sheet.classList.add("sh-detail");sheet.classList.remove("sh-list");}
+      else{sheet.style.height="calc(100vh - 58px - 68px - 6px)";}
+    } else if(dy<-40){
+      sheet.style.height="";
+      if(S.current){ closeDetail(); }
+      else{ sheet.classList.remove("sh-detail");sheet.classList.add("sh-list"); }
+    }
+  },{passive:true});
+})();
+
+// ── HEADER SCROLL-AWARE ───────────────────────────────────────
+(function(){
+  var list=document.getElementById("vl-list");
+  var hdr=document.getElementById("app-header");
+  list.addEventListener("scroll",function(){
+    if(list.scrollTop>20) hdr.classList.add("scrolled");
+    else hdr.classList.remove("scrolled");
+  },{passive:true});
+})();
+
+// ── ADMIN ─────────────────────────────────────────────────────
+async function hashPwd(p){
+  var enc=new TextEncoder();
+  var buf=await crypto.subtle.digest("SHA-256",enc.encode(p));
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+}
+
+// Long-press on title → admin modal
+var titleEl=document.getElementById("app-title");
+titleEl.addEventListener("touchstart",function(){
+  S.pressTimer=setTimeout(openAdminModal,1500);
+});
+titleEl.addEventListener("touchend",function(){clearTimeout(S.pressTimer);});
+
+function openAdminModal(){
+  document.getElementById("adm-overlay").classList.add("open");
+  setTimeout(function(){document.getElementById("adm-pwd").focus();},100);
+}
+function closeAdminModal(){
+  document.getElementById("adm-overlay").classList.remove("open");
+  document.getElementById("adm-pwd").value="";
+  document.getElementById("adm-err").textContent="";
+}
+async function submitAdmin(){
+  var pwd=document.getElementById("adm-pwd").value;
+  if(!pwd)return;
+  var hash=await hashPwd(pwd);
+  if(hash===ADMIN_HASH){
+    S.isAdmin=true;document.body.classList.add("admin-mode");
+    document.getElementById("admin-dot").style.display="block";
+    closeAdminModal();showToast("Mode administrateur activé");
+  } else {
+    document.getElementById("adm-err").textContent="Mot de passe incorrect.";
+    document.getElementById("adm-pwd").value="";
+  }
+}
+function logout(){
+  S.isAdmin=false;document.body.classList.remove("admin-mode");
+  document.getElementById("admin-dot").style.display="none";
+  closeDrawer();showToast("Session admin terminée");
+}
+document.getElementById("adm-pwd").addEventListener("keydown",function(e){if(e.key==="Enter")submitAdmin();});
+document.getElementById("adm-overlay").addEventListener("click",function(e){if(e.target===this)closeAdminModal();});
+
+// Expose globals
+window.setFilter=setFilter; window.setSbFilter=setSbFilter;
+window.openDetail=openDetail; window.switchTab=switchTab;
+window.dNav=dNav; window.closeDrawer=closeDrawer; window.openDrawer=openDrawer;
+window.openAdminModal=openAdminModal; window.closeAdminModal=closeAdminModal;
+window.submitAdmin=submitAdmin; window.logout=logout;
+
+// ── INIT ──────────────────────────────────────────────────────
+loadLocalPhotos();
+buildFilters();
+buildList();
+buildSbList();
+initMap();
+</script>
 </body>
 </html>
