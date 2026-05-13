@@ -1,28 +1,25 @@
-const CACHE_NAME = 'ferrieres-v1';
-const PRECACHE_URLS = ['/', '/index.html', '/ar.html', '/manifest.json', '/data.js'];
+// Service Worker — Ferrières-en-Brie Patrimoine
+var CACHE = "ferrieres-v2";
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
-  );
+self.addEventListener("install", function(e) {
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      ))
-      .then(() => self.clients.claim())
+self.addEventListener("activate", function(e) {
+  e.waitUntil(
+    caches.keys().then(function(keys) {
+      return Promise.all(
+        keys.filter(function(k) { return k !== CACHE; })
+            .map(function(k) { return caches.delete(k); })
+      );
+    })
   );
+  self.clients.claim();
 });
 
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-  if (!event.request.url.startsWith(self.location.origin)) return;
-  event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
-  );
+self.addEventListener("fetch", function(e) {
+  // Pass through — no offline caching to avoid 404 loops
+  e.respondWith(fetch(e.request).catch(function() {
+    return new Response("Hors ligne", { status: 503 });
+  }));
 });

@@ -2,980 +2,1484 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#1e293b">
-  <meta name="description" content="Bâtiments publics de Ferrières-en-Brie">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Ferrières">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Ferrières-en-Brie</title>
-  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1A2540">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.0/maptiler-sdk.css" rel="stylesheet">
   <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.0/maptiler-sdk.umd.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-/* ── VARIABLES ── */
-:root {
-  --bg: #f1f5f9;
-  --white: #ffffff;
-  --ink: #0f172a;
-  --ink2: #475569;
-  --ink3: #94a3b8;
-  --border: #e2e8f0;
-  --border2: #cbd5e1;
-  --blue: #2563eb;
-  --blue-light: #eff6ff;
-  --green: #16a34a;
-  --orange: #ea580c;
-  --red: #dc2626;
-  --card-radius: 18px;
-  --btn-h: 56px;
-  --safe-t: env(safe-area-inset-top, 0px);
-  --safe-b: env(safe-area-inset-bottom, 0px);
-  --nav-h: 72px;
-}
+  <script src="./data.js"></script>
 
-/* ── RESET ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; background: var(--ink); }
-button { font-family: inherit; cursor: pointer; border: none; background: none; }
-a { text-decoration: none; font-family: inherit; }
-img { display: block; }
+  <style>
+    /* ── VARIABLES ─────────────────────────────── */
+    :root {
+      --bg:        #F5F3EE;
+      --surface:   #FFFFFF;
+      --navy:      #1A2540;
+      --navy-90:   rgba(26,37,64,0.92);
+      --gold:      #C8933A;
+      --gold-light:#FBF2E3;
+      --text:      #111827;
+      --muted:     #6B7280;
+      --border:    #E5E0D5;
+      --radius-sm: 10px;
+      --radius:    16px;
+      --radius-lg: 22px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow:    0 4px 20px rgba(0,0,0,0.12);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.18);
+      --font:      'Plus Jakarta Sans', sans-serif;
+      --nav-h:     72px;
+      --hdr-h:     60px;
+    }
 
-/* ── CARTE ── */
-#map { position: fixed; inset: 0; z-index: 0; }
-.mapboxgl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left,
-.maptiler-ctrl-bottom-right, .maptiler-ctrl-bottom-left { display: none !important; }
-.mapboxgl-ctrl-logo, .maptiler-ctrl-logo { display: none !important; }
-.mapboxgl-popup-content, .maplibregl-popup-content {
-  background: var(--white) !important;
-  border: 1px solid var(--border2) !important;
-  border-radius: 14px !important;
-  padding: 12px 16px !important;
-  font-family: 'Inter', sans-serif !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
-  pointer-events: none;
-}
-.mapboxgl-popup-tip, .maplibregl-popup-tip { display: none !important; }
-.popup-name { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.3; }
-.popup-cat  { font-size: 12px; color: var(--ink3); margin-top: 3px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+    /* ── RESET ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: var(--font); color: var(--text); -webkit-font-smoothing: antialiased; }
 
-/* ── HEADER ── */
-#header {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 30;
-  padding: calc(var(--safe-t) + 52px) 18px 16px;
-  background: linear-gradient(180deg, rgba(15,23,42,0.75) 0%, transparent 100%);
-  pointer-events: none;
-}
-.hdr-inner { display: flex; align-items: flex-start; justify-content: space-between; pointer-events: auto; gap: 12px; }
-.hdr-text {}
-.hdr-title { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.02em; line-height: 1.1; text-shadow: 0 1px 8px rgba(0,0,0,0.4); }
-.hdr-sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 3px; font-weight: 500; }
-#btn-admin-trigger { width: 44px; height: 44px; opacity: 0; flex-shrink: 0; }
+    /* ── MAP ───────────────────────────────────── */
+    #map {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
 
-/* ── BOUTON ROND (localiser, compas) ── */
-.map-btn {
-  width: var(--btn-h); height: var(--btn-h);
-  border-radius: 50%;
-  background: var(--white);
-  border: 1px solid var(--border2);
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.14);
-  transition: transform 0.12s, box-shadow 0.12s;
-}
-.map-btn:active { transform: scale(0.94); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-.map-btn svg { width: 22px; height: 22px; stroke: var(--ink); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.map-btn.busy { opacity: 0.4; pointer-events: none; }
+    /* ── HEADER ────────────────────────────────── */
+    #app-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--hdr-h);
+      background: var(--navy-90);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 100;
+    }
+    #app-header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #app-header h1 span {
+      display: block;
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .hdr-btn {
+      width: 40px; height: 40px;
+      border: none; background: rgba(255,255,255,0.12);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #fff;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hdr-btn:active { background: rgba(255,255,255,0.22); }
+    .hdr-btn svg { width: 20px; height: 20px; }
+    #admin-indicator {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: absolute;
+      top: 10px; right: 64px;
+      display: none;
+    }
 
-#btn-locate { position: fixed; right: 18px; z-index: 30; top: calc(var(--safe-t) + 116px); }
+    /* ── FILTER BAR ────────────────────────────── */
+    #filter-bar {
+      position: fixed;
+      top: var(--hdr-h); left: 0; right: 0;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      z-index: 99;
+      background: linear-gradient(180deg, rgba(26,37,64,0.7) 0%, rgba(26,37,64,0) 100%);
+    }
+    #filter-bar::-webkit-scrollbar { display: none; }
+    .filter-pill {
+      flex-shrink: 0;
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255,255,255,0.4);
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: rgba(255,255,255,0.9);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .filter-pill.active {
+      background: #fff;
+      border-color: #fff;
+      color: var(--navy);
+    }
+    .filter-pill .pill-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
 
-/* ── BADGE GPS ── */
-#location-badge {
-  position: fixed; left: 18px; right: 86px;
-  top: calc(var(--safe-t) + 116px);
-  z-index: 30;
-  background: var(--white);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  padding: 10px 14px;
-  display: flex; align-items: center; gap: 10px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  opacity: 0; transform: translateY(6px) scale(0.97);
-  transition: opacity 0.28s, transform 0.28s;
-  pointer-events: none;
-}
-#location-badge.visible { opacity: 1; transform: none; pointer-events: auto; }
-.lbadge-ic { width: 34px; height: 34px; border-radius: 50%; background: var(--blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.lbadge-ic svg { width: 16px; height: 16px; stroke: var(--blue); fill: none; stroke-width: 2.2; stroke-linecap: round; }
-.lbadge-text { flex: 1; min-width: 0; }
-.lbadge-lbl { font-size: 10px; font-weight: 600; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.06em; }
-.lbadge-val { font-size: 13px; font-weight: 600; color: var(--ink); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#badge-close { width: 28px; height: 28px; border-radius: 50%; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-#badge-close svg { width: 13px; height: 13px; stroke: var(--ink2); fill: none; stroke-width: 2.5; stroke-linecap: round; }
+    /* ── FAB LOCATE ────────────────────────────── */
+    #fab-locate {
+      position: fixed;
+      right: 16px;
+      bottom: calc(var(--nav-h) + 220px);
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      z-index: 90;
+      color: var(--navy);
+      transition: transform 0.15s, box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #fab-locate:active { transform: scale(0.94); box-shadow: var(--shadow-sm); }
+    #fab-locate svg { width: 22px; height: 22px; }
+    #fab-locate.active { color: var(--gold); }
 
-/* ── BOTTOM SHEET ── */
-#sheet {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-  background: var(--white);
-  border-radius: 24px 24px 0 0;
-  box-shadow: 0 -4px 32px rgba(0,0,0,0.12);
-  transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
-  max-height: 92vh; display: flex; flex-direction: column;
-  will-change: transform;
-}
-#sheet.collapsed { transform: translateY(calc(100% - 96px)); }
-#sheet.peek      { transform: translateY(calc(100% - 360px)); }
-#sheet.expanded  { transform: translateY(0); }
+    /* ── BOTTOM SHEET ──────────────────────────── */
+    #sheet {
+      position: fixed;
+      left: 0; right: 0;
+      bottom: var(--nav-h);
+      background: var(--surface);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      box-shadow: var(--shadow-lg);
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: height 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+      height: 200px;
+    }
+    #sheet.list-mode  { height: 55vh; }
+    #sheet.detail-mode { height: calc(100vh - var(--hdr-h) - var(--nav-h) - 8px); }
 
-.grip-wrap { padding: 12px 0 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
-.grip-bar { width: 40px; height: 5px; border-radius: 3px; background: var(--border2); transition: background 0.15s; }
-.grip-wrap:hover .grip-bar { background: var(--ink3); }
+    .sheet-handle {
+      width: 100%;
+      padding: 12px 0 8px;
+      display: flex;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .sheet-handle-bar {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+    }
 
-#sheet-head { padding: 8px 18px 12px; flex-shrink: 0; cursor: pointer; border-bottom: 1px solid var(--border); }
-#sheet-title { font-size: 20px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
-#sheet-sub { font-size: 14px; color: var(--ink3); margin-top: 4px; font-weight: 500; }
+    /* ── BUILDING LIST ─────────────────────────── */
+    #view-list {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+    #list-header {
+      padding: 0 16px 12px;
+      flex-shrink: 0;
+    }
+    #list-header h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+    #list-header p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    #buildings-list {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #buildings-list::-webkit-scrollbar { display: none; }
 
-#sheet-body {
-  flex: 1; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
-  scrollbar-color: var(--border2) transparent;
-  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 8px);
-}
-#sheet-body::-webkit-scrollbar { width: 4px; }
-#sheet-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+    .building-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 14px 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.18s;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 64px;
+    }
+    .building-card:active {
+      background: var(--bg);
+      transform: scale(0.98);
+    }
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-icon svg { width: 20px; height: 20px; }
+    .card-info { flex: 1; min-width: 0; }
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-cat {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+    .card-dist {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .card-chevron { color: var(--border); flex-shrink: 0; }
+    .card-chevron svg { width: 16px; height: 16px; }
 
-/* ── FILTRES PILLS ── */
-#filters {
-  padding: 10px 16px 14px;
-  display: flex; gap: 8px;
-  overflow-x: auto; scrollbar-width: none;
-  flex-shrink: 0;
-}
-#filters::-webkit-scrollbar { display: none; }
-.fpill {
-  display: flex; align-items: center; gap: 6px;
-  padding: 9px 16px; border-radius: 50px;
-  font-size: 13px; font-weight: 600;
-  white-space: nowrap; flex-shrink: 0;
-  border: 1.5px solid var(--border2);
-  background: var(--white); color: var(--ink2);
-  transition: all 0.15s; line-height: 1;
-}
-.fpill:active { transform: scale(0.96); }
-.fpill svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
-.fpill.active { background: var(--ink); color: var(--white); border-color: var(--ink); box-shadow: 0 2px 10px rgba(15,23,42,0.25); }
+    /* ── BUILDING DETAIL ───────────────────────── */
+    #view-detail {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+    #view-detail.active {
+      display: flex;
+    }
+    .detail-header {
+      display: flex;
+      align-items: center;
+      padding: 0 16px 12px;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    #btn-back {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--text);
+      flex-shrink: 0;
+      transition: background 0.18s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #btn-back:active { background: var(--bg); }
+    #btn-back svg { width: 20px; height: 20px; }
+    .detail-title { flex: 1; min-width: 0; }
+    .detail-title h2 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .detail-title .detail-cat {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .detail-cat .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
 
-/* ── LIGNE BÂTIMENT ── */
-.brow {
-  display: flex; align-items: center; gap: 14px;
-  padding: 15px 18px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background 0.1s;
-  text-align: left; width: 100%; background: var(--white);
-}
-.brow:active { background: var(--bg); }
-.brow:last-child { border-bottom: none; }
+    #detail-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 16px 24px;
+    }
+    #detail-scroll::-webkit-scrollbar { display: none; }
 
-.brow-ic {
-  width: 52px; height: 52px; flex-shrink: 0;
-  border-radius: 14px; background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--border);
-}
-.brow-ic svg { width: 24px; height: 24px; stroke: var(--ink2); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    /* Photo block */
+    .photo-block {
+      width: 100%;
+      height: 180px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 16px;
+      position: relative;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+    }
+    .photo-block img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .photo-placeholder svg { width: 36px; height: 36px; color: #C8C3B8; }
+    .photo-placeholder p {
+      font-size: 13px;
+      color: #C8C3B8;
+      font-weight: 500;
+    }
+    /* Admin photo button */
+    .photo-admin-btn {
+      position: absolute;
+      bottom: 12px; right: 12px;
+      height: 38px;
+      padding: 0 14px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font);
+      display: none;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .photo-admin-btn svg { width: 16px; height: 16px; }
+    body.admin-mode .photo-admin-btn { display: flex; }
 
-.brow-info { flex: 1; min-width: 0; }
-.brow-name { font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
-.brow-meta { font-size: 12px; color: var(--ink3); margin-top: 4px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-.brow-dist { font-size: 12px; font-weight: 700; color: var(--blue); background: var(--blue-light); padding: 2px 7px; border-radius: 6px; }
+    /* Info rows */
+    .info-section {
+      background: var(--bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row-icon {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--muted);
+    }
+    .info-row-icon svg { width: 16px; height: 16px; }
+    .info-row-content { flex: 1; padding-top: 2px; }
+    .info-row-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 2px;
+    }
+    .info-row-value {
+      font-size: 15px;
+      color: var(--text);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    .info-row-value.unavailable { color: var(--muted); font-style: italic; font-size: 14px; }
 
-.brow-chev { flex-shrink: 0; }
-.brow-chev svg { width: 18px; height: 18px; stroke: var(--border2); fill: none; stroke-width: 2.5; stroke-linecap: round; }
+    /* AR button in detail */
+    #btn-ar-nav {
+      width: 100%;
+      height: 52px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: opacity 0.18s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #btn-ar-nav:active { opacity: 0.85; }
+    #btn-ar-nav svg { width: 20px; height: 20px; }
 
-/* ── FICHE PAGE (plein écran) ── */
-#fiche-page {
-  position: fixed; inset: 0; z-index: 60;
-  background: var(--bg);
-  transform: translateX(100%);
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-  display: flex; flex-direction: column; overflow: hidden;
-}
-#fiche-page.open { transform: translateX(0); }
+    /* ── BOTTOM NAV ────────────────────────────── */
+    #bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: stretch;
+      z-index: 100;
+    }
+    .nav-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      font-family: var(--font);
+      letter-spacing: 0.3px;
+      transition: color 0.18s;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-btn svg { width: 22px; height: 22px; }
+    .nav-btn.active { color: var(--navy); }
+    .nav-btn.active svg { stroke-width: 2.5; }
 
-/* Topbar fiche */
-.fiche-topbar {
-  background: var(--ink);
-  padding: calc(var(--safe-t) + 12px) 18px 20px;
-  flex-shrink: 0;
-}
-.fiche-back {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 15px; font-weight: 600;
-  color: rgba(255,255,255,0.72);
-  padding: 8px 0; margin-bottom: 10px;
-  min-height: 44px;
-}
-.fiche-back svg { width: 20px; height: 20px; stroke: rgba(255,255,255,0.72); fill: none; stroke-width: 2.5; stroke-linecap: round; }
-.fiche-cat-pill {
-  display: inline-flex; align-items: center;
-  padding: 5px 12px; border-radius: 50px;
-  background: rgba(255,255,255,0.14);
-  font-size: 12px; font-weight: 700;
-  color: rgba(255,255,255,0.85);
-  text-transform: uppercase; letter-spacing: 0.06em;
-  margin-bottom: 10px;
-}
-#fiche-name { font-size: 26px; font-weight: 700; color: #fff; letter-spacing: -0.02em; line-height: 1.2; }
+    /* ── ABOUT VIEW ────────────────────────────── */
+    #view-about {
+      position: fixed;
+      top: var(--hdr-h);
+      left: 0; right: 0;
+      bottom: var(--nav-h);
+      background: var(--bg);
+      z-index: 85;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 24px 16px;
+      display: none;
+    }
+    #view-about.active { display: block; }
+    .about-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+    .about-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .about-card p {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+    .about-stat {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .stat-box {
+      flex: 1;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-box .stat-n {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+    .stat-box .stat-l {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
 
-/* Scroll fiche */
-.fscroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
-.fscroll::-webkit-scrollbar { width: 4px; }
-.fscroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+    /* ── LOCATION BADGE ────────────────────────── */
+    #location-badge {
+      position: fixed;
+      top: calc(var(--hdr-h) + 60px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: var(--navy-90);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      z-index: 95;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      white-space: nowrap;
+    }
+    #location-badge.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #location-badge svg { width: 14px; height: 14px; color: #4ADE80; }
 
-/* Photo */
-.fphoto {
-  width: 100%; aspect-ratio: 16/9;
-  background: #1e293b; overflow: hidden;
-  position: relative;
-}
-.fphoto img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.fphoto-empty {
-  width: 100%; height: 100%; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 10px;
-}
-.fphoto-empty svg { width: 40px; height: 40px; stroke: #475569; fill: none; stroke-width: 1.5; }
-.fphoto-empty span { font-size: 13px; color: #475569; font-weight: 500; }
+    /* ── ADMIN MODAL ───────────────────────────── */
+    #admin-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #admin-overlay.active { display: flex; }
+    #admin-modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 360px;
+    }
+    #admin-modal h3 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    #admin-modal p { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+    #admin-pwd {
+      width: 100%;
+      height: 52px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0 14px;
+      font-size: 16px;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #admin-pwd:focus { border-color: var(--navy); }
+    #admin-pwd-error {
+      font-size: 13px;
+      color: #DC2626;
+      margin-top: 6px;
+      min-height: 18px;
+    }
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .modal-btn {
+      flex: 1;
+      height: 50px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: opacity 0.18s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .modal-btn:active { opacity: 0.8; }
+    .modal-btn.secondary { background: var(--bg); color: var(--text); }
+    .modal-btn.primary { background: var(--navy); color: #fff; }
+    #btn-logout {
+      width: 100%;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid #DC2626;
+      background: transparent;
+      color: #DC2626;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      margin-top: 12px;
+      display: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body.admin-mode #btn-logout { display: block; }
 
-/* Bouton admin photo */
-.photo-admin-btn {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  width: calc(100% - 36px); margin: 14px 18px 0;
-  height: 52px; border-radius: 14px;
-  background: var(--ink); color: #fff;
-  font-size: 15px; font-weight: 700;
-  transition: opacity 0.15s, transform 0.12s;
-}
-.photo-admin-btn:active { opacity: 0.88; transform: scale(0.98); }
-.photo-admin-btn svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; }
+    /* ── TOAST ─────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: calc(var(--nav-h) + 16px);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 300;
+      opacity: 0;
+      transition: all 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
 
-/* Section fiche */
-.fsect {
-  background: var(--white);
-  margin-top: 10px;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.fsect-title {
-  padding: 16px 18px 8px;
-  font-size: 11px; font-weight: 700;
-  color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em;
-}
-.frow {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 13px 18px; border-bottom: 1px solid var(--border);
-}
-.frow:last-child { border-bottom: none; }
-.frow-ic {
-  width: 44px; height: 44px; flex-shrink: 0;
-  border-radius: 12px; background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--border);
-  margin-top: 1px;
-}
-.frow-ic svg { width: 20px; height: 20px; stroke: var(--ink2); fill: none; stroke-width: 1.8; stroke-linecap: round; }
-.frow-content { flex: 1; min-width: 0; }
-.frow-lbl { font-size: 11px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-.frow-val { font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.45; }
+    /* ── NO RESULTS ────────────────────────────── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      gap: 10px;
+    }
+    .empty-state svg { width: 36px; height: 36px; opacity: 0.4; }
+    .empty-state p { font-size: 15px; font-weight: 500; }
 
-/* Badge état */
-.ebadge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 50px; font-size: 13px; font-weight: 700; }
-.e-ras  { background: #dcfce7; color: #15803d; }
-.e-moy  { background: #fef9c3; color: #92400e; }
-.e-ko   { background: #fee2e2; color: #b91c1c; }
-.e-nd   { background: var(--bg); color: var(--ink3); }
-
-/* ── NAV BAR ── */
-#nav-bar {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-  background: var(--white);
-  border-top: 1px solid var(--border);
-  display: flex; justify-content: space-around; align-items: stretch;
-  padding-bottom: var(--safe-b);
-  height: calc(var(--nav-h) + var(--safe-b));
-  box-shadow: 0 -2px 16px rgba(0,0,0,0.07);
-}
-.nbtn {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px; flex: 1; padding: 8px 4px;
-  color: var(--ink3); transition: color 0.15s;
-}
-.nbtn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; transition: stroke 0.15s; }
-.nbtn span { font-size: 11px; font-weight: 700; }
-.nbtn.active { color: var(--ink); }
-.nbtn:active { color: var(--blue); }
-.nbtn-a {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px; flex: 1; padding: 8px 4px; color: var(--ink3);
-  font-size: 11px; font-weight: 700;
-}
-.nbtn-a svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
-.nbtn-a:active { color: var(--blue); }
-
-/* ── TOAST ── */
-#toast {
-  position: fixed;
-  bottom: calc(var(--nav-h) + var(--safe-b) + 16px);
-  left: 50%; transform: translateX(-50%) translateY(8px);
-  z-index: 70; background: var(--ink); color: #fff;
-  font-size: 14px; font-weight: 600;
-  padding: 12px 22px; border-radius: 50px;
-  white-space: nowrap; opacity: 0;
-  transition: opacity 0.25s, transform 0.25s;
-  pointer-events: none;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ── LOADER ── */
-#loader {
-  position: fixed; inset: 0; z-index: 100;
-  background: var(--ink);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 24px;
-  transition: opacity 0.5s;
-}
-#loader.hidden { opacity: 0; pointer-events: none; }
-.loader-city { font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -0.03em; }
-.loader-bar { width: 180px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; }
-.loader-bar::after { content: ''; display: block; width: 100%; height: 100%; background: #fff; transform: translateX(-100%); animation: lb 1.6s ease-in-out forwards; }
-@keyframes lb { to { transform: translateX(0); } }
-.loader-sub { font-size: 14px; color: rgba(255,255,255,0.5); font-weight: 500; }
-
-/* ── RESPONSIVE DESKTOP ── */
-@media (min-width: 700px) {
-  #sheet { left: auto; right: 0; width: 400px; border-radius: 0; box-shadow: -4px 0 32px rgba(0,0,0,0.08); max-height: 100vh; height: 100%; }
-  #sheet.collapsed { transform: translateX(100%); }
-  #sheet.peek, #sheet.expanded { transform: none; }
-  #nav-bar { display: none; }
-  #fiche-page { left: auto; right: 0; width: 400px; }
-  #btn-locate { top: 80px; right: 420px; }
-  #location-badge { top: 80px; right: 490px; left: auto; width: 280px; }
-  #header { padding-top: 20px; }
-}
-
-#photo-input { display: none; }
-</style>
+    /* hidden input for photo */
+    #photo-input { display: none; }
+  </style>
 </head>
 <body>
 
-<!-- LOADER -->
-<div id="loader">
-  <div class="loader-city">Ferrières-en-Brie</div>
-  <div class="loader-bar"></div>
-  <div class="loader-sub">Chargement de la carte…</div>
-</div>
+  <!-- MAP -->
+  <div id="map"></div>
 
-<!-- TOAST -->
-<div id="toast" role="status" aria-live="polite"></div>
-
-<!-- CARTE -->
-<div id="map"></div>
-
-<!-- HEADER -->
-<header id="header">
-  <div class="hdr-inner">
-    <div class="hdr-text">
-      <div class="hdr-title">Ferrières-en-Brie</div>
-      <div class="hdr-sub">Seine-et-Marne · 77164</div>
+  <!-- HEADER -->
+  <header id="app-header">
+    <div>
+      <h1 id="app-title">Ferrières-en-Brie<span>Patrimoine communal</span></h1>
     </div>
-    <button id="btn-admin-trigger" aria-label="Administration" title="Accès administration"></button>
-  </div>
-</header>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div id="admin-indicator"></div>
+      <button class="hdr-btn" id="btn-ar-header" title="Vue AR" onclick="window.location.href='ar.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
 
-<!-- BOUTON LOCALISER -->
-<button id="btn-locate" class="map-btn" aria-label="Centrer sur ma position">
-  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 2.5"/></svg>
-</button>
+  <!-- FILTER BAR -->
+  <div id="filter-bar"></div>
 
-<!-- BADGE POSITION -->
-<div id="location-badge" role="status" aria-live="polite">
-  <div class="lbadge-ic">
-    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-  </div>
-  <div class="lbadge-text">
-    <div class="lbadge-lbl">Votre position</div>
-    <div class="lbadge-val" id="badge-addr">Localisation…</div>
-  </div>
-  <button id="badge-close" aria-label="Fermer">
-    <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  <!-- FAB LOCATE -->
+  <button id="fab-locate" title="Ma position">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>
   </button>
-</div>
 
-<!-- BOTTOM SHEET -->
-<div id="sheet" role="dialog" aria-label="Liste des bâtiments">
-  <div class="grip-wrap" id="grip" role="button" tabindex="0" aria-label="Agrandir le panneau">
-    <div class="grip-bar"></div>
+  <!-- LOCATION BADGE -->
+  <div id="location-badge">
+    <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg>
+    <span id="location-text">Localisation en cours...</span>
   </div>
-  <div id="sheet-head" role="button" tabindex="0">
-    <div id="sheet-title">Bâtiments publics</div>
-    <div id="sheet-sub">19 lieux</div>
+
+  <!-- BOTTOM SHEET -->
+  <div id="sheet" class="list-mode">
+
+    <div class="sheet-handle" id="sheet-handle">
+      <div class="sheet-handle-bar"></div>
+    </div>
+
+    <!-- LIST VIEW -->
+    <div id="view-list">
+      <div id="list-header">
+        <h2>Bâtiments publics</h2>
+        <p id="list-count">20 lieux répertoriés</p>
+      </div>
+      <div id="buildings-list"></div>
+    </div>
+
+    <!-- DETAIL VIEW -->
+    <div id="view-detail">
+      <div class="detail-header">
+        <button id="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        </button>
+        <div class="detail-title">
+          <h2 id="detail-name">Nom</h2>
+          <div class="detail-cat" id="detail-cat"></div>
+        </div>
+      </div>
+      <div id="detail-scroll">
+        <!-- Photo -->
+        <div class="photo-block" id="detail-photo-block">
+          <div class="photo-placeholder" id="photo-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            <p>Photo à venir</p>
+          </div>
+          <img id="detail-photo-img" src="" alt="Photo du bâtiment" style="display:none;">
+          <button class="photo-admin-btn" id="btn-add-photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            Ajouter une photo
+          </button>
+        </div>
+
+        <!-- Info rows -->
+        <div class="info-section" id="detail-info"></div>
+
+        <!-- AR Button -->
+        <button id="btn-ar-nav">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          Naviguer vers ce lieu
+        </button>
+      </div>
+    </div>
+
   </div>
-  <div id="filters" role="tablist">
-    <button class="fpill active" data-cat="all" role="tab" aria-selected="true">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Tous
-    </button>
-    <button class="fpill" data-cat="administration" role="tab" aria-selected="false">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
-      Administration
-    </button>
-    <button class="fpill" data-cat="culture" role="tab" aria-selected="false">
-      <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-      Culture
-    </button>
-    <button class="fpill" data-cat="sport" role="tab" aria-selected="false">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93 19.07 19.07"/></svg>
-      Sport
-    </button>
-    <button class="fpill" data-cat="education" role="tab" aria-selected="false">
-      <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-      Éducation
-    </button>
-    <button class="fpill" data-cat="nature" role="tab" aria-selected="false">
-      <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21"/><path d="M9.5 9.38C9.5 14 12 17 21 17"/></svg>
-      Nature
-    </button>
-    <button class="fpill" data-cat="technique" role="tab" aria-selected="false">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-      Technique
-    </button>
-    <button class="fpill" data-cat="social" role="tab" aria-selected="false">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-      Social
-    </button>
-    <button class="fpill" data-cat="service" role="tab" aria-selected="false">
-      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      Service
-    </button>
+
+  <!-- ABOUT VIEW -->
+  <div id="view-about">
+    <div class="about-card">
+      <h3>Ferrières-en-Brie</h3>
+      <p>Cartographie interactive du patrimoine communal. Retrouvez l'ensemble des bâtiments publics de la commune avec leurs informations.</p>
+      <div class="about-stat">
+        <div class="stat-box">
+          <div class="stat-n">20</div>
+          <div class="stat-l">Bâtiments</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-n">7</div>
+          <div class="stat-l">Catégories</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-n">AR</div>
+          <div class="stat-l">Réalité augm.</div>
+        </div>
+      </div>
+    </div>
+    <div class="about-card">
+      <h3>Confidentialité</h3>
+      <p>Les photos sont enregistrées uniquement sur cet appareil. La géolocalisation n'est jamais transmise à un serveur. Aucune donnée personnelle n'est collectée.</p>
+    </div>
+    <div class="about-card">
+      <h3>Administration</h3>
+      <p>Accès réservé au gestionnaire du contenu.</p>
+      <button id="btn-open-admin" style="margin-top:14px;width:100%;height:48px;border-radius:10px;border:1.5px solid var(--border);background:transparent;font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;color:var(--text);">Mode administrateur</button>
+      <button id="btn-logout">Quitter le mode admin</button>
+    </div>
+    <div class="about-card">
+      <h3>Version</h3>
+      <p>Ferrières-en-Brie Patrimoine v2.0<br>Données : Commune de Ferrières-en-Brie</p>
+    </div>
   </div>
-  <div id="sheet-body"></div>
-</div>
 
-<!-- FICHE DETAIL -->
-<div id="fiche-page" role="dialog" aria-modal="true">
-  <div class="fiche-topbar">
-    <button class="fiche-back" id="fiche-back">
-      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-      Retour à la carte
+  <!-- BOTTOM NAV -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" id="nav-carte" onclick="switchTab('carte')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+      Carte
     </button>
-    <div class="fiche-cat-pill" id="fiche-cat">—</div>
-    <div id="fiche-name">—</div>
+    <button class="nav-btn" id="nav-liste" onclick="switchTab('liste')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+      Liste
+    </button>
+    <button class="nav-btn" id="nav-about" onclick="switchTab('about')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      À propos
+    </button>
+  </nav>
+
+  <!-- ADMIN MODAL -->
+  <div id="admin-overlay">
+    <div id="admin-modal">
+      <h3>Accès administrateur</h3>
+      <p>Saisissez le mot de passe pour gérer les photos et les informations.</p>
+      <input type="password" id="admin-pwd" placeholder="Mot de passe" autocomplete="off">
+      <div id="admin-pwd-error"></div>
+      <div class="modal-btns">
+        <button class="modal-btn secondary" onclick="closeAdminModal()">Annuler</button>
+        <button class="modal-btn primary" onclick="submitAdmin()">Confirmer</button>
+      </div>
+    </div>
   </div>
-  <div class="fscroll" id="fscroll"></div>
-</div>
 
-<!-- NAV BAR -->
-<nav id="nav-bar" aria-label="Navigation principale">
-  <button class="nbtn active" data-view="map" aria-label="Carte">
-    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-    <span>Carte</span>
-  </button>
-  <button class="nbtn" data-view="list" aria-label="Liste des lieux">
-    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-    <span>Liste</span>
-  </button>
-  <a class="nbtn-a" href="ar.html" aria-label="Vue réalité augmentée">
-    <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-    <span>Vue AR</span>
-  </a>
-</nav>
+  <!-- Photo input -->
+  <input type="file" id="photo-input" accept="image/*" capture="environment">
 
-<input type="file" id="photo-input" accept="image/*" capture="environment">
+  <!-- TOAST -->
+  <div id="toast"></div>
 
-<!-- DONNÉES -->
-<script src="data.js"></script>
+  <script>
+  // ── ADMIN HASH ────────────────────────────────────────────────────
+  // SHA-256 of "admin" — change this value to secure your installation
+  // Generate yours at: https://emn178.github.io/online-tools/sha256.html
+  var ADMIN_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
 
-<script>
-/* ── CONFIG ── */
-maptilersdk.config.apiKey = 'AhQ10drEx79exZrx0qNv';
-
-/* ── ÉTAT ── */
-const S = {
-  map: null,
-  uLat: null, uLng: null,
-  filter: 'all',
-  sheet: 'collapsed',
-  selId: null,
-  admin: false,
-  photos: {}
-};
-
-/* ── UTILS ── */
-const $ = id => document.getElementById(id);
-
-function toast(msg, ms) {
-  ms = ms || 2800;
-  var el = $('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t = setTimeout(function() { el.classList.remove('show'); }, ms);
-}
-
-function dKm(la1, lo1, la2, lo2) {
-  var R = 6371;
-  var dLa = (la2 - la1) * Math.PI / 180;
-  var dLo = (lo2 - lo1) * Math.PI / 180;
-  var a = Math.sin(dLa/2)*Math.sin(dLa/2)
-        + Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)*Math.sin(dLo/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-function fDist(km) {
-  return km < 1 ? Math.round(km * 1000) + '\u202fm' : km.toFixed(1) + '\u202fkm';
-}
-
-/* ── PHOTOS ── */
-function loadPhotos() {
-  // Ne charger que les photos en base64 ajoutées par l'admin
-  // Ignorer les anciens chemins relatifs (bulle-tennis.jpg, photos/...) 
-  // qui sont des résidus de versions précédentes
-  BATIMENTS.forEach(function(b) {
-    try {
-      var s = localStorage.getItem('fp_' + b.id);
-      if (s && s.indexOf('data:') === 0) {
-        S.photos[b.id] = s;
-      } else if (s) {
-        // Supprimer les anciennes valeurs incorrectes
-        localStorage.removeItem('fp_' + b.id);
-      }
-    } catch(e) {}
-  });
-}
-
-function savePhoto(id, url) {
-  S.photos[id] = url;
-  try { localStorage.setItem('fp_' + id, url); } catch(e) {}
-}
-
-/* ── ICÔNES ── */
-var CAT_PATHS = {
-  administration: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>',
-  culture:        '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
-  sport:          '<circle cx="12" cy="12" r="10"/><path d="M4.93 4.93 19.07 19.07"/>',
-  education:      '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
-  nature:         '<path d="M17 8C8 10 5.9 16.17 3.82 21"/><path d="M9.5 9.38C9.5 14 12 17 21 17"/>',
-  technique:      '<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>',
-  social:         '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
-  service:        '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>'
-};
-
-var INFO_PATHS = {
-  pin:    '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
-  users:  '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
-  clock:  '<circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>',
-  info:   '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
-  tool:   '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
-  lock:   '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-  img:    '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>',
-  upload: '<polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>'
-};
-
-function photoError(img) {
-  var parent = img.parentElement;
-  if (!parent) return;
-  parent.innerHTML = '<div class="fphoto-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:40px;height:40px;stroke-width:1.5;stroke-linecap:round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><span>Photo non disponible</span></div>';
-}
-
-function mkSvg(paths, size) {
-  size = size || 20;
-  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" style="width:' + size + 'px;height:' + size + 'px;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round">' + paths + '</svg>';
-}
-
-function catSvg(cat) {
-  return mkSvg(CAT_PATHS[cat] || CAT_PATHS.administration, 24);
-}
-
-/* ── BADGE ÉTAT ── */
-function ebadge(e) {
-  if (!e || e === '—') return '<span class="ebadge e-nd">—</span>';
-  var v = e.toLowerCase();
-  if (v.indexOf('ras') >= 0 || v.indexOf('bon') >= 0) return '<span class="ebadge e-ras">' + e + '</span>';
-  if (v.indexOf('moyen') >= 0 || v.indexOf('vétuste') >= 0) return '<span class="ebadge e-moy">' + e + '</span>';
-  return '<span class="ebadge e-nd">' + e + '</span>';
-}
-
-/* ── SHEET STATE ── */
-function setSheet(s) {
-  S.sheet = s;
-  $('sheet').className = s;
-}
-
-/* ── FILTRAGE + TRI ── */
-function getVisible() {
-  var list = BATIMENTS.filter(function(b) {
-    return S.filter === 'all' || b.categorie === S.filter;
-  });
-  if (S.uLat !== null) {
-    list = list.slice().sort(function(a, b) {
-      return dKm(S.uLat, S.uLng, a.lat, a.lng) - dKm(S.uLat, S.uLng, b.lat, b.lng);
-    });
-  }
-  return list;
-}
-
-/* ── RENDU LISTE ── */
-function renderList() {
-  S.selId = null;
-  var list = getVisible();
-  $('sheet-title').textContent = 'Bâtiments publics';
-  $('sheet-sub').textContent = list.length + ' lieu' + (list.length > 1 ? 'x' : '') + ' \u00b7 toucher pour les détails';
-
-  var html = '';
-  for (var i = 0; i < list.length; i++) {
-    var b = list[i];
-    var dist = '';
-    if (S.uLat !== null) {
-      dist = '<span class="brow-dist">' + fDist(dKm(S.uLat, S.uLng, b.lat, b.lng)) + '</span>';
-    }
-    html += '<button class="brow" data-id="' + b.id + '" type="button">'
-      + '<div class="brow-ic">' + catSvg(b.categorie) + '</div>'
-      + '<div class="brow-info">'
-      + '<div class="brow-name">' + b.nom + '</div>'
-      + '<div class="brow-meta">' + b.categorie + dist + '</div>'
-      + '</div>'
-      + '<div class="brow-chev">' + mkSvg('<polyline points="9,18 15,12 9,6"/>', 18) + '</div>'
-      + '</button>';
-  }
-  $('sheet-body').innerHTML = html;
-
-  var rows = $('sheet-body').querySelectorAll('.brow');
-  for (var j = 0; j < rows.length; j++) {
-    rows[j].addEventListener('click', (function(id) {
-      return function() { openFiche(id); };
-    })(rows[j].dataset.id));
-  }
-}
-
-/* ── FICHE DÉTAIL ── */
-function openFiche(id) {
-  var b = null;
-  for (var i = 0; i < BATIMENTS.length; i++) {
-    if (BATIMENTS[i].id === id) { b = BATIMENTS[i]; break; }
-  }
-  if (!b) return;
-  S.selId = id;
-
-  $('fiche-cat').textContent = b.categorie.charAt(0).toUpperCase() + b.categorie.slice(1);
-  $('fiche-name').textContent = b.nom;
-
-  var photo = S.photos[id] || null; // b.photo ignoré : aucune image statique disponible
-
-  /* Photo block */
-  var photoHtml = '';
-  if (photo) {
-    photoHtml = '<div class="fphoto"><img src="' + photo + '" alt="Photo de ' + b.nom + '" onerror="photoError(this)"></div>';
-  } else {
-    photoHtml = '<div class="fphoto"><div class="fphoto-empty">' + mkSvg(INFO_PATHS.img, 40) + '<span>Aucune photo disponible</span></div></div>';
-  }
-
-  /* Bouton admin */
-  var adminHtml = '';
-  if (S.admin) {
-    adminHtml = '<button class="photo-admin-btn" onclick="triggerPhoto(\'' + id + '\')">' + mkSvg(INFO_PATHS.upload, 20) + (photo ? ' Changer la photo' : ' Ajouter une photo') + '</button>';
-  }
-
-  /* Infos */
-  var fields = [];
-  if (b.adresse && b.adresse !== '—') fields.push({ k: 'pin',   l: 'Adresse',       v: b.adresse });
-  if (b.capacite && b.capacite !== '—') fields.push({ k: 'users', l: 'Capacité',      v: b.capacite });
-  if (b.horaires && b.horaires !== '—') fields.push({ k: 'clock', l: 'Horaires',      v: b.horaires });
-  if (b.description) fields.push({ k: 'info',  l: 'Description',   v: b.description });
-  if (b.activites && b.activites !== '—') fields.push({ k: 'lock',  l: 'Activités',   v: b.activites });
-  if (b.equipements && b.equipements !== '—') fields.push({ k: 'tool',  l: 'Équipements', v: b.equipements });
-  if (b.accessibilite && b.accessibilite !== '—') fields.push({ k: 'info',  l: 'Accessibilité', v: b.accessibilite });
-
-  var infoRows = '';
-  for (var fi = 0; fi < fields.length; fi++) {
-    var f = fields[fi];
-    infoRows += '<div class="frow">'
-      + '<div class="frow-ic">' + mkSvg(INFO_PATHS[f.k]) + '</div>'
-      + '<div class="frow-content"><div class="frow-lbl">' + f.l + '</div><div class="frow-val">' + f.v + '</div></div>'
-      + '</div>';
-  }
-
-  /* État */
-  var etatRows = '';
-  etatRows += '<div class="frow"><div class="frow-ic">' + mkSvg(INFO_PATHS.info) + '</div><div class="frow-content"><div class="frow-lbl">État général</div><div class="frow-val">' + ebadge(b.etat) + '</div></div></div>';
-  if (b.travaux_recents && b.travaux_recents !== '—' && b.travaux_recents !== 'RAS') {
-    etatRows += '<div class="frow"><div class="frow-ic">' + mkSvg(INFO_PATHS.tool) + '</div><div class="frow-content"><div class="frow-lbl">Travaux récents</div><div class="frow-val">' + b.travaux_recents + '</div></div></div>';
-  }
-  if (b.travaux_prevus && b.travaux_prevus !== '—' && b.travaux_prevus !== 'RAS') {
-    etatRows += '<div class="frow"><div class="frow-ic">' + mkSvg(INFO_PATHS.tool) + '</div><div class="frow-content"><div class="frow-lbl">Travaux à prévoir</div><div class="frow-val">' + b.travaux_prevus + '</div></div></div>';
-  }
-
-  $('fscroll').innerHTML = photoHtml
-    + (adminHtml ? '<div style="padding:0 0 2px">' + adminHtml + '</div>' : '')
-    + '<div class="fsect"><div class="fsect-title">Informations</div>' + infoRows + '</div>'
-    + '<div class="fsect"><div class="fsect-title">État du bâtiment</div>' + etatRows + '</div>'
-    + '<div style="height:28px"></div>';
-
-  $('fiche-page').classList.add('open');
-  $('fscroll').scrollTop = 0;
-  S.map.flyTo({ center: [b.lng, b.lat], zoom: Math.max(S.map.getZoom(), 16), duration: 600 });
-}
-
-function closeFiche() {
-  $('fiche-page').classList.remove('open');
-  S.selId = null;
-}
-
-$('fiche-back').addEventListener('click', closeFiche);
-
-/* ── PHOTO UPLOAD ── */
-window.triggerPhoto = function(id) {
-  if (!S.admin) return;
-  $('photo-input').setAttribute('data-id', id);
-  $('photo-input').click();
-};
-
-$('photo-input').addEventListener('change', function() {
-  if (!S.admin) return;
-  var id = this.getAttribute('data-id');
-  var file = this.files[0];
-  if (!file || !id) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    savePhoto(id, e.target.result);
-    toast('Photo enregistrée');
-    openFiche(id);
+  // ── STATE ─────────────────────────────────────────────────────────
+  var S = {
+    map: null,
+    markers: {},
+    userMarker: null,
+    userLat: null,
+    userLng: null,
+    currentFilter: "all",
+    currentBuilding: null,
+    isAdmin: false,
+    photos: {},
+    tab: "carte",
+    adminPressTimer: null
   };
-  reader.readAsDataURL(file);
-  this.value = '';
-});
 
-/* ── ADMIN ── */
-var ADMIN_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
-
-async function hashStr(s) {
-  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-}
-
-async function promptAdmin() {
-  var pwd = prompt('Mot de passe administrateur :');
-  if (!pwd) return;
-  var h = await hashStr(pwd);
-  if (h === ADMIN_HASH) {
-    S.admin = true;
-    toast('Mode administrateur activé');
-    if (S.selId) openFiche(S.selId);
-  } else {
-    toast('Mot de passe incorrect.');
+  // ── UTILS ─────────────────────────────────────────────────────────
+  function haversine(lat1, lng1, lat2, lng2) {
+    var R = 6371000;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+            Math.sin(dLng/2)*Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
-}
 
-var aTimer = null;
-$('btn-admin-trigger').addEventListener('pointerdown', function() { aTimer = setTimeout(promptAdmin, 1500); });
-$('btn-admin-trigger').addEventListener('pointerup',    function() { clearTimeout(aTimer); });
-$('btn-admin-trigger').addEventListener('pointercancel',function() { clearTimeout(aTimer); });
+  function formatDist(m) {
+    if (m < 1000) return Math.round(m) + " m";
+    return (m/1000).toFixed(1) + " km";
+  }
 
-/* ── GÉOLOCALISATION ── */
-function requestLocation() {
-  if (!('geolocation' in navigator)) { toast('Géolocalisation non disponible.'); return; }
-  $('btn-locate').classList.add('busy');
-  navigator.geolocation.getCurrentPosition(
-    function(pos) {
-      S.uLat = pos.coords.latitude;
-      S.uLng = pos.coords.longitude;
-      $('btn-locate').classList.remove('busy');
+  function showToast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(function() { t.classList.remove("show"); }, 2800);
+  }
 
-      if (S.map.getSource('uloc')) {
-        S.map.getSource('uloc').setData({ type: 'Feature', geometry: { type: 'Point', coordinates: [S.uLng, S.uLat] } });
-      } else {
-        S.map.addSource('uloc', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'Point', coordinates: [S.uLng, S.uLat] } } });
-        S.map.addLayer({ id: 'u-halo', type: 'circle', source: 'uloc', paint: { 'circle-radius': 20, 'circle-color': '#2563eb', 'circle-opacity': 0.15 } });
-        S.map.addLayer({ id: 'u-dot',  type: 'circle', source: 'uloc', paint: { 'circle-radius': 9, 'circle-color': '#2563eb', 'circle-stroke-width': 3, 'circle-stroke-color': '#ffffff' } });
+  function getCatColor(cat) {
+    var c = CATEGORIES[cat];
+    return c ? c.color : "#6B7280";
+  }
+
+  function getCatLabel(cat) {
+    var c = CATEGORIES[cat];
+    return c ? c.label : cat;
+  }
+
+  // ── ICONS (inline SVG) ────────────────────────────────────────────
+  var ICONS = {
+    building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>',
+    music: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+    sport: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93a10 10 0 0 1 14.14 0"/><path d="M4.93 19.07a10 10 0 0 0 14.14 0"/></svg>',
+    leaf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
+    wrench: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+    heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+    droplets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg>',
+    chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
+  };
+
+  function catIcon(cat) {
+    var map = {
+      administration: ICONS.building,
+      culture: ICONS.music,
+      sport: ICONS.sport,
+      nature: ICONS.leaf,
+      technique: ICONS.wrench,
+      social: ICONS.heart,
+      infrastructure: ICONS.droplets
+    };
+    return map[cat] || ICONS.building;
+  }
+
+  // ── PHOTO STORAGE ─────────────────────────────────────────────────
+  function loadPhotos() {
+    // Clean localStorage of invalid entries first
+    var keys = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        keys.push(localStorage.key(i));
       }
+    } catch(e) { return; }
+    for (var j = 0; j < keys.length; j++) {
+      var k = keys[j];
+      if (k && k.indexOf("photo_") === 0) {
+        try {
+          var v = localStorage.getItem(k);
+          // Only accept base64 photos (added by admin via camera)
+          if (v && v.indexOf("data:image") === 0) {
+            var bid = k.replace("photo_", "");
+            S.photos[bid] = v;
+          } else {
+            // Remove legacy/invalid paths
+            localStorage.removeItem(k);
+          }
+        } catch(e) {}
+      }
+    }
+  }
 
-      S.map.flyTo({ center: [S.uLng, S.uLat], zoom: 15.5, duration: 900 });
+  function savePhoto(buildingId, dataUrl) {
+    if (!dataUrl || dataUrl.indexOf("data:image") !== 0) return;
+    try {
+      localStorage.setItem("photo_" + buildingId, dataUrl);
+      S.photos[buildingId] = dataUrl;
+    } catch(e) {
+      showToast("Stockage indisponible");
+    }
+  }
 
-      fetch('https://nominatim.openstreetmap.org/reverse?lat=' + S.uLat + '&lon=' + S.uLng + '&format=json&accept-language=fr')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          var a = d.address || {};
-          var parts = [a.road, a.suburb || a.village || a.town || a.city].filter(Boolean);
-          $('badge-addr').textContent = parts.join(', ') || 'Position localisée';
-          $('location-badge').classList.add('visible');
-          renderList();
-        })
-        .catch(function() {
-          $('badge-addr').textContent = S.uLat.toFixed(4) + ', ' + S.uLng.toFixed(4);
-          $('location-badge').classList.add('visible');
+  // ── MAP INIT ──────────────────────────────────────────────────────
+  function initMap() {
+    maptilersdk.config.apiKey = MAPTILER_KEY;
+
+    S.map = new maptilersdk.Map({
+      container: "map",
+      style: "https://api.maptiler.com/maps/dataviz-light/style.json?key=" + MAPTILER_KEY,
+      center: [2.7055, 48.8215],
+      zoom: 13.5,
+      attributionControl: false,
+      navigationControl: false
+    });
+
+    S.map.on("load", function() {
+      // Hide POI layers to keep map clean
+      var layers = S.map.getStyle().layers;
+      if (layers) {
+        for (var i = 0; i < layers.length; i++) {
+          var l = layers[i];
+          if (l.id) {
+            var lid = l.id.toLowerCase();
+            if (lid.indexOf("poi") >= 0 || lid.indexOf("icon") >= 0 ||
+                lid.indexOf("label") >= 0 || lid.indexOf("symbol") >= 0) {
+              try { S.map.setLayoutProperty(l.id, "visibility", "none"); } catch(e) {}
+            }
+          }
+        }
+      }
+      addMarkers();
+    });
+
+    S.map.on("click", function() {
+      // Click on empty map → close detail, show list
+      if (S.currentBuilding) {
+        closeDetail();
+      }
+    });
+  }
+
+  // ── MARKERS ───────────────────────────────────────────────────────
+  function addMarkers() {
+    for (var i = 0; i < BATIMENTS.length; i++) {
+      (function(b) {
+        if (!b.lat || !b.lng) return;
+
+        var color = getCatColor(b.categorie);
+
+        // Create marker element
+        var el = document.createElement("div");
+        el.style.cssText = [
+          "width:36px",
+          "height:36px",
+          "border-radius:50%",
+          "background:" + color,
+          "border:3px solid #fff",
+          "box-shadow:0 2px 8px rgba(0,0,0,0.25)",
+          "display:flex",
+          "align-items:center",
+          "justify-content:center",
+          "cursor:pointer",
+          "transition:transform 0.15s"
+        ].join(";");
+
+        var inner = document.createElement("div");
+        inner.style.cssText = "width:16px;height:16px;color:#fff;display:flex;align-items:center;justify-content:center;";
+        inner.innerHTML = catIcon(b.categorie);
+        var svgEl = inner.querySelector("svg");
+        if (svgEl) {
+          svgEl.style.width = "14px";
+          svgEl.style.height = "14px";
+          svgEl.style.stroke = "#fff";
+        }
+        el.appendChild(inner);
+
+        el.addEventListener("touchstart", function() {
+          el.style.transform = "scale(1.2)";
         });
-    },
-    function(err) {
-      $('btn-locate').classList.remove('busy');
-      var msgs = { 1: 'Accès GPS refusé.', 2: 'GPS indisponible.', 3: 'Délai dépassé.' };
-      toast(msgs[err.code] || 'Géolocalisation impossible.');
-    },
-    { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
-  );
-}
+        el.addEventListener("touchend", function() {
+          el.style.transform = "scale(1)";
+        });
+        el.addEventListener("click", function(e) {
+          e.stopPropagation();
+          openDetail(b.id);
+        });
 
-$('btn-locate').addEventListener('click', requestLocation);
-$('badge-close').addEventListener('click', function() { $('location-badge').classList.remove('visible'); });
+        var marker = new maptilersdk.Marker({ element: el })
+          .setLngLat([b.lng, b.lat])
+          .addTo(S.map);
 
-/* ── CARTE MAPTILER ── */
-function initMap() {
-  S.map = new maptilersdk.Map({
-    container: 'map',
-    style: 'https://api.maptiler.com/maps/basic-v2-light/style.json?key=AhQ10drEx79exZrx0qNv',
-    center: [2.7046, 48.8216],
-    zoom: 14.2,
-    pitch: 0,
-    bearing: 0,
-    attributionControl: false
-  });
+        S.markers[b.id] = { marker: marker, el: el };
+      })(BATIMENTS[i]);
+    }
+  }
 
-  S.map.on('load', function() {
-    /* Masquer les POI commerciaux OSM */
-    var layers = S.map.getStyle().layers;
-    for (var i = 0; i < layers.length; i++) {
-      var lid = layers[i].id.toLowerCase();
-      if (lid.indexOf('poi') >= 0 || lid.indexOf('shop') >= 0 || lid.indexOf('amenity') >= 0) {
-        try { S.map.setLayoutProperty(layers[i].id, 'visibility', 'none'); } catch(e) {}
+  function updateMarkersVisibility() {
+    for (var i = 0; i < BATIMENTS.length; i++) {
+      var b = BATIMENTS[i];
+      var m = S.markers[b.id];
+      if (!m) continue;
+      var visible = (S.currentFilter === "all" || b.categorie === S.currentFilter);
+      m.el.style.display = visible ? "flex" : "none";
+    }
+  }
+
+  // ── FILTERS ───────────────────────────────────────────────────────
+  function buildFilters() {
+    var bar = document.getElementById("filter-bar");
+    var html = "";
+
+    html += '<button class="filter-pill active" data-cat="all" onclick="setFilter(this,\'all\')">Tous</button>';
+
+    var cats = Object.keys(CATEGORIES);
+    for (var i = 0; i < cats.length; i++) {
+      var cat = cats[i];
+      var hasBat = false;
+      for (var j = 0; j < BATIMENTS.length; j++) {
+        if (BATIMENTS[j].categorie === cat) { hasBat = true; break; }
+      }
+      if (!hasBat) continue;
+      var color = getCatColor(cat);
+      var label = getCatLabel(cat);
+      html += '<button class="filter-pill" data-cat="' + cat + '" onclick="setFilter(this,\'' + cat + '\')">' +
+              '<span class="pill-dot" style="background:' + color + '"></span>' +
+              label + '</button>';
+    }
+
+    bar.innerHTML = html;
+  }
+
+  function setFilter(el, cat) {
+    S.currentFilter = cat;
+    var pills = document.querySelectorAll(".filter-pill");
+    for (var i = 0; i < pills.length; i++) {
+      pills[i].classList.remove("active");
+    }
+    el.classList.add("active");
+    updateMarkersVisibility();
+    buildList();
+  }
+
+  // ── BUILD LIST ────────────────────────────────────────────────────
+  function buildList() {
+    var container = document.getElementById("buildings-list");
+    var countEl = document.getElementById("list-count");
+
+    var filtered = [];
+    for (var i = 0; i < BATIMENTS.length; i++) {
+      var b = BATIMENTS[i];
+      if (S.currentFilter === "all" || b.categorie === S.currentFilter) {
+        filtered.push(b);
       }
     }
 
-    /* Source GeoJSON bâtiments */
-    var features = BATIMENTS.map(function(b) {
-      return { type: 'Feature', properties: { id: b.id, nom: b.nom, categorie: b.categorie }, geometry: { type: 'Point', coordinates: [b.lng, b.lat] } };
-    });
-    S.map.addSource('b', { type: 'geojson', data: { type: 'FeatureCollection', features: features } });
+    // Sort by distance if known
+    if (S.userLat !== null) {
+      filtered.sort(function(a, b) {
+        return haversine(S.userLat, S.userLng, a.lat, a.lng) -
+               haversine(S.userLat, S.userLng, b.lat, b.lng);
+      });
+    }
 
-    /* Halo */
-    S.map.addLayer({ id: 'b-halo', type: 'circle', source: 'b', paint: { 'circle-radius': 26, 'circle-color': '#0f172a', 'circle-opacity': 0.06 } });
+    countEl.textContent = filtered.length + " lieu" + (filtered.length > 1 ? "x" : "") + " répertorié" + (filtered.length > 1 ? "s" : "");
 
-    /* Points marqueurs */
-    S.map.addLayer({ id: 'b-dot', type: 'circle', source: 'b', paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 6, 17, 14],
-      'circle-color': '#1e3a8a',
-      'circle-stroke-width': 3,
-      'circle-stroke-color': '#ffffff',
-      'circle-opacity': 1
-    }});
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="empty-state">' + ICONS.info + '<p>Aucun bâtiment dans cette catégorie</p></div>';
+      return;
+    }
 
-    /* Libellés */
-    S.map.addLayer({ id: 'b-lbl', type: 'symbol', source: 'b', minzoom: 14, layout: {
-      'text-field': ['get', 'nom'],
-      'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
-      'text-size': 13,
-      'text-offset': [0, 1.6],
-      'text-anchor': 'top',
-      'text-max-width': 10
-    }, paint: {
-      'text-color': '#0f172a',
-      'text-halo-color': 'rgba(255,255,255,0.97)',
-      'text-halo-width': 2
-    }});
+    var html = "";
+    for (var j = 0; j < filtered.length; j++) {
+      var b = filtered[j];
+      var color = getCatColor(b.categorie);
+      var catLabel = getCatLabel(b.categorie);
+      var dist = "";
+      if (S.userLat !== null) {
+        dist = '<span class="card-dist">' + formatDist(haversine(S.userLat, S.userLng, b.lat, b.lng)) + '</span>';
+      }
 
-    /* Popup hover */
-    var popup = new maptilersdk.Popup({ closeButton: false, closeOnClick: false, offset: 20 });
+      html += '<div class="building-card" onclick="openDetail(\'' + b.id + '\')">' +
+              '<div class="card-icon" style="background:' + hexToRgba(color, 0.12) + '">' +
+              '<span style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:' + color + '">' +
+              catIcon(b.categorie).replace('<svg', '<svg style="width:18px;height:18px;"') +
+              '</span></div>' +
+              '<div class="card-info">' +
+              '<div class="card-name">' + b.nom + '</div>' +
+              '<div class="card-cat">' + catLabel + '</div>' +
+              '</div>' +
+              dist +
+              '<span class="card-chevron">' + ICONS.chevron + '</span>' +
+              '</div>';
+    }
 
-    S.map.on('mouseenter', 'b-dot', function(e) {
-      S.map.getCanvas().style.cursor = 'pointer';
-      var p = e.features[0].properties;
-      popup.setLngLat(e.features[0].geometry.coordinates)
-        .setHTML('<div class="popup-name">' + p.nom + '</div><div class="popup-cat">' + p.categorie + '</div>')
-        .addTo(S.map);
-    });
-    S.map.on('mouseleave', 'b-dot', function() {
-      S.map.getCanvas().style.cursor = '';
-      popup.remove();
-    });
-    S.map.on('click', 'b-dot', function(e) {
-      openFiche(e.features[0].properties.id);
-      setSheet('peek');
-    });
-    S.map.on('click', function(e) {
-      var feats = S.map.queryRenderedFeatures(e.point, { layers: ['b-dot'] });
-      if (!feats.length) { closeFiche(); renderList(); setSheet('collapsed'); }
-    });
+    container.innerHTML = html;
+  }
 
-    setTimeout(function() {
-      $('loader').classList.add('hidden');
-      renderList();
-      setSheet('collapsed');
-    }, 1400);
+  function hexToRgba(hex, alpha) {
+    var r = parseInt(hex.slice(1,3),16);
+    var g = parseInt(hex.slice(3,5),16);
+    var b = parseInt(hex.slice(5,7),16);
+    return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
+  }
+
+  // ── DETAIL VIEW ───────────────────────────────────────────────────
+  function openDetail(id) {
+    var b = null;
+    for (var i = 0; i < BATIMENTS.length; i++) {
+      if (BATIMENTS[i].id === id) { b = BATIMENTS[i]; break; }
+    }
+    if (!b) return;
+    S.currentBuilding = b;
+
+    // Center map
+    if (b.lat && b.lng && S.map) {
+      S.map.flyTo({ center: [b.lng, b.lat], zoom: 16, duration: 600 });
+    }
+
+    // Name & category
+    document.getElementById("detail-name").textContent = b.nom;
+    var color = getCatColor(b.categorie);
+    var catEl = document.getElementById("detail-cat");
+    catEl.style.background = hexToRgba(color, 0.12);
+    catEl.style.color = color;
+    catEl.innerHTML = '<span class="dot" style="background:' + color + '"></span>' + getCatLabel(b.categorie);
+
+    // Photo
+    var img = document.getElementById("detail-photo-img");
+    var placeholder = document.getElementById("photo-placeholder");
+    var photoData = S.photos[b.id] || null;
+
+    if (photoData && photoData.indexOf("data:image") === 0) {
+      img.src = photoData;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+    } else {
+      img.src = "";
+      img.style.display = "none";
+      placeholder.style.display = "flex";
+    }
+
+    // Admin photo button
+    document.getElementById("btn-add-photo").onclick = function() {
+      document.getElementById("photo-input").click();
+    };
+
+    // Info rows
+    var rows = [
+      { label: "Catégorie", value: getCatLabel(b.categorie), icon: ICONS.building },
+      { label: "Adresse", value: b.adresse || null, icon: ICONS.pin },
+      { label: "Description", value: b.description || null, icon: ICONS.info },
+      { label: "Capacité", value: b.capacite || null, icon: ICONS.info },
+      { label: "Accessibilité PMR", value: b.pmr || null, icon: ICONS.info },
+      { label: "Équipements", value: b.equipements || null, icon: ICONS.wrench },
+      { label: "État général", value: b.etat || null, icon: ICONS.info }
+    ];
+
+    var infoHtml = "";
+    for (var r = 0; r < rows.length; r++) {
+      var row = rows[r];
+      if (row.value === null || row.value === undefined) continue;
+      infoHtml += '<div class="info-row">' +
+        '<div class="info-row-icon">' + row.icon.replace('<svg', '<svg style="width:16px;height:16px;"') + '</div>' +
+        '<div class="info-row-content">' +
+        '<div class="info-row-label">' + row.label + '</div>' +
+        '<div class="info-row-value">' + row.value + '</div>' +
+        '</div></div>';
+    }
+    if (!infoHtml) {
+      infoHtml = '<div class="info-row"><div class="info-row-content"><div class="info-row-value unavailable">Informations détaillées non disponibles</div></div></div>';
+    }
+    document.getElementById("detail-info").innerHTML = infoHtml;
+
+    // AR nav button
+    document.getElementById("btn-ar-nav").onclick = function() {
+      window.location.href = "ar.html?id=" + b.id;
+    };
+
+    // Show detail view
+    document.getElementById("view-list").style.display = "none";
+    var vd = document.getElementById("view-detail");
+    vd.classList.add("active");
+    vd.style.display = "flex";
+
+    // Expand sheet
+    var sheet = document.getElementById("sheet");
+    sheet.classList.remove("list-mode");
+    sheet.classList.add("detail-mode");
+  }
+
+  function closeDetail() {
+    S.currentBuilding = null;
+    document.getElementById("view-detail").classList.remove("active");
+    document.getElementById("view-detail").style.display = "none";
+    document.getElementById("view-list").style.display = "flex";
+
+    var sheet = document.getElementById("sheet");
+    sheet.classList.remove("detail-mode");
+    sheet.classList.add("list-mode");
+  }
+
+  document.getElementById("btn-back").onclick = closeDetail;
+
+  // ── PHOTO INPUT ───────────────────────────────────────────────────
+  document.getElementById("photo-input").addEventListener("change", function(e) {
+    if (!S.currentBuilding) return;
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      savePhoto(S.currentBuilding.id, ev.target.result);
+      // Refresh photo in view
+      var img = document.getElementById("detail-photo-img");
+      var placeholder = document.getElementById("photo-placeholder");
+      img.src = ev.target.result;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+      showToast("Photo enregistrée");
+    };
+    reader.readAsDataURL(file);
+    this.value = "";
   });
-}
 
-/* ── FILTRES ── */
-var pills = document.querySelectorAll('.fpill');
-for (var pi = 0; pi < pills.length; pi++) {
-  pills[pi].addEventListener('click', (function(pill) {
-    return function() {
-      for (var i = 0; i < pills.length; i++) {
-        pills[i].classList.remove('active');
-        pills[i].setAttribute('aria-selected', 'false');
+  // ── GEOLOCATION ───────────────────────────────────────────────────
+  document.getElementById("fab-locate").onclick = function() {
+    if (!navigator.geolocation) {
+      showToast("Géolocalisation non disponible");
+      return;
+    }
+    var btn = document.getElementById("fab-locate");
+    btn.classList.add("active");
+
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      S.userLat = pos.coords.latitude;
+      S.userLng = pos.coords.longitude;
+
+      // Add/update user marker
+      if (S.userMarker) S.userMarker.remove();
+      var el = document.createElement("div");
+      el.style.cssText = "width:18px;height:18px;border-radius:50%;background:#2563EB;border:3px solid #fff;box-shadow:0 2px 8px rgba(37,99,235,0.4);";
+      S.userMarker = new maptilersdk.Marker({ element: el })
+        .setLngLat([S.userLng, S.userLat])
+        .addTo(S.map);
+
+      S.map.flyTo({ center: [S.userLng, S.userLat], zoom: 15, duration: 800 });
+
+      // Show badge
+      var badge = document.getElementById("location-badge");
+      document.getElementById("location-text").textContent = "Position obtenue";
+      badge.classList.add("visible");
+      setTimeout(function() { badge.classList.remove("visible"); }, 3000);
+
+      buildList();
+    }, function(err) {
+      btn.classList.remove("active");
+      showToast("Position non disponible");
+    }, { enableHighAccuracy: true, timeout: 8000 });
+  };
+
+  // ── TABS ──────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    S.tab = tab;
+
+    // Update nav
+    document.getElementById("nav-carte").classList.remove("active");
+    document.getElementById("nav-liste").classList.remove("active");
+    document.getElementById("nav-about").classList.remove("active");
+    document.getElementById("nav-" + (tab === "about" ? "about" : (tab === "liste" ? "liste" : "carte"))).classList.add("active");
+
+    var aboutEl = document.getElementById("view-about");
+    var sheet = document.getElementById("sheet");
+
+    if (tab === "about") {
+      aboutEl.classList.add("active");
+      sheet.style.display = "none";
+    } else if (tab === "liste") {
+      aboutEl.classList.remove("active");
+      sheet.style.display = "flex";
+      closeDetail();
+      sheet.classList.remove("detail-mode");
+      sheet.classList.add("list-mode");
+      // Expand to full in list tab
+      sheet.style.height = "calc(100vh - var(--hdr-h) - var(--nav-h) - 8px)";
+    } else {
+      aboutEl.classList.remove("active");
+      sheet.style.display = "flex";
+      sheet.style.height = "";
+      if (!S.currentBuilding) {
+        sheet.classList.remove("detail-mode");
+        sheet.classList.add("list-mode");
       }
-      pill.classList.add('active');
-      pill.setAttribute('aria-selected', 'true');
-      S.filter = pill.dataset.cat;
+    }
+  }
 
-      var f = S.filter === 'all' ? null : ['==', ['get', 'categorie'], S.filter];
-      if (S.map && S.map.getLayer('b-dot')) {
-        S.map.setFilter('b-dot',  f);
-        S.map.setFilter('b-halo', f);
-        S.map.setFilter('b-lbl',  f);
+  // ── SHEET DRAG HANDLE ─────────────────────────────────────────────
+  (function() {
+    var handle = document.getElementById("sheet-handle");
+    var sheet = document.getElementById("sheet");
+    var startY = 0;
+    var startH = 0;
+
+    handle.addEventListener("touchstart", function(e) {
+      startY = e.touches[0].clientY;
+      startH = sheet.offsetHeight;
+    }, { passive: true });
+
+    handle.addEventListener("touchend", function(e) {
+      var dy = startY - e.changedTouches[0].clientY;
+      if (dy > 30) {
+        // Swipe up → expand
+        if (S.currentBuilding) {
+          sheet.classList.add("detail-mode");
+          sheet.classList.remove("list-mode");
+        } else {
+          sheet.style.height = "calc(100vh - var(--hdr-h) - var(--nav-h) - 8px)";
+        }
+      } else if (dy < -30) {
+        // Swipe down → collapse
+        sheet.style.height = "";
+        if (!S.currentBuilding) {
+          sheet.classList.remove("detail-mode");
+          sheet.classList.add("list-mode");
+        } else {
+          closeDetail();
+        }
       }
-      renderList();
-      setSheet('peek');
-    };
-  })(pills[pi]));
-}
+    }, { passive: true });
+  })();
 
-/* ── SHEET TOGGLE ── */
-function toggleSheet() {
-  if (S.sheet === 'collapsed') setSheet('peek');
-  else if (S.sheet === 'peek') setSheet('expanded');
-  else setSheet('peek');
-}
-$('grip').addEventListener('click', toggleSheet);
-$('grip').addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') toggleSheet(); });
-$('sheet-head').addEventListener('click', toggleSheet);
-$('sheet-head').addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') toggleSheet(); });
+  // ── ADMIN ─────────────────────────────────────────────────────────
+  async function hashPwd(pwd) {
+    var enc = new TextEncoder();
+    var data = enc.encode(pwd);
+    var buf = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(buf))
+      .map(function(b) { return b.toString(16).padStart(2, "0"); })
+      .join("");
+  }
 
-/* ── NAV BAR ── */
-var navBtns = document.querySelectorAll('.nbtn[data-view]');
-for (var ni = 0; ni < navBtns.length; ni++) {
-  navBtns[ni].addEventListener('click', (function(btn) {
-    return function() {
-      for (var i = 0; i < navBtns.length; i++) navBtns[i].classList.remove('active');
-      btn.classList.add('active');
-      var v = btn.dataset.view;
-      if (v === 'map')  { closeFiche(); setSheet('collapsed'); }
-      if (v === 'list') { closeFiche(); renderList(); setSheet('expanded'); }
-    };
-  })(navBtns[ni]));
-}
+  // Long press on title → show admin button hint
+  var titleEl = document.getElementById("app-title");
+  titleEl.addEventListener("touchstart", function() {
+    S.adminPressTimer = setTimeout(function() {
+      document.getElementById("admin-overlay").classList.add("active");
+    }, 1500);
+  });
+  titleEl.addEventListener("touchend", function() {
+    clearTimeout(S.adminPressTimer);
+  });
 
-/* ── INIT ── */
-// Migration : nettoyer les résidus de localStorage d'anciennes versions
-(function() {
-  try {
-    BATIMENTS.forEach(function(b) {
-      var s = localStorage.getItem('fp_' + b.id);
-      if (s && s.indexOf('data:') !== 0) {
-        localStorage.removeItem('fp_' + b.id);
-      }
-    });
-  } catch(e) {}
-})();
-loadPhotos();
-initMap();
-</script>
+  document.getElementById("btn-open-admin").onclick = function() {
+    document.getElementById("admin-overlay").classList.add("active");
+  };
+
+  function closeAdminModal() {
+    document.getElementById("admin-overlay").classList.remove("active");
+    document.getElementById("admin-pwd").value = "";
+    document.getElementById("admin-pwd-error").textContent = "";
+  }
+
+  async function submitAdmin() {
+    var pwd = document.getElementById("admin-pwd").value;
+    if (!pwd) return;
+    var hash = await hashPwd(pwd);
+    if (hash === ADMIN_HASH) {
+      S.isAdmin = true;
+      document.body.classList.add("admin-mode");
+      document.getElementById("admin-indicator").style.display = "block";
+      closeAdminModal();
+      showToast("Mode administrateur activé");
+    } else {
+      document.getElementById("admin-pwd-error").textContent = "Mot de passe incorrect.";
+      document.getElementById("admin-pwd").value = "";
+    }
+  }
+
+  document.getElementById("btn-logout").onclick = function() {
+    S.isAdmin = false;
+    document.body.classList.remove("admin-mode");
+    document.getElementById("admin-indicator").style.display = "none";
+    showToast("Session admin terminée");
+  };
+
+  document.getElementById("admin-pwd").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") submitAdmin();
+  });
+
+  document.getElementById("admin-overlay").addEventListener("click", function(e) {
+    if (e.target === this) closeAdminModal();
+  });
+
+  // ── INIT ──────────────────────────────────────────────────────────
+  window.setFilter = setFilter;
+  window.openDetail = openDetail;
+  window.switchTab = switchTab;
+  window.closeAdminModal = closeAdminModal;
+  window.submitAdmin = submitAdmin;
+
+  loadPhotos();
+  buildFilters();
+  buildList();
+  initMap();
+
+  </script>
 </body>
 </html>

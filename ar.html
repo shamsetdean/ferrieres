@@ -2,999 +2,635 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Ferrières AR</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vue AR — Ferrières-en-Brie</title>
+  <meta name="theme-color" content="#1A2540">
+  <script src="./data.js"></script>
   <style>
-    /* === VARIABLES === */
-    :root {
-      --safe-t: env(safe-area-inset-top, 0px);
-      --safe-b: env(safe-area-inset-bottom, 0px);
-      --blue: #4f6ef7;
-      --blue-light: #8fa8ff;
-      --glass-dark: rgba(10,10,14,0.82);
-      --glass-border: rgba(255,255,255,0.12);
-    }
-
-    /* === RESET === */
-    *, *::before, *::after {
-      box-sizing: border-box; margin: 0; padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       width: 100%; height: 100%; overflow: hidden;
       background: #000;
-      font-family: 'DM Sans', system-ui, sans-serif;
-      color: #fff;
+      font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      user-select: none;
+      color: #fff;
     }
-    button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-    a { color: inherit; text-decoration: none; }
 
-    /* === CAMERA === */
-    #video {
-      position: fixed; inset: 0;
+    /* CAMERA */
+    #camera {
+      position: fixed;
+      inset: 0;
       width: 100%; height: 100%;
-      object-fit: cover; z-index: 0;
+      object-fit: cover;
+      z-index: 0;
     }
 
-    /* === HEADER === */
-    #ar-header {
-      position: fixed; top: 0; left: 0; right: 0;
-      z-index: 30;
-      padding: calc(var(--safe-t) + 14px) 16px 16px;
-      display: flex; align-items: center; justify-content: space-between;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
-      pointer-events: none;
-    }
-    .ar-back-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: 8px 14px 8px 10px;
-      border-radius: 20px;
-      background: rgba(0,0,0,0.45);
-      border: 0.5px solid rgba(255,255,255,0.18);
-      font-size: 13px; font-weight: 500; color: #fff;
-      pointer-events: auto;
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    }
-    .ar-back-btn svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .ar-header-title { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.8); }
-    .compass-btn {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: rgba(0,0,0,0.45);
-      border: 0.5px solid rgba(255,255,255,0.18);
-      display: flex; align-items: center; justify-content: center;
-      pointer-events: auto;
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    }
-    .compass-btn svg { width: 20px; height: 20px; transition: transform 0.3s ease; }
-
-    /* === RÉTICULE === */
-    #reticle {
-      position: fixed; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 10; width: 56px; height: 56px;
-      pointer-events: none;
-      animation: reticle-pulse 2.8s ease-in-out infinite;
-    }
-    @keyframes reticle-pulse {
-      0%, 100% { opacity: 0.28; }
-      50%       { opacity: 0.55; }
-    }
-    #reticle svg { width: 100%; height: 100%; }
-
-    /* === AR MARKERS LAYER === */
-    #ar-layer {
-      position: fixed; inset: 0; z-index: 20;
+    /* OVERLAY */
+    #ar-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
       pointer-events: none;
     }
 
-    /* === MARQUEUR AR === */
+    /* AR MARKERS */
     .ar-marker {
       position: absolute;
-      /* transform appliqué dynamiquement via JS: translate(-50%, -100%) scale(...) */
+      transform: translate(-50%, -100%);
       pointer-events: auto;
       cursor: pointer;
-      will-change: transform, opacity;
-    }
-    .ar-marker-inner {
-      display: flex; flex-direction: column; align-items: center; gap: 0;
+      transition: opacity 0.3s;
     }
     .ar-bubble {
-      background: rgba(255,255,255,0.93);
-      border-radius: 12px;
-      padding: 8px 14px;
-      min-width: 110px; max-width: 190px;
+      background: rgba(26,37,64,0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 14px;
+      padding: 10px 14px;
+      min-width: 120px;
+      max-width: 160px;
       text-align: center;
-      border: 0.5px solid rgba(255,255,255,0.4);
-      transition: transform 0.18s ease;
-      pointer-events: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+      transition: transform 0.15s;
     }
-    .ar-marker.selected .ar-bubble { transform: scale(1.06); }
-    .ar-bubble-name {
-      font-size: 12px; font-weight: 500; color: #111;
-      line-height: 1.25; margin-bottom: 3px;
+    .ar-marker:active .ar-bubble { transform: scale(0.95); }
+    .ar-name {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 4px;
     }
-    .ar-bubble-dist {
-      display: flex; align-items: center; justify-content: center; gap: 3px;
-      font-size: 11px; color: #888;
+    .ar-dist {
+      font-size: 11px;
+      opacity: 0.7;
+      font-weight: 500;
     }
-    .ar-bubble-dist svg { width: 10px; height: 10px; stroke: #888; fill: none; stroke-width: 2; stroke-linecap: round; }
-    .ar-stem { width: 2px; height: 14px; background: rgba(255,255,255,0.65); }
-    .ar-dot { width: 9px; height: 9px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(255,255,255,0.18); }
+    .ar-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin: 6px auto 0;
+    }
+    .ar-stem {
+      width: 2px;
+      height: 14px;
+      background: rgba(255,255,255,0.5);
+      margin: 0 auto;
+    }
+    .ar-tip {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #fff;
+      margin: 0 auto;
+      box-shadow: 0 0 8px #fff;
+    }
 
-    /* === STATUS BAR === */
-    #status-bar {
+    /* COMPASS */
+    #compass {
       position: fixed;
-      bottom: calc(var(--safe-b) + 128px);
-      left: 50%; transform: translateX(-50%);
-      z-index: 30;
-      display: flex; align-items: center; gap: 8px;
-      padding: 8px 16px;
-      border-radius: 20px;
-      background: rgba(0,0,0,0.5);
-      border: 0.5px solid rgba(255,255,255,0.14);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      font-size: 12px; color: rgba(255,255,255,0.78);
-      white-space: nowrap;
-      pointer-events: none;
-      transition: opacity 0.4s;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
     }
-    #status-bar.hidden { opacity: 0; }
-    .s-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .s-dot.green  { background: #4caf50; }
-    .s-dot.orange { background: #ff9800; }
-    .s-dot.red    { background: #f44336; }
-
-    /* === COMPAS DE NAVIGATION === */
-    #nav-compass {
-      position: fixed;
-      left: 50%; transform: translateX(-50%);
-      z-index: 35;
-      bottom: calc(var(--safe-b) + 32px);
-      display: flex; flex-direction: column; align-items: center; gap: 0;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.35s ease, bottom 0.35s ease;
-    }
-    #nav-compass.visible {
-      opacity: 1; pointer-events: auto;
-    }
-    /* Remonte au-dessus de la fiche quand elle est ouverte */
-    #nav-compass.above-fiche {
-      bottom: calc(var(--safe-b) + 32px + 300px);
-    }
-
-    .nc-ring {
-      width: 76px; height: 76px; border-radius: 50%;
-      background: var(--glass-dark);
-      border: 1.5px solid var(--glass-border);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    #compass.active { display: flex; }
+    #compass-ring {
+      width: 70px; height: 70px;
+      border-radius: 50%;
+      background: rgba(26,37,64,0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 2px solid rgba(255,255,255,0.2);
       display: flex; align-items: center; justify-content: center;
       position: relative;
     }
-    .nc-pulse {
-      position: absolute; inset: -6px; border-radius: 50%;
-      border: 1.5px solid rgba(79,110,247,0.3);
-      animation: nc-pulse-anim 2.2s ease-in-out infinite;
+    #compass-arrow {
+      width: 4px; height: 28px;
+      background: linear-gradient(180deg, #ef4444 50%, rgba(255,255,255,0.4) 50%);
+      border-radius: 999px;
+      transform-origin: center bottom;
+      position: absolute;
+      bottom: 50%;
+      left: calc(50% - 2px);
     }
-    @keyframes nc-pulse-anim {
-      0%, 100% { transform: scale(1); opacity: 0.45; }
-      50%       { transform: scale(1.1); opacity: 0.08; }
+    #compass-dist-badge {
+      background: rgba(26,37,64,0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
     }
-    #nc-arrow-wrap {
-      width: 100%; height: 100%;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+    #compass-target {
+      font-size: 11px;
+      opacity: 0.7;
+      max-width: 80px;
+      text-align: center;
+      line-height: 1.3;
     }
-    #nc-arrow-wrap svg { width: 30px; height: 30px; filter: drop-shadow(0 0 5px rgba(79,110,247,0.55)); }
 
-    .nc-card {
-      background: var(--glass-dark);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 0.5px solid var(--glass-border);
-      border-radius: 14px;
-      padding: 10px 18px 12px;
-      display: flex; flex-direction: column; align-items: center; gap: 3px;
-      margin-top: 10px; min-width: 210px; text-align: center;
-    }
-    .nc-bldg-name {
-      font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.88);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
-    }
-    .nc-metrics {
-      display: flex; align-items: center; gap: 10px; margin-top: 2px;
-    }
-    .nc-dist-block { text-align: center; }
-    .nc-dist-val {
-      font-size: 22px; font-weight: 300; color: #fff;
-      letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1;
-    }
-    .nc-dist-unit { font-size: 11px; color: rgba(255,255,255,0.42); margin-top: 1px; }
-    .nc-divider { width: 1px; height: 22px; background: rgba(255,255,255,0.1); }
-    .nc-bearing { font-size: 12px; color: rgba(255,255,255,0.42); font-variant-numeric: tabular-nums; }
-
-    .nc-progress-wrap {
-      width: 150px; height: 3px;
-      background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;
-      margin-top: 6px;
-    }
-    .nc-progress-fill {
-      height: 100%; border-radius: 2px; background: var(--blue);
-      transition: width 0.5s ease; width: 0%;
-    }
-    #nc-stop {
-      display: flex; align-items: center; gap: 4px;
-      margin-top: 8px; padding: 5px 13px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.06);
-      border: 0.5px solid rgba(255,255,255,0.1);
-      font-size: 11px; color: rgba(255,255,255,0.45);
-      transition: background 0.15s;
-    }
-    #nc-stop:active { background: rgba(255,255,255,0.12); }
-    #nc-stop svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
-
-    /* === FICHE BÂTIMENT === */
-    #fiche {
+    /* HEADER */
+    #ar-header {
       position: fixed;
-      left: 0; right: 0; bottom: 0; z-index: 40;
-      background: rgba(12,12,14,0.97);
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border-radius: 20px 20px 0 0;
-      border-top: 0.5px solid rgba(255,255,255,0.1);
-      padding-bottom: var(--safe-b);
-      max-height: 78vh;
-      display: flex; flex-direction: column;
-      transform: translateY(100%);
-      transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
-      will-change: transform;
+      top: 0; left: 0; right: 0;
+      padding: 12px 16px;
+      padding-top: calc(12px + env(safe-area-inset-top, 0px));
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 50;
+      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+      pointer-events: auto;
     }
-    #fiche.open { transform: none; }
-
-    .fiche-grip {
-      padding: 10px 0 0;
+    #btn-ar-back {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: none;
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; flex-shrink: 0;
+      cursor: pointer; color: #fff;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
     }
-    .fiche-grip-bar { width: 34px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.18); }
+    #btn-ar-back svg { width: 20px; height: 20px; }
+    #ar-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    #ar-subtitle {
+      font-size: 12px;
+      opacity: 0.6;
+      margin-top: 1px;
+    }
 
-    .fiche-head {
-      padding: 10px 20px 14px; flex-shrink: 0;
-      border-bottom: 0.5px solid rgba(255,255,255,0.07);
-    }
-    .fiche-cat {
-      font-size: 10px; color: rgba(255,255,255,0.4);
-      letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 4px;
-    }
-    .fiche-name {
-      font-family: 'DM Serif Display', serif;
-      font-size: 21px; color: #fff;
-      letter-spacing: -0.01em; line-height: 1.2;
-    }
-    .fiche-dist-badge {
-      display: inline-flex; align-items: center; gap: 5px;
-      margin-top: 8px; padding: 4px 10px;
-      border-radius: 20px;
-      background: rgba(79,110,247,0.18);
-      border: 0.5px solid rgba(79,110,247,0.35);
-      font-size: 12px; color: var(--blue-light);
-    }
-    .fiche-dist-badge svg { width: 11px; height: 11px; stroke: var(--blue-light); fill: none; stroke-width: 2; stroke-linecap: round; }
-
-    .fiche-body {
-      flex: 1; overflow-y: auto;
-      overscroll-behavior: contain;
-      scrollbar-width: none;
-    }
-    .fiche-body::-webkit-scrollbar { display: none; }
-
-    /* Photo */
-    .fiche-photo-section { padding: 12px 20px 14px; border-bottom: 0.5px solid rgba(255,255,255,0.06); }
-    .fiche-photo-box {
-      width: 100%; aspect-ratio: 16/9;
-      border-radius: 12px; overflow: hidden;
-      background: rgba(255,255,255,0.05);
-      border: 0.5px solid rgba(255,255,255,0.08);
-      position: relative; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .fiche-photo-empty {
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
-      width: 100%; height: 100%; pointer-events: none;
-    }
-    .fiche-photo-empty svg { width: 24px; height: 24px; stroke: rgba(255,255,255,0.28); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-    .fiche-photo-empty span { font-size: 12px; color: rgba(255,255,255,0.32); }
-    .fiche-photo-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .fiche-photo-change {
-      position: absolute; bottom: 8px; right: 8px;
-      display: flex; align-items: center; gap: 4px;
-      padding: 5px 10px; border-radius: 8px;
-      background: rgba(255,255,255,0.1);
-      border: 0.5px solid rgba(255,255,255,0.18);
-      font-size: 11px; color: rgba(255,255,255,0.75);
+    /* STATUS BAR */
+    #ar-status {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 16px;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+      z-index: 50;
       pointer-events: none;
     }
-    .fiche-photo-change svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
-
-    /* Lignes info */
-    .fiche-rows { padding: 4px 0; }
-    .fiche-row {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 11px 20px;
-      border-bottom: 0.5px solid rgba(255,255,255,0.05);
+    #ar-status-text {
+      text-align: center;
+      font-size: 13px;
+      opacity: 0.75;
     }
-    .fiche-row:last-child { border-bottom: none; }
-    .fiche-row-ic {
-      width: 30px; height: 30px;
-      border-radius: 8px; background: rgba(255,255,255,0.07);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; margin-top: 1px;
+    #ar-status-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 8px;
     }
-    .fiche-row-ic svg { width: 14px; height: 14px; stroke: rgba(255,255,255,0.45); fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
-    .fiche-row-lbl { font-size: 10px; color: rgba(255,255,255,0.35); margin-bottom: 2px; }
-    .fiche-row-val { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.45; }
-
-    /* Bouton navigation */
-    .fiche-nav-section { padding: 10px 20px 14px; }
-    .fiche-nav-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      width: 100%; padding: 13px;
-      border-radius: 12px; background: var(--blue);
-      font-size: 14px; font-weight: 500; color: #fff;
-      transition: opacity 0.15s;
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      opacity: 0.4;
     }
-    .fiche-nav-btn:active { opacity: 0.82; }
-    .fiche-nav-btn svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .status-dot.ok { opacity: 1; background: #4ADE80; }
+    .status-dot.pending { opacity: 1; background: #FBBF24; }
+    .status-dot.err { opacity: 1; background: #EF4444; }
+    .status-dot.idle { background: #fff; }
 
-    /* === ÉCRAN PERMISSIONS === */
+    /* DETAIL SHEET */
+    #ar-sheet {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #fff;
+      color: #111;
+      border-radius: 22px 22px 0 0;
+      z-index: 60;
+      transform: translateY(100%);
+      transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+      padding: 0 0 env(safe-area-inset-bottom, 16px);
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    #ar-sheet.open { transform: translateY(0); }
+    #ar-sheet::-webkit-scrollbar { display: none; }
+    .ar-sheet-handle {
+      padding: 12px 0 0;
+      display: flex; justify-content: center;
+    }
+    .ar-sheet-handle-bar {
+      width: 36px; height: 4px;
+      background: #E5E0D5;
+      border-radius: 999px;
+    }
+    #ar-sheet-content { padding: 12px 20px 24px; }
+    #ar-sheet-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #111;
+      margin-bottom: 6px;
+    }
+    #ar-sheet-cat {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    #ar-sheet-desc {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #4B5563;
+      margin-bottom: 16px;
+    }
+    #ar-sheet-btns {
+      display: flex;
+      gap: 10px;
+    }
+    .ar-sheet-btn {
+      flex: 1;
+      height: 50px;
+      border-radius: 12px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ar-sheet-btn.primary { background: #1A2540; color: #fff; }
+    .ar-sheet-btn.secondary { background: #F5F3EE; color: #1A2540; }
+    .ar-sheet-btn svg { width: 18px; height: 18px; }
+
+    /* PERMISSION SCREEN */
     #perm-screen {
-      position: fixed; inset: 0; z-index: 100;
-      background: #000;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: calc(var(--safe-t) + 40px) 32px calc(var(--safe-b) + 32px);
-      gap: 22px; text-align: center;
+      position: fixed;
+      inset: 0;
+      background: #1A2540;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      text-align: center;
     }
     #perm-screen.hidden { display: none; }
-    .perm-icon {
-      width: 72px; height: 72px; border-radius: 20px;
-      background: rgba(255,255,255,0.05);
-      border: 0.5px solid rgba(255,255,255,0.1);
-      display: flex; align-items: center; justify-content: center;
+    #perm-screen h2 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    #perm-screen p { font-size: 15px; opacity: 0.7; line-height: 1.6; margin-bottom: 28px; }
+    #btn-start-ar {
+      width: 100%;
+      max-width: 320px;
+      height: 54px;
+      background: #fff;
+      color: #1A2540;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
-    .perm-icon svg { width: 32px; height: 32px; stroke: rgba(255,255,255,0.55); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-    .perm-title { font-family: 'DM Serif Display', serif; font-size: 28px; color: #fff; letter-spacing: -0.02em; line-height: 1.2; }
-    .perm-desc { font-size: 15px; color: rgba(255,255,255,0.48); line-height: 1.65; max-width: 290px; }
-    .perm-steps { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 300px; }
-    .perm-step {
-      display: flex; align-items: center; gap: 12px;
-      padding: 11px 14px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px; border: 0.5px solid rgba(255,255,255,0.07);
-      text-align: left;
-    }
-    .perm-step-num {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: rgba(255,255,255,0.08);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.55);
-      flex-shrink: 0;
-    }
-    .perm-step-txt { font-size: 13px; color: rgba(255,255,255,0.68); line-height: 1.35; }
-    #perm-btn {
-      width: 100%; max-width: 300px; padding: 15px;
-      border-radius: 14px; background: #fff;
-      font-size: 15px; font-weight: 500; color: #111;
-      transition: opacity 0.15s;
-    }
-    #perm-btn:active { opacity: 0.85; }
-    .perm-skip { font-size: 13px; color: rgba(255,255,255,0.32); }
-    .perm-skip a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-
-    /* === TOAST === */
-    #ar-toast {
-      position: fixed;
-      top: calc(var(--safe-t) + 80px);
-      left: 50%; transform: translateX(-50%) translateY(-6px);
-      z-index: 60;
-      background: rgba(20,20,22,0.9);
-      border: 0.5px solid rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.88);
-      font-size: 13px; padding: 8px 18px;
-      border-radius: 20px; white-space: nowrap;
-      opacity: 0;
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      transition: opacity 0.25s, transform 0.25s;
-      pointer-events: none;
-    }
-    #ar-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* === RESPONSIVE DESKTOP === */
-    @media (min-width: 768px) {
-      #fiche {
-        left: auto; right: 0; bottom: 0;
-        width: 380px; border-radius: 0;
-        border-left: 0.5px solid rgba(255,255,255,0.1);
-        border-top: none;
-        max-height: 100vh; height: 100%;
-        transform: translateX(100%);
-      }
-      #fiche.open { transform: none; }
-      #nav-compass.above-fiche { bottom: calc(var(--safe-b) + 32px); left: calc(50% - 190px); }
-      #status-bar { bottom: 24px; }
-    }
+    #btn-start-ar:active { opacity: 0.85; }
   </style>
 </head>
 <body>
 
-<!-- ÉCRAN PERMISSIONS -->
-<div id="perm-screen" role="dialog" aria-modal="true" aria-labelledby="perm-title-el">
-  <div class="perm-icon">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+  <!-- PERMISSION SCREEN -->
+  <div id="perm-screen">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:20px;opacity:0.7"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+    <h2>Vue Réalité Augmentée</h2>
+    <p>L'application va demander l'accès à votre caméra, votre GPS et l'orientation de l'appareil pour afficher les bâtiments dans votre champ de vision.</p>
+    <button id="btn-start-ar">Activer la vue AR</button>
   </div>
-  <h1 class="perm-title" id="perm-title-el">Vue AR</h1>
-  <p class="perm-desc">Pointez votre caméra vers les bâtiments pour voir leurs informations en réalité augmentée.</p>
-  <div class="perm-steps" aria-label="Étapes d'autorisation requises">
-    <div class="perm-step"><div class="perm-step-num">1</div><div class="perm-step-txt">Autoriser l'accès à la caméra</div></div>
-    <div class="perm-step"><div class="perm-step-num">2</div><div class="perm-step-txt">Autoriser la géolocalisation GPS</div></div>
-    <div class="perm-step"><div class="perm-step-num">3</div><div class="perm-step-txt">Autoriser l'orientation de l'appareil</div></div>
-  </div>
-  <button id="perm-btn">Activer la vue AR</button>
-  <p class="perm-skip"><a href="index.html">Retour à la carte</a></p>
-</div>
 
-<!-- FLUX CAMÉRA -->
-<video id="video" autoplay playsinline muted aria-hidden="true"></video>
+  <!-- CAMERA FEED -->
+  <video id="camera" autoplay playsinline muted></video>
 
-<!-- COUCHE MARQUEURS AR -->
-<div id="ar-layer" aria-hidden="true"></div>
+  <!-- AR OVERLAY -->
+  <div id="ar-overlay"></div>
 
-<!-- RÉTICULE -->
-<div id="reticle" aria-hidden="true">
-  <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M9 21 L9 9 L21 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M35 9 L47 9 L47 21" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M47 35 L47 47 L35 47" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M21 47 L9 47 L9 35" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</div>
-
-<!-- HEADER -->
-<header id="ar-header">
-  <a href="index.html" class="ar-back-btn" aria-label="Retour à la carte">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-    Carte
-  </a>
-  <div class="ar-header-title">Vue AR</div>
-  <div class="compass-btn" id="compass-btn" aria-label="Compas">
-    <svg id="compass-svg" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" fill="none"/>
-      <polygon points="12,3.5 13.8,12 12,10.5 10.2,12" fill="white"/>
-      <polygon points="12,20.5 13.8,12 12,13.5 10.2,12" fill="rgba(255,255,255,0.3)"/>
-    </svg>
-  </div>
-</header>
-
-<!-- BARRE STATUS -->
-<div id="status-bar" role="status" aria-live="polite">
-  <div class="s-dot orange" id="s-dot"></div>
-  <span id="s-txt">Initialisation…</span>
-</div>
-
-<!-- COMPAS DE NAVIGATION -->
-<div id="nav-compass" role="complementary" aria-label="Navigation vers le bâtiment">
-  <div class="nc-ring">
-    <div class="nc-pulse" aria-hidden="true"></div>
-    <div id="nc-arrow-wrap" aria-hidden="true">
-      <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M15 3 L18.5 19 L15 16.5 L11.5 19 Z" fill="#4f6ef7"/>
-        <path d="M15 27 L18.5 19 L15 16.5 L11.5 19 Z" fill="rgba(255,255,255,0.18)"/>
-      </svg>
+  <!-- COMPASS (shown when navigating) -->
+  <div id="compass">
+    <div id="compass-ring">
+      <div id="compass-arrow"></div>
     </div>
+    <div id="compass-dist-badge">— m</div>
+    <div id="compass-target">—</div>
   </div>
-  <div class="nc-card">
-    <div class="nc-bldg-name" id="nc-name">—</div>
-    <div class="nc-metrics">
-      <div class="nc-dist-block">
-        <div class="nc-dist-val" id="nc-dist-val">—</div>
-        <div class="nc-dist-unit" id="nc-dist-unit">mètres</div>
-      </div>
-      <div class="nc-divider" aria-hidden="true"></div>
-      <div class="nc-bearing" id="nc-bearing">—</div>
-    </div>
-    <div class="nc-progress-wrap" aria-hidden="true">
-      <div class="nc-progress-fill" id="nc-progress"></div>
-    </div>
-    <button id="nc-stop" aria-label="Arrêter la navigation">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      Arrêter la navigation
+
+  <!-- HEADER -->
+  <div id="ar-header">
+    <button id="btn-ar-back" onclick="window.location.href='index.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
     </button>
-  </div>
-</div>
-
-<!-- FICHE BÂTIMENT -->
-<div id="fiche" role="dialog" aria-modal="false" aria-label="Informations sur le bâtiment">
-  <div class="fiche-grip" id="fiche-grip" role="button" tabindex="0" aria-label="Fermer">
-    <div class="fiche-grip-bar"></div>
-  </div>
-  <div class="fiche-head">
-    <div class="fiche-cat" id="fiche-cat">—</div>
-    <div class="fiche-name" id="fiche-name">—</div>
-    <div class="fiche-dist-badge">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span id="fiche-dist-txt">—</span>
+    <div>
+      <div id="ar-title">Réalité Augmentée</div>
+      <div id="ar-subtitle">Pointez vers les bâtiments</div>
     </div>
   </div>
-  <div class="fiche-body" id="fiche-body"></div>
-</div>
 
-<!-- TOAST -->
-<div id="ar-toast" role="status" aria-live="polite"></div>
+  <!-- STATUS BAR -->
+  <div id="ar-status">
+    <div id="ar-status-text">Initialisation...</div>
+    <div id="ar-status-dots">
+      <div class="status-dot idle" id="dot-camera" title="Caméra"></div>
+      <div class="status-dot idle" id="dot-gps" title="GPS"></div>
+      <div class="status-dot idle" id="dot-orient" title="Orientation"></div>
+    </div>
+  </div>
 
-<!-- INPUT PHOTO -->
-<input type="file" id="photo-input" accept="image/*" capture="environment" aria-hidden="true" style="display:none">
+  <!-- DETAIL SHEET -->
+  <div id="ar-sheet">
+    <div class="ar-sheet-handle"><div class="ar-sheet-handle-bar"></div></div>
+    <div id="ar-sheet-content">
+      <div id="ar-sheet-name">—</div>
+      <div id="ar-sheet-cat"></div>
+      <div id="ar-sheet-desc">—</div>
+      <div id="ar-sheet-btns">
+        <button class="ar-sheet-btn secondary" onclick="closeArSheet()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          Fermer
+        </button>
+        <button class="ar-sheet-btn primary" id="btn-ar-navigate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          Naviguer
+        </button>
+      </div>
+    </div>
+  </div>
 
-<!-- DONNÉES PARTAGÉES -->
-<script src="data.js"></script>
+  <script>
+  var AR = {
+    stream: null,
+    heading: 0,
+    lat: null,
+    lng: null,
+    watchId: null,
+    orientOk: false,
+    gpsOk: false,
+    cameraOk: false,
+    navTarget: null,
+    fov: 60
+  };
 
-<script>
-/* =====================================================================
-   AR.JS — Vue réalité augmentée Ferrières-en-Brie
-   Approche : GPS + gyroscope + caméra (sans ML, sans lib AR externe)
-   ===================================================================== */
+  // ── UTILS ──────────────────────────────────────────────────────
+  function haversine(lat1, lng1, lat2, lng2) {
+    var R = 6371000;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+            Math.sin(dLng/2)*Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
 
-/* --- État global --- */
-const ar = {
-  userLat:    null,
-  userLng:    null,
-  heading:    0,       // cap en degrés (0 = Nord)
-  arReady:    false,
-  selectedId: null,
-  photos:     {},
-  navTarget:  null,    // bâtiment cible de navigation
-  navInitDist:null     // distance initiale pour la barre de progression
-};
+  function bearing(lat1, lng1, lat2, lng2) {
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var y = Math.sin(dLng) * Math.cos(lat2 * Math.PI / 180);
+    var x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+            Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLng);
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
 
-/* --- Utilitaires DOM --- */
-const $ = id => document.getElementById(id);
+  function formatDist(m) {
+    if (m < 1000) return Math.round(m) + " m";
+    return (m/1000).toFixed(1) + " km";
+  }
 
-function showToast(msg, ms = 2400) {
-  const el = $('ar-toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), ms);
-}
+  function hexToRgba(hex, alpha) {
+    var r = parseInt(hex.slice(1,3),16);
+    var g = parseInt(hex.slice(3,5),16);
+    var b = parseInt(hex.slice(5,7),16);
+    return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
+  }
 
-function setStatus(msg, color) {
-  const dot = $('s-dot');
-  dot.className = 's-dot ' + (color || 'orange');
-  $('s-txt').textContent = msg;
-}
-
-/* --- Géométrie --- */
-function distKm(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2
-    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function bearingTo(lat1, lng1, lat2, lng2) {
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const la1  = lat1 * Math.PI / 180;
-  const la2  = lat2 * Math.PI / 180;
-  const y = Math.sin(dLng) * Math.cos(la2);
-  const x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(dLng);
-  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-}
-
-function fmtDist(km) {
-  return km < 1 ? Math.round(km * 1000) + '\u202fm' : km.toFixed(2) + '\u202fkm';
-}
-
-function bearingLabel(deg) {
-  const pts = ['N','NE','E','SE','S','SO','O','NO'];
-  return pts[Math.round(deg / 45) % 8];
-}
-
-/* --- Photos localStorage --- */
-function loadPhotos() {
-  BATIMENTS.forEach(b => {
-    try {
-      const s = localStorage.getItem('fb_photo_' + b.id);
-      if (s) ar.photos[b.id] = s;
-    } catch (_) {}
-  });
-}
-
-function savePhoto(id, dataUrl) {
-  ar.photos[id] = dataUrl;
-  try { localStorage.setItem('fb_photo_' + id, dataUrl); } catch (_) {}
-}
-
-/* --- Icônes SVG inline --- */
-const IC = {
-  pin:   '<circle cx="12" cy="10" r="3"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>',
-  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>',
-  phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.07 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
-  info:  '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
-  cal:   '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
-  img:   '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>',
-  up:    '<polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
-  nav:   '<polygon points="3,11 22,2 13,21 11,13 3,11"/>'
-};
-
-function svgIcon(key, size) {
-  size = size || 14;
-  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"'
-    + ' style="width:' + size + 'px;height:' + size + 'px;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round">'
-    + IC[key] + '</svg>';
-}
-
-/* =====================================================================
-   MARQUEURS AR
-   ===================================================================== */
-const markerMap = {};   // id -> DOM element
-const FOV       = 62;   // champ de vision horizontal estimé (degrés)
-const MAX_DIST  = 1.5;  // portée des marqueurs (km)
-
-function buildMarkers() {
-  const layer = $('ar-layer');
-  layer.innerHTML = '';
-
-  BATIMENTS.forEach(b => {
-    const el = document.createElement('div');
-    el.className = 'ar-marker';
-    el.id = 'armark-' + b.id;
-    el.setAttribute('role', 'button');
-    el.setAttribute('aria-label', b.nom);
-    el.tabIndex = 0;
-
-    el.innerHTML = '<div class="ar-marker-inner">'
-      + '<div class="ar-bubble">'
-      + '<div class="ar-bubble-name">' + b.nom + '</div>'
-      + '<div class="ar-bubble-dist">'
-      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:10px;height:10px;stroke-width:2;stroke-linecap:round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'
-      + '<span class="ar-dist-val">—</span>'
-      + '</div></div>'
-      + '<div class="ar-stem" aria-hidden="true"></div>'
-      + '<div class="ar-dot" aria-hidden="true"></div>'
-      + '</div>';
-
-    el.addEventListener('click', () => openFiche(b.id));
-    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openFiche(b.id); });
-
-    layer.appendChild(el);
-    markerMap[b.id] = el;
-  });
-}
-
-function updateMarkers() {
-  if (!ar.arReady || ar.userLat === null) return;
-
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-
-  BATIMENTS.forEach(b => {
-    const el = markerMap[b.id];
+  // ── STATUS DOTS ────────────────────────────────────────────────
+  function setDot(id, state) {
+    var el = document.getElementById("dot-" + id);
     if (!el) return;
+    el.className = "status-dot " + state;
+  }
 
-    const km   = distKm(ar.userLat, ar.userLng, b.lat, b.lng);
-    const bear = bearingTo(ar.userLat, ar.userLng, b.lat, b.lng);
+  function updateStatus() {
+    var msgs = [];
+    if (!AR.cameraOk) msgs.push("Caméra en attente");
+    if (!AR.gpsOk)    msgs.push("GPS en attente");
+    if (!AR.orientOk) msgs.push("Orientation en attente");
+    if (msgs.length === 0) {
+      document.getElementById("ar-status-text").textContent = "Vue AR active — " + BATIMENTS.length + " bâtiments";
+    } else {
+      document.getElementById("ar-status-text").textContent = msgs.join(" · ");
+    }
+  }
 
-    // Angle relatif entre le cap de l'utilisateur et le bâtiment
-    let diff = (bear - ar.heading + 360) % 360;
-    if (diff > 180) diff -= 360;   // ramener dans [-180, 180]
+  // ── CAMERA ────────────────────────────────────────────────────
+  function startCamera() {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+      .then(function(stream) {
+        AR.stream = stream;
+        document.getElementById("camera").srcObject = stream;
+        AR.cameraOk = true;
+        setDot("camera", "ok");
+        updateStatus();
+      })
+      .catch(function() {
+        setDot("camera", "err");
+        document.getElementById("ar-status-text").textContent = "Caméra inaccessible";
+      });
+  }
 
-    // Masquer si hors champ ou trop loin
-    if (Math.abs(diff) > (FOV / 2 + 12) || km > MAX_DIST) {
-      el.style.opacity = '0';
-      el.style.pointerEvents = 'none';
+  // ── GPS ───────────────────────────────────────────────────────
+  function startGPS() {
+    if (!navigator.geolocation) {
+      setDot("gps", "err");
       return;
     }
-
-    // Position horizontale : linéaire dans le FOV
-    const x = (W / 2) + (diff / (FOV / 2)) * (W / 2);
-    // Position verticale : les bâtiments proches sont plus bas
-    const distFactor = Math.max(0.25, 1 - km / MAX_DIST);
-    const y = H * 0.22 + (1 - distFactor) * H * 0.28;
-
-    const scale = 0.65 + distFactor * 0.5;
-    const alpha = Math.max(0.15, 1 - Math.abs(diff) / (FOV / 2 + 12));
-
-    el.style.left      = x + 'px';
-    el.style.top       = y + 'px';
-    el.style.transform = 'translate(-50%,-100%) scale(' + scale.toFixed(3) + ')';
-    el.style.opacity   = alpha.toFixed(3);
-    el.style.zIndex    = Math.round(distFactor * 10).toString();
-    el.style.pointerEvents = 'auto';
-
-    // Mise à jour distance affichée
-    const distEl = el.querySelector('.ar-dist-val');
-    if (distEl) distEl.textContent = fmtDist(km);
-  });
-}
-
-/* =====================================================================
-   COMPAS DE NAVIGATION
-   ===================================================================== */
-function startNav(id) {
-  const b = BATIMENTS.find(x => x.id === id);
-  if (!b) return;
-  ar.navTarget   = b;
-  ar.navInitDist = (ar.userLat !== null) ? distKm(ar.userLat, ar.userLng, b.lat, b.lng) : null;
-  $('nc-name').textContent = b.nom;
-  $('nav-compass').classList.add('visible');
-  showToast('Navigation vers ' + b.nom);
-}
-
-function stopNav() {
-  ar.navTarget   = null;
-  ar.navInitDist = null;
-  $('nav-compass').classList.remove('visible', 'above-fiche');
-}
-
-function updateNav() {
-  if (!ar.navTarget || ar.userLat === null) return;
-
-  const b    = ar.navTarget;
-  const km   = distKm(ar.userLat, ar.userLng, b.lat, b.lng);
-  const bear = bearingTo(ar.userLat, ar.userLng, b.lat, b.lng);
-
-  // Rotation de la flèche (angle relatif)
-  const relAngle = (bear - ar.heading + 360) % 360;
-  $('nc-arrow-wrap').style.transform = 'rotate(' + relAngle.toFixed(1) + 'deg)';
-
-  // Distance
-  if (km < 1) {
-    $('nc-dist-val').textContent  = Math.round(km * 1000).toString();
-    $('nc-dist-unit').textContent = 'mètres';
-  } else {
-    $('nc-dist-val').textContent  = km.toFixed(2);
-    $('nc-dist-unit').textContent = 'km';
+    setDot("gps", "pending");
+    AR.watchId = navigator.geolocation.watchPosition(
+      function(pos) {
+        AR.lat = pos.coords.latitude;
+        AR.lng = pos.coords.longitude;
+        AR.gpsOk = true;
+        setDot("gps", "ok");
+        updateStatus();
+        updateCompass();
+        renderMarkers();
+      },
+      function() { setDot("gps", "err"); },
+      { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
+    );
   }
 
-  // Cap
-  $('nc-bearing').textContent = Math.round(bear) + '° ' + bearingLabel(bear);
-
-  // Barre de progression
-  if (ar.navInitDist && ar.navInitDist > 0) {
-    const pct = Math.min(100, Math.max(0, (1 - km / ar.navInitDist) * 100));
-    $('nc-progress').style.width = pct.toFixed(1) + '%';
-  }
-
-  // Mise à jour distance dans la fiche si ouverte
-  if (ar.selectedId === b.id) {
-    $('fiche-dist-txt').textContent = fmtDist(km) + ' de vous';
-  }
-
-  // Arrivée détectée (< 15 m)
-  if (km < 0.015) {
-    showToast('Vous êtes arrivé à ' + b.nom + ' !', 3500);
-    stopNav();
-    return;
-  }
-
-  // Positionnement au-dessus de la fiche si ouverte
-  if ($('fiche').classList.contains('open')) {
-    $('nav-compass').classList.add('above-fiche');
-  } else {
-    $('nav-compass').classList.remove('above-fiche');
-  }
-}
-
-$('nc-stop').addEventListener('click', stopNav);
-
-/* =====================================================================
-   FICHE BÂTIMENT
-   ===================================================================== */
-function openFiche(id) {
-  const b = BATIMENTS.find(x => x.id === id);
-  if (!b) return;
-  ar.selectedId = id;
-
-  $('fiche-cat').textContent  = b.categorie.toUpperCase();
-  $('fiche-name').textContent = b.nom;
-
-  const km = (ar.userLat !== null) ? distKm(ar.userLat, ar.userLng, b.lat, b.lng) : null;
-  $('fiche-dist-txt').textContent = km ? fmtDist(km) + ' de vous' : 'Distance inconnue';
-
-  // Photo
-  const photo = ar.photos[id] || null;
-  const photoHTML = '<div class="fiche-photo-section">'
-    + '<div class="fiche-photo-box" id="fiche-photo-box">'
-    + (photo
-        ? '<img class="fiche-photo-img" src="' + photo + '" alt="Photo de ' + b.nom + '">'
-          + '<div class="fiche-photo-change" aria-hidden="true">' + svgIcon('up', 12) + ' Changer</div>'
-        : '<div class="fiche-photo-empty">' + svgIcon('img', 24) + '<span>Ajouter une photo</span></div>')
-    + '</div></div>';
-
-  // Champs info
-  const fields = [
-    b.adresse       && b.adresse       !== '—' ? { k: 'pin',   lbl: 'Adresse',      val: b.adresse }       : null,
-    b.capacite      && b.capacite      !== '—' ? { k: 'info',  lbl: 'Capacité',      val: b.capacite }      : null,
-    b.horaires      && b.horaires      !== '—' ? { k: 'clock', lbl: 'Horaires',      val: b.horaires }      : null,
-    b.telephone     && b.telephone     !== '—' ? { k: 'phone', lbl: 'Téléphone',     val: b.telephone }     : null,
-    b.description                              ? { k: 'info',  lbl: 'Description',   val: b.description }   : null,
-    b.activites     && b.activites     !== '—' ? { k: 'info',  lbl: 'Activités',     val: b.activites }     : null,
-    b.equipements   && b.equipements   !== '—' ? { k: 'info',  lbl: 'Équipements',   val: b.equipements }   : null,
-    b.accessibilite && b.accessibilite !== '—' ? { k: 'info',  lbl: 'Accessibilité', val: b.accessibilite } : null,
-    b.etat          && b.etat          !== '—' ? { k: 'info',  lbl: 'État général',  val: b.etat }          : null,
-    b.travaux_prevus && b.travaux_prevus !== '—' && b.travaux_prevus !== 'RAS' ? { k: 'cal', lbl: 'Travaux à prévoir', val: b.travaux_prevus } : null
-  ].filter(Boolean);
-
-  const rowsHTML = '<div class="fiche-rows">'
-    + fields.map(f =>
-        '<div class="fiche-row">'
-        + '<div class="fiche-row-ic">' + svgIcon(f.k) + '</div>'
-        + '<div><div class="fiche-row-lbl">' + f.lbl + '</div>'
-        + '<div class="fiche-row-val">' + f.val + '</div></div>'
-        + '</div>'
-      ).join('')
-    + '</div>';
-
-  // Bouton navigation
-  const navHTML = '<div class="fiche-nav-section">'
-    + '<button class="fiche-nav-btn" id="fiche-nav-trigger" aria-label="Démarrer la navigation vers ' + b.nom + '">'
-    + svgIcon('nav', 16)
-    + 'Naviguer vers ce bâtiment'
-    + '</button></div>';
-
-  $('fiche-body').innerHTML = photoHTML + rowsHTML + navHTML;
-
-  // Attacher photo-box
-  const pb = $('fiche-photo-box');
-  if (pb) pb.addEventListener('click', () => triggerPhoto(id));
-
-  // Attacher bouton nav
-  const navBtn = $('fiche-nav-trigger');
-  if (navBtn) navBtn.addEventListener('click', () => startNav(id));
-
-  // Marquer le marqueur sélectionné
-  Object.values(markerMap).forEach(el => el.classList.remove('selected'));
-  if (markerMap[id]) markerMap[id].classList.add('selected');
-
-  $('fiche').classList.add('open');
-}
-
-function closeFiche() {
-  $('fiche').classList.remove('open');
-  Object.values(markerMap).forEach(el => el.classList.remove('selected'));
-  ar.selectedId = null;
-  if (ar.navTarget) $('nav-compass').classList.remove('above-fiche');
-}
-
-$('fiche-grip').addEventListener('click', closeFiche);
-$('fiche-grip').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') closeFiche(); });
-
-/* --- Photo upload --- */
-function triggerPhoto(id) {
-  const inp = $('photo-input');
-  inp.setAttribute('data-id', id);
-  inp.click();
-}
-
-$('photo-input').addEventListener('change', function () {
-  const id   = this.getAttribute('data-id');
-  const file = this.files[0];
-  if (!file || !id) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    savePhoto(id, e.target.result);
-    showToast('Photo enregistrée');
-    openFiche(id);
-  };
-  reader.readAsDataURL(file);
-  this.value = '';
-});
-
-/* =====================================================================
-   CAPTEURS
-   ===================================================================== */
-
-/* --- Orientation / Compas --- */
-function initOrientation() {
-  const handler = e => {
-    let h = null;
-    if (e.webkitCompassHeading != null) {
-      h = e.webkitCompassHeading;     // iOS : cap magnétique direct
-    } else if (e.alpha != null) {
-      h = (360 - e.alpha) % 360;      // Android : alpha = rotation inverse
+  // ── ORIENTATION ───────────────────────────────────────────────
+  function startOrientation() {
+    function onOrient(e) {
+      var alpha = e.webkitCompassHeading || (e.alpha ? (360 - e.alpha) : 0);
+      AR.heading = alpha;
+      AR.orientOk = true;
+      setDot("orient", "ok");
+      renderMarkers();
+      updateCompass();
     }
-    if (h === null) return;
-    ar.heading = h;
-    // Rotation de l'aiguille du compas header
-    $('compass-svg').style.transform = 'rotate(' + (-h).toFixed(1) + 'deg)';
+
+    if (typeof DeviceOrientationEvent !== "undefined" &&
+        typeof DeviceOrientationEvent.requestPermission === "function") {
+      DeviceOrientationEvent.requestPermission()
+        .then(function(p) {
+          if (p === "granted") {
+            window.addEventListener("deviceorientation", onOrient, true);
+          } else {
+            setDot("orient", "err");
+          }
+        })
+        .catch(function() { setDot("orient", "err"); });
+    } else {
+      window.addEventListener("deviceorientation", onOrient, true);
+    }
+  }
+
+  // ── RENDER AR MARKERS ─────────────────────────────────────────
+  function renderMarkers() {
+    if (!AR.gpsOk || !AR.orientOk) return;
+
+    var overlay = document.getElementById("ar-overlay");
+    overlay.innerHTML = "";
+
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var halfFov = AR.fov / 2;
+
+    for (var i = 0; i < BATIMENTS.length; i++) {
+      var b = BATIMENTS[i];
+      if (!b.lat || !b.lng) continue;
+
+      var dist = haversine(AR.lat, AR.lng, b.lat, b.lng);
+      if (dist > 1500) continue;
+
+      var bear = bearing(AR.lat, AR.lng, b.lat, b.lng);
+      var diff = bear - AR.heading;
+      while (diff > 180) diff -= 360;
+      while (diff < -180) diff += 360;
+
+      if (Math.abs(diff) > halfFov + 5) continue;
+
+      var x = vw / 2 + (diff / halfFov) * (vw / 2);
+      // Y: closer = lower on screen
+      var yFactor = Math.min(dist / 400, 1);
+      var y = vh * 0.25 + yFactor * vh * 0.35;
+
+      var color = (CATEGORIES[b.categorie] && CATEGORIES[b.categorie].color) || "#1A2540";
+      var opacity = Math.max(0.4, 1 - (dist / 1500));
+
+      var el = document.createElement("div");
+      el.className = "ar-marker";
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+      el.style.opacity = opacity;
+
+      el.innerHTML =
+        '<div class="ar-bubble">' +
+          '<div class="ar-name">' + b.nom + '</div>' +
+          '<div class="ar-dist">' + formatDist(dist) + '</div>' +
+          '<div class="ar-dot" style="background:' + color + '"></div>' +
+        '</div>' +
+        '<div class="ar-stem"></div>' +
+        '<div class="ar-tip"></div>';
+
+      (function(building) {
+        el.addEventListener("click", function() {
+          openArSheet(building);
+        });
+      })(b);
+
+      overlay.appendChild(el);
+    }
+  }
+
+  // ── AR SHEET ──────────────────────────────────────────────────
+  function openArSheet(b) {
+    document.getElementById("ar-sheet-name").textContent = b.nom;
+
+    var color = (CATEGORIES[b.categorie] && CATEGORIES[b.categorie].color) || "#1A2540";
+    var catLabel = (CATEGORIES[b.categorie] && CATEGORIES[b.categorie].label) || b.categorie;
+    var catEl = document.getElementById("ar-sheet-cat");
+    catEl.style.background = hexToRgba(color, 0.12);
+    catEl.style.color = color;
+    catEl.textContent = catLabel;
+
+    document.getElementById("ar-sheet-desc").textContent = b.description || "Bâtiment public communal.";
+
+    document.getElementById("btn-ar-navigate").onclick = function() {
+      AR.navTarget = b;
+      document.getElementById("compass").classList.add("active");
+      document.getElementById("compass-target").textContent = b.nom;
+      updateCompass();
+      closeArSheet();
+    };
+
+    document.getElementById("ar-sheet").classList.add("open");
+  }
+
+  function closeArSheet() {
+    document.getElementById("ar-sheet").classList.remove("open");
+  }
+
+  // ── COMPASS (navigation) ──────────────────────────────────────
+  function updateCompass() {
+    if (!AR.navTarget || !AR.gpsOk) return;
+    var b = AR.navTarget;
+    var dist = haversine(AR.lat, AR.lng, b.lat, b.lng);
+    var bear = bearing(AR.lat, AR.lng, b.lat, b.lng);
+    var relBear = bear - AR.heading;
+
+    document.getElementById("compass-arrow").style.transform = "rotate(" + relBear + "deg)";
+    document.getElementById("compass-dist-badge").textContent = formatDist(dist);
+
+    if (dist < 20) {
+      document.getElementById("compass-target").textContent = "Arrivé !";
+      setTimeout(function() {
+        AR.navTarget = null;
+        document.getElementById("compass").classList.remove("active");
+      }, 3000);
+    }
+  }
+
+  // ── START ─────────────────────────────────────────────────────
+  document.getElementById("btn-start-ar").onclick = function() {
+    document.getElementById("perm-screen").classList.add("hidden");
+    startCamera();
+    startGPS();
+    startOrientation();
+    updateStatus();
+
+    // Render loop
+    setInterval(renderMarkers, 200);
   };
 
-  if (typeof DeviceOrientationEvent !== 'undefined'
-    && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // iOS 13+ : demande de permission requise
-    DeviceOrientationEvent.requestPermission()
-      .then(state => {
-        if (state === 'granted') {
-          window.addEventListener('deviceorientation', handler, true);
-        } else {
-          showToast('Orientation refusée — marqueurs approximatifs.');
-        }
-      })
-      .catch(() => showToast('Orientation non disponible.'));
-  } else {
-    window.addEventListener('deviceorientation', handler, true);
-  }
-}
+  window.closeArSheet = closeArSheet;
 
-/* --- Géolocalisation --- */
-function initGeo() {
-  setStatus('Localisation GPS…', 'orange');
-
-  navigator.geolocation.watchPosition(
-    pos => {
-      ar.userLat = pos.coords.latitude;
-      ar.userLng = pos.coords.longitude;
-      ar.arReady = true;
-      setStatus('AR actif — pointez vers un bâtiment', 'green');
-      setTimeout(() => $('status-bar').classList.add('hidden'), 3000);
-    },
-    err => {
-      const msgs = { 1: 'GPS refusé.', 2: 'GPS indisponible.', 3: 'Délai GPS dépassé.' };
-      setStatus(msgs[err.code] || 'GPS indisponible.', 'red');
-    },
-    { enableHighAccuracy: true, timeout: 14000, maximumAge: 5000 }
-  );
-}
-
-/* --- Caméra --- */
-async function initCamera() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
-      audio: false
-    });
-    $('video').srcObject = stream;
-    return true;
-  } catch (err) {
-    setStatus('Caméra non disponible.', 'red');
-    return false;
-  }
-}
-
-/* =====================================================================
-   BOUCLE RAF
-   ===================================================================== */
-function loop() {
-  updateMarkers();
-  if (ar.navTarget) updateNav();
-  requestAnimationFrame(loop);
-}
-
-/* =====================================================================
-   INIT
-   ===================================================================== */
-$('perm-btn').addEventListener('click', async () => {
-  $('perm-screen').classList.add('hidden');
-
-  const camOk = await initCamera();
-  if (!camOk) {
-    $('perm-screen').classList.remove('hidden');
-    return;
-  }
-
-  initOrientation();
-  initGeo();
-  loadPhotos();
-  buildMarkers();
-  requestAnimationFrame(loop);
-});
-</script>
+  // Stop camera when leaving
+  window.addEventListener("pagehide", function() {
+    if (AR.stream) {
+      AR.stream.getTracks().forEach(function(t) { t.stop(); });
+    }
+    if (AR.watchId !== null) {
+      navigator.geolocation.clearWatch(AR.watchId);
+    }
+  });
+  </script>
 </body>
 </html>
