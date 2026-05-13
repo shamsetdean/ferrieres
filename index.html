@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f7f4">
+  <meta name="description" content="Carte interactive des bâtiments publics de Ferrières-en-Brie">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Ferrières">
+  <title>Ferrières-en-Brie</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://cdn.maptiler.com/maptiler-sdk-js/v2.2.1/maptiler-sdk.css" rel="stylesheet">
+  <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.2.1/maptiler-sdk.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    /* === VARIABLES === */
+    :root {
+      --bg: #f8f7f4;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.07);
+      --border-md: rgba(0,0,0,0.12);
+      --ink: #111110;
+      --ink-2: #6b6b68;
+      --ink-3: #a8a8a5;
+      --blue: #4f6ef7;
+      --r: 14px;
+      --r-sm: 8px;
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --nav-h: 56px;
+      --header-h: 110px;
+    }
+
+    /* === RESET === */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    a { text-decoration: none; }
+
+    /* === MAP === */
+    #map {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    /* Masquer les contrôles MapTiler/Mapbox par défaut */
+    .mapboxgl-ctrl-bottom-right,
+    .mapboxgl-ctrl-bottom-left,
+    .maptiler-ctrl-bottom-right,
+    .maptiler-ctrl-bottom-left { display: none !important; }
+    .mapboxgl-ctrl-logo,
+    .maptiler-ctrl-logo { display: none !important; }
+
+    /* Popup carte */
+    .mapboxgl-popup-content,
+    .maplibregl-popup-content {
+      background: var(--surface) !important;
+      border: 0.5px solid var(--border-md) !important;
+      border-radius: 10px !important;
+      padding: 10px 14px !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.09) !important;
+      font-family: 'DM Sans', sans-serif !important;
+      pointer-events: none;
+    }
+    .mapboxgl-popup-tip,
+    .maplibregl-popup-tip { display: none !important; }
+    .popup-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .popup-cat  { font-size: 11px; color: var(--ink-2); margin-top: 2px; }
+
+    /* === HEADER === */
+    #header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 30;
+      padding: calc(var(--safe-t) + 48px) 16px 12px;
+      background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+      pointer-events: none;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      pointer-events: auto;
+    }
+    .header-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: -0.01em;
+    }
+    .header-sub {
+      font-size: 12px;
+      color: var(--ink-2);
+      margin-top: 2px;
+      font-weight: 300;
+    }
+
+    /* === BOUTON ICÔNE === */
+    .icon-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 0.5px solid var(--border-md);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .icon-btn:active { background: #eeece8; }
+    .icon-btn svg {
+      width: 18px; height: 18px;
+      stroke: var(--ink); fill: none; stroke-width: 1.75;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* === PILLS CATÉGORIES === */
+    #pills-wrap {
+      position: fixed;
+      top: calc(var(--safe-t) + var(--header-h));
+      left: 0; right: 0;
+      z-index: 30;
+      padding: 0 16px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      pointer-events: auto;
+    }
+    #pills-wrap::-webkit-scrollbar { display: none; }
+
+    .pill {
+      display: flex; align-items: center; gap: 5px;
+      padding: 7px 13px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 0.5px solid var(--border-md);
+      white-space: nowrap;
+      font-size: 12px; font-weight: 500; color: var(--ink-2);
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pill svg {
+      width: 13px; height: 13px;
+      stroke: currentColor; fill: none; stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+    .pill.active {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    /* === BOUTON LOCALISATION === */
+    #btn-locate {
+      position: fixed;
+      right: 16px;
+      top: calc(var(--safe-t) + var(--header-h) + 46px);
+      z-index: 30;
+      transition: opacity 0.2s;
+    }
+    #btn-locate.busy { opacity: 0.5; pointer-events: none; }
+
+    /* === BADGE POSITION === */
+    #location-badge {
+      position: fixed;
+      left: 16px;
+      right: 68px;
+      top: calc(var(--safe-t) + var(--header-h) + 46px);
+      z-index: 30;
+      background: var(--surface);
+      border: 0.5px solid var(--border-md);
+      border-radius: var(--r);
+      padding: 9px 12px;
+      display: flex; align-items: center; gap: 10px;
+      opacity: 0; transform: translateY(4px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+    }
+    #location-badge.visible {
+      opacity: 1; transform: none;
+      pointer-events: auto;
+    }
+    .badge-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%; background: #eef2ff;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .badge-dot svg { width: 13px; height: 13px; stroke: var(--blue); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .badge-text { flex: 1; min-width: 0; }
+    .badge-lbl { font-size: 10px; color: var(--ink-2); }
+    .badge-val { font-size: 12px; font-weight: 500; color: var(--ink); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #badge-close {
+      width: 22px; height: 22px;
+      border-radius: 50%; background: #f0eeea; border: none;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    #badge-close svg { width: 11px; height: 11px; stroke: var(--ink-2); fill: none; stroke-width: 2; stroke-linecap: round; }
+
+    /* === BOTTOM SHEET === */
+    #sheet {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 40;
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      border-top: 0.5px solid var(--border-md);
+      transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+      max-height: 92vh;
+      display: flex; flex-direction: column;
+      will-change: transform;
+    }
+    #sheet.collapsed { transform: translateY(calc(100% - 80px)); }
+    #sheet.peek      { transform: translateY(calc(100% - 280px)); }
+    #sheet.expanded  { transform: none; }
+
+    .sheet-grip {
+      padding: 10px 0 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sheet-grip-bar {
+      width: 36px; height: 4px;
+      border-radius: 2px; background: #d8d6d0;
+    }
+    #sheet-head {
+      padding: 10px 16px 14px;
+      flex-shrink: 0;
+    }
+    #sheet-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px; color: var(--ink);
+      letter-spacing: -0.01em; line-height: 1.2;
+    }
+    #sheet-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 6px; padding: 4px 10px;
+      border-radius: 6px; background: #f2f0ec;
+      font-size: 11px; font-weight: 500; color: var(--ink-2);
+    }
+    #sheet-tag svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    #sheet-body {
+      flex: 1;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
+      /* padding-bottom pour ne pas être masqué par la nav bar */
+      padding-bottom: calc(var(--nav-h) + var(--safe-b) + 8px);
+    }
+    #sheet-body::-webkit-scrollbar { display: none; }
+
+    /* === SECTION PHOTO === */
+    .photo-section {
+      padding: 0 16px 14px;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .photo-box {
+      width: 100%; aspect-ratio: 16/9;
+      border-radius: var(--r); overflow: hidden;
+      background: #f2f0ec; border: 0.5px solid var(--border-md);
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .photo-empty {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 8px;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    .photo-empty svg { width: 26px; height: 26px; stroke: var(--ink-3); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .photo-empty span { font-size: 13px; color: var(--ink-2); }
+    .photo-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .photo-change {
+      position: absolute; bottom: 8px; right: 8px;
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 11px; border-radius: 9px;
+      background: rgba(255,255,255,0.94);
+      border: 0.5px solid var(--border-md);
+      font-size: 12px; font-weight: 500; color: var(--ink);
+      pointer-events: none;
+    }
+    .photo-change svg { width: 13px; height: 13px; stroke: var(--ink); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* === LIGNES INFO === */
+    .info-rows { padding: 4px 0; }
+    .info-row {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 11px 16px;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .row-ic {
+      width: 32px; height: 32px;
+      border-radius: var(--r-sm); background: #f2f0ec;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .row-ic svg { width: 15px; height: 15px; stroke: var(--ink-2); fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .row-content { flex: 1; min-width: 0; }
+    .row-lbl { font-size: 11px; color: var(--ink-3); margin-bottom: 2px; }
+    .row-val { font-size: 14px; color: var(--ink); line-height: 1.45; }
+
+    /* Ligne cliquable (liste) */
+    .info-row.clickable { cursor: pointer; }
+    .info-row.clickable .row-chev svg { width: 14px; height: 14px; stroke: var(--ink-3); fill: none; stroke-width: 2; stroke-linecap: round; margin-top: 10px; }
+
+    /* === SECTION PROXIMITÉ === */
+    .nearby-section {
+      padding: 14px 16px;
+      border-top: 0.5px solid var(--border);
+    }
+    .nearby-title {
+      font-size: 11px; color: var(--ink-3);
+      font-weight: 500; letter-spacing: 0.04em;
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .nearby-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px;
+      background: #f8f7f4; border-radius: var(--r-sm);
+      cursor: pointer; margin-bottom: 6px;
+    }
+    .nearby-item:last-child { margin-bottom: 0; }
+    .nearby-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); flex-shrink: 0; }
+    .nearby-name { font-size: 13px; color: var(--ink); flex: 1; }
+    .nearby-dist { font-size: 11px; color: var(--ink-3); }
+    .nearby-chev svg { width: 13px; height: 13px; stroke: var(--ink-3); fill: none; stroke-width: 2; stroke-linecap: round; }
+
+    /* === BOUTON NAVIGATION AR === */
+    .ar-nav-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 13px 16px;
+      border-radius: 12px;
+      background: var(--blue); border: none;
+      color: #fff; font-size: 14px; font-weight: 500;
+      transition: opacity 0.15s;
+    }
+    .ar-nav-btn:active { opacity: 0.85; }
+    .ar-nav-btn svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* === NAVIGATION BAR === */
+    #nav-bar {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 50;
+      background: var(--surface);
+      border-top: 0.5px solid var(--border-md);
+      display: flex; justify-content: space-around; align-items: stretch;
+      padding-bottom: var(--safe-b);
+      height: calc(var(--nav-h) + var(--safe-b));
+    }
+    .nav-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; flex: 1;
+      padding: 6px 4px;
+      background: none; border: none; color: var(--ink-3);
+      font-size: 10px; font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
+    .nav-btn.active { color: var(--ink); }
+    .nav-btn span { font-size: 10px; }
+
+    /* Lien AR dans nav */
+    .nav-btn-link {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; flex: 1;
+      padding: 6px 4px;
+      color: var(--ink-3);
+      font-size: 10px; font-weight: 500;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-btn-link svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .nav-btn-link span { font-size: 10px; }
+
+    /* === TOAST === */
+    #toast {
+      position: fixed;
+      bottom: calc(var(--nav-h) + var(--safe-b) + 16px);
+      left: 50%; transform: translateX(-50%) translateY(6px);
+      z-index: 60;
+      background: var(--ink); color: #fff;
+      font-size: 13px; padding: 8px 18px;
+      border-radius: 20px; white-space: nowrap;
+      opacity: 0; transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* === LOADER === */
+    #loader {
+      position: fixed; inset: 0; z-index: 100;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 20px;
+      transition: opacity 0.5s;
+    }
+    #loader.hidden { opacity: 0; pointer-events: none; }
+    .loader-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px; color: var(--ink); letter-spacing: -0.02em;
+    }
+    .loader-bar {
+      width: 160px; height: 1px;
+      background: var(--border-md); position: relative; overflow: hidden;
+    }
+    .loader-bar::after {
+      content: '';
+      position: absolute; top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: var(--ink);
+      animation: loadbar 1.6s ease-in-out forwards;
+    }
+    @keyframes loadbar { to { left: 100%; } }
+    .loader-sub { font-size: 12px; color: var(--ink-2); font-weight: 300; }
+
+    /* === RESPONSIVE DESKTOP === */
+    @media (min-width: 768px) {
+      #sheet {
+        left: auto; right: 0;
+        width: 380px;
+        border-radius: 0;
+        border-left: 0.5px solid var(--border-md);
+        border-top: none;
+        max-height: 100vh;
+        height: 100%;
+      }
+      #sheet.collapsed { transform: translateX(100%); }
+      #sheet.peek      { transform: none; }
+      #sheet.expanded  { transform: none; }
+
+      #nav-bar { display: none; }
+      #btn-locate { top: 80px; right: 400px; }
+      #location-badge { top: 80px; right: 452px; left: auto; width: 260px; }
+      #header { padding-top: 20px; }
+      #pills-wrap { top: 80px; }
+      #sheet-body { padding-bottom: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-title">Ferrières-en-Brie</div>
+  <div class="loader-bar"></div>
+  <div class="loader-sub">Chargement de la carte</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- CARTE -->
+<div id="map"></div>
+
+<!-- HEADER -->
+<header id="header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title">Ferrières-en-Brie</div>
+      <div class="header-sub">Seine-et-Marne · 77164</div>
+    </div>
+    <button class="icon-btn" id="btn-search" aria-label="Rechercher un bâtiment">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- PILLS CATÉGORIES -->
+<div id="pills-wrap" role="tablist" aria-label="Filtrer par catégorie">
+  <button class="pill active" data-cat="all" role="tab" aria-selected="true">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Tous
+  </button>
+  <button class="pill" data-cat="administration" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    Administration
+  </button>
+  <button class="pill" data-cat="education" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+    Éducation
+  </button>
+  <button class="pill" data-cat="culture" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    Culture
+  </button>
+  <button class="pill" data-cat="sport" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93 19.07 19.07M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    Sport
+  </button>
+  <button class="pill" data-cat="sante" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    Santé
+  </button>
+</div>
+
+<!-- BOUTON LOCALISATION -->
+<button class="icon-btn" id="btn-locate" aria-label="Centrer sur ma position">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/></svg>
+</button>
+
+<!-- BADGE POSITION -->
+<div id="location-badge" role="status" aria-label="Votre position actuelle">
+  <div class="badge-dot">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+  </div>
+  <div class="badge-text">
+    <div class="badge-lbl">Votre position</div>
+    <div class="badge-val" id="badge-addr">Localisation…</div>
+  </div>
+  <button id="badge-close" aria-label="Fermer le badge de position">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+</div>
+
+<!-- BOTTOM SHEET -->
+<div id="sheet" role="dialog" aria-label="Informations">
+  <div class="sheet-grip" id="sheet-grip" role="button" tabindex="0" aria-label="Agrandir ou réduire le panneau">
+    <div class="sheet-grip-bar"></div>
+  </div>
+  <div id="sheet-head" role="button" tabindex="0" aria-expanded="false">
+    <div id="sheet-title">Bâtiments publics</div>
+    <div id="sheet-tag">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span id="sheet-tag-txt">6 lieux</span>
+    </div>
+  </div>
+  <div id="sheet-body"></div>
+</div>
+
+<!-- BARRE DE NAVIGATION -->
+<nav id="nav-bar" aria-label="Navigation principale">
+  <button class="nav-btn active" data-view="map" aria-label="Vue carte">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    <span>Carte</span>
+  </button>
+  <button class="nav-btn" data-view="list" aria-label="Liste des lieux">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span>Liste</span>
+  </button>
+  <button class="nav-btn" data-view="nearby" aria-label="Lieux à proximité">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+    <span>Proximité</span>
+  </button>
+  <a class="nav-btn-link" href="ar.html" aria-label="Vue réalité augmentée">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    <span>Vue AR</span>
+  </a>
+</nav>
+
+<!-- INPUT PHOTO (caché) -->
+<input type="file" id="photo-input" accept="image/*" capture="environment" aria-hidden="true">
+
+<!-- DONNÉES -->
+<script src="data.js"></script>
+
+<script>
+/* =====================================================================
+   INDEX.JS — Carte interactive Ferrières-en-Brie
+   ===================================================================== */
+
+// Token MapTiler
+maptilersdk.config.apiKey = 'AhQ10drEx79exZrx0qNv';
+
+/* --- État global --- */
+const state = {
+  map: null,
+  userLat: null,
+  userLng: null,
+  activeFilter: 'all',
+  activeSheet: 'collapsed',   // 'collapsed' | 'peek' | 'expanded'
+  selectedId: null,
+  photos: {}
+};
+
+/* --- Utilitaires DOM --- */
+const $ = id => document.getElementById(id);
+
+function showToast(msg, duration = 2400) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+/* --- Géométrie --- */
+function distKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function fmtDist(km) {
+  return km < 1 ? Math.round(km * 1000) + '\u202fm' : km.toFixed(1) + '\u202fkm';
+}
+
+/* --- Photos localStorage --- */
+function loadPhotos() {
+  BATIMENTS.forEach(b => {
+    try {
+      const stored = localStorage.getItem('fb_photo_' + b.id);
+      if (stored) state.photos[b.id] = stored;
+    } catch (_) {}
+  });
+}
+
+function savePhoto(id, dataUrl) {
+  state.photos[id] = dataUrl;
+  try { localStorage.setItem('fb_photo_' + id, dataUrl); } catch (_) {}
+}
+
+/* --- Sheet state --- */
+function setSheet(s) {
+  state.activeSheet = s;
+  $('sheet').className = s;
+  $('sheet-head').setAttribute('aria-expanded', s === 'expanded' ? 'true' : 'false');
+}
+
+/* --- Icônes SVG inline (Lucide) --- */
+const IC = {
+  pin:   '<circle cx="12" cy="10" r="3"/><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>',
+  phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.07 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  info:  '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+  cal:   '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  img:   '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>',
+  up:    '<polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
+  chev:  '<polyline points="9,18 15,12 9,6"/>',
+  cam:   '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'
+};
+
+function svgIcon(key, size = 15) {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"'
+    + ' style="width:' + size + 'px;height:' + size + 'px;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round">'
+    + IC[key] + '</svg>';
+}
+
+/* --- Filtrage --- */
+function visibleBatiments() {
+  if (state.activeFilter === 'all') return BATIMENTS;
+  return BATIMENTS.filter(b => b.categorie === state.activeFilter);
+}
+
+function sortedByDist(list) {
+  if (!state.userLat) return list;
+  return [...list].sort((a, b) =>
+    distKm(state.userLat, state.userLng, a.lat, a.lng)
+    - distKm(state.userLat, state.userLng, b.lat, b.lng)
+  );
+}
+
+/* --- Rendu liste par défaut --- */
+function renderDefaultSheet() {
+  state.selectedId = null;
+  const list = sortedByDist(visibleBatiments());
+  $('sheet-title').textContent = 'Bâtiments publics';
+  $('sheet-tag-txt').textContent = list.length + ' lieu' + (list.length > 1 ? 'x' : '');
+
+  const rows = list.map(b => {
+    const d = state.userLat
+      ? '<span style="font-size:11px;color:var(--ink-3);margin-left:auto;flex-shrink:0">' + fmtDist(distKm(state.userLat, state.userLng, b.lat, b.lng)) + '</span>'
+      : '';
+    return '<div class="info-row clickable" data-id="' + b.id + '" role="button" tabindex="0" aria-label="' + b.nom + '">'
+      + '<div class="row-ic">' + svgIcon('pin') + '</div>'
+      + '<div class="row-content">'
+      + '<div class="row-lbl">' + b.categorie + '</div>'
+      + '<div class="row-val" style="display:flex;align-items:center;gap:6px">'
+      + '<span>' + b.nom + '</span>' + d
+      + '</div></div>'
+      + '<div class="row-chev">' + svgIcon('chev', 14) + '</div>'
+      + '</div>';
+  }).join('');
+
+  $('sheet-body').innerHTML = rows;
+
+  // Délégation d'événements sur les lignes
+  $('sheet-body').querySelectorAll('.info-row.clickable').forEach(row => {
+    row.addEventListener('click', () => openBuilding(row.dataset.id));
+    row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openBuilding(row.dataset.id); });
+  });
+}
+
+/* --- Ouvrir une fiche bâtiment --- */
+function openBuilding(id) {
+  const b = BATIMENTS.find(x => x.id === id);
+  if (!b) return;
+  state.selectedId = id;
+
+  $('sheet-title').textContent = b.nom;
+  $('sheet-tag-txt').textContent = b.categorie;
+
+  // Photo
+  const photo = state.photos[id] || null;
+  const photoHTML = '<div class="photo-section">'
+    + '<div class="photo-box" id="photo-box-' + id + '">'
+    + (photo
+        ? '<img class="photo-img" src="' + photo + '" alt="Photo de ' + b.nom + '">'
+          + '<div class="photo-change" aria-hidden="true">' + svgIcon('up', 13) + ' Changer</div>'
+        : '<div class="photo-empty">' + svgIcon('img', 26) + '<span>Ajouter une photo</span></div>')
+    + '</div></div>';
+
+  // Informations
+  const fields = [
+    b.adresse   && b.adresse   !== '—' ? { k: 'pin',   lbl: 'Adresse',     val: b.adresse }   : null,
+    b.horaires  && b.horaires  !== '—' ? { k: 'clock', lbl: 'Horaires',    val: b.horaires }  : null,
+    b.telephone && b.telephone !== '—' ? { k: 'phone', lbl: 'Téléphone',   val: b.telephone } : null,
+    b.description                      ? { k: 'info',  lbl: 'Description', val: b.description }: null,
+    b.annee    && b.annee      !== '—' ? { k: 'cal',   lbl: 'Période',     val: b.annee }      : null
+  ].filter(Boolean);
+
+  const infoHTML = '<div class="info-rows">'
+    + fields.map(f =>
+        '<div class="info-row">'
+        + '<div class="row-ic">' + svgIcon(f.k) + '</div>'
+        + '<div class="row-content"><div class="row-lbl">' + f.lbl + '</div>'
+        + '<div class="row-val">' + f.val + '</div></div>'
+        + '</div>'
+      ).join('')
+    + '</div>';
+
+  // Proximité
+  const nearby = (() => {
+    if (!state.userLat) return [];
+    return BATIMENTS
+      .filter(x => x.id !== id)
+      .map(x => ({ ...x, _d: distKm(state.userLat, state.userLng, x.lat, x.lng) }))
+      .sort((a, c) => a._d - c._d)
+      .slice(0, 3);
+  })();
+
+  const nearbyHTML = nearby.length
+    ? '<div class="nearby-section"><div class="nearby-title">À proximité</div>'
+      + nearby.map(n =>
+          '<div class="nearby-item" data-id="' + n.id + '" role="button" tabindex="0" aria-label="' + n.nom + ', à ' + fmtDist(n._d) + '">'
+          + '<div class="nearby-dot"></div>'
+          + '<div class="nearby-name">' + n.nom + '</div>'
+          + '<div class="nearby-dist">' + fmtDist(n._d) + '</div>'
+          + '<div class="nearby-chev">' + svgIcon('chev', 13) + '</div>'
+          + '</div>'
+        ).join('')
+      + '</div>'
+    : '';
+
+  // Bouton AR
+  const arHTML = '<div style="padding:12px 16px 4px">'
+    + '<a class="ar-nav-btn" href="ar.html" aria-label="Ouvrir la vue réalité augmentée">'
+    + svgIcon('cam', 16)
+    + 'Vue AR de ce bâtiment</a></div>';
+
+  $('sheet-body').innerHTML = photoHTML + infoHTML + nearbyHTML + arHTML;
+
+  // Attacher photo-box
+  const photoBox = $('photo-box-' + id);
+  if (photoBox) {
+    photoBox.addEventListener('click', () => triggerPhotoInput(id));
+  }
+
+  // Attacher les lieux proches
+  $('sheet-body').querySelectorAll('.nearby-item').forEach(item => {
+    item.addEventListener('click', () => openBuilding(item.dataset.id));
+    item.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openBuilding(item.dataset.id); });
+  });
+
+  // Centrer la carte
+  state.map.flyTo({ center: [b.lng, b.lat], zoom: Math.max(state.map.getZoom(), 15.5), duration: 700 });
+  setSheet('peek');
+}
+
+/* --- Photo upload --- */
+function triggerPhotoInput(id) {
+  const inp = $('photo-input');
+  inp.setAttribute('data-id', id);
+  inp.click();
+}
+
+$('photo-input').addEventListener('change', function () {
+  const id = this.getAttribute('data-id');
+  const file = this.files[0];
+  if (!file || !id) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    savePhoto(id, e.target.result);
+    showToast('Photo enregistrée');
+    openBuilding(id);
+  };
+  reader.readAsDataURL(file);
+  this.value = '';
+});
+
+/* --- Géolocalisation --- */
+function requestLocation() {
+  if (!('geolocation' in navigator)) { showToast('Géolocalisation non disponible.'); return; }
+  $('btn-locate').classList.add('busy');
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      state.userLat = pos.coords.latitude;
+      state.userLng = pos.coords.longitude;
+      $('btn-locate').classList.remove('busy');
+
+      // Marqueur utilisateur
+      if (state.map.getSource('user-loc')) {
+        state.map.getSource('user-loc').setData({ type: 'Feature', geometry: { type: 'Point', coordinates: [state.userLng, state.userLat] } });
+      } else {
+        state.map.addSource('user-loc', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'Point', coordinates: [state.userLng, state.userLat] } } });
+        state.map.addLayer({ id: 'user-halo', type: 'circle', source: 'user-loc', paint: { 'circle-radius': 18, 'circle-color': '#4f6ef7', 'circle-opacity': 0.15 } });
+        state.map.addLayer({ id: 'user-dot',  type: 'circle', source: 'user-loc', paint: { 'circle-radius': 7, 'circle-color': '#4f6ef7', 'circle-stroke-width': 2.5, 'circle-stroke-color': '#fff' } });
+      }
+
+      state.map.flyTo({ center: [state.userLng, state.userLat], zoom: 15.5, duration: 900 });
+
+      // Reverse geocoding
+      fetch('https://nominatim.openstreetmap.org/reverse?lat=' + state.userLat + '&lon=' + state.userLng + '&format=json&accept-language=fr')
+        .then(r => r.json())
+        .then(data => {
+          const a = data.address || {};
+          $('badge-addr').textContent = [a.road, a.suburb || a.village || a.town || a.city].filter(Boolean).join(', ') || 'Position localisée';
+          $('location-badge').classList.add('visible');
+          if (state.selectedId) openBuilding(state.selectedId);
+          else renderDefaultSheet();
+        })
+        .catch(() => {
+          $('badge-addr').textContent = state.userLat.toFixed(5) + ', ' + state.userLng.toFixed(5);
+          $('location-badge').classList.add('visible');
+        });
+    },
+    err => {
+      $('btn-locate').classList.remove('busy');
+      const msgs = { 1: 'Accès GPS refusé.', 2: 'Position GPS indisponible.', 3: 'Délai GPS dépassé.' };
+      showToast(msgs[err.code] || 'Géolocalisation impossible.');
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
+  );
+}
+
+/* --- Carte MapTiler --- */
+function initMap() {
+  state.map = new maptilersdk.Map({
+    container: 'map',
+    style: maptilersdk.MapStyle.STREETS,
+    center: [2.7093, 48.8262],
+    zoom: 14,
+    pitch: 0,
+    bearing: 0,
+    attributionControl: false
+  });
+
+  state.map.on('load', () => {
+    // Source GeoJSON
+    state.map.addSource('batiments', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: BATIMENTS.map(b => ({
+          type: 'Feature',
+          properties: { id: b.id, nom: b.nom, categorie: b.categorie },
+          geometry: { type: 'Point', coordinates: [b.lng, b.lat] }
+        }))
+      }
+    });
+
+    // Halo
+    state.map.addLayer({ id: 'b-halo', type: 'circle', source: 'batiments', paint: { 'circle-radius': 20, 'circle-color': '#1a1a18', 'circle-opacity': 0.06 } });
+
+    // Points
+    state.map.addLayer({ id: 'b-dot', type: 'circle', source: 'batiments', paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 6, 17, 11],
+      'circle-color': '#1a1a18',
+      'circle-stroke-width': 2.5,
+      'circle-stroke-color': '#ffffff',
+      'circle-opacity': 0.9
+    }});
+
+    // Libellés
+    state.map.addLayer({ id: 'b-label', type: 'symbol', source: 'batiments', minzoom: 14.5, layout: {
+      'text-field': ['get', 'nom'],
+      'text-font': ['DIN Pro Regular', 'Arial Unicode MS Regular'],
+      'text-size': 11, 'text-offset': [0, 1.6], 'text-anchor': 'top', 'text-max-width': 10
+    }, paint: { 'text-color': '#1a1a18', 'text-halo-color': 'rgba(255,255,255,0.9)', 'text-halo-width': 1.5 }});
+
+    // Popup hover
+    const popup = new maptilersdk.Popup({ closeButton: false, closeOnClick: false, offset: 16 });
+
+    state.map.on('mouseenter', 'b-dot', e => {
+      state.map.getCanvas().style.cursor = 'pointer';
+      const p = e.features[0].properties;
+      popup.setLngLat(e.features[0].geometry.coordinates)
+        .setHTML('<div class="popup-name">' + p.nom + '</div><div class="popup-cat">' + p.categorie + '</div>')
+        .addTo(state.map);
+    });
+    state.map.on('mouseleave', 'b-dot', () => { state.map.getCanvas().style.cursor = ''; popup.remove(); });
+    state.map.on('click', 'b-dot', e => openBuilding(e.features[0].properties.id));
+    state.map.on('click', e => {
+      if (!state.map.queryRenderedFeatures(e.point, { layers: ['b-dot'] }).length) {
+        renderDefaultSheet();
+        setSheet('collapsed');
+      }
+    });
+
+    // Fin du chargement
+    setTimeout(() => {
+      $('loader').classList.add('hidden');
+      renderDefaultSheet();
+      setSheet('collapsed');
+    }, 1400);
+  });
+}
+
+/* --- Filtres pills --- */
+document.querySelectorAll('.pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(p => { p.classList.remove('active'); p.setAttribute('aria-selected', 'false'); });
+    pill.classList.add('active');
+    pill.setAttribute('aria-selected', 'true');
+    state.activeFilter = pill.dataset.cat;
+
+    const filter = state.activeFilter === 'all' ? null : ['==', ['get', 'categorie'], state.activeFilter];
+    if (state.map && state.map.getLayer('b-dot')) {
+      state.map.setFilter('b-dot',   filter);
+      state.map.setFilter('b-halo',  filter);
+      state.map.setFilter('b-label', filter);
+    }
+
+    renderDefaultSheet();
+    setSheet('collapsed');
+  });
+});
+
+/* --- Sheet grip (toggle) --- */
+function toggleSheet() {
+  if (state.activeSheet === 'collapsed') setSheet('peek');
+  else if (state.activeSheet === 'peek')  setSheet('expanded');
+  else setSheet('peek');
+}
+$('sheet-grip').addEventListener('click', toggleSheet);
+$('sheet-grip').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') toggleSheet(); });
+$('sheet-head').addEventListener('click', toggleSheet);
+$('sheet-head').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') toggleSheet(); });
+
+/* --- Navigation bar --- */
+document.querySelectorAll('.nav-btn[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn[data-view]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const view = btn.dataset.view;
+
+    if (view === 'map') {
+      setSheet('collapsed');
+
+    } else if (view === 'list') {
+      renderDefaultSheet();
+      setSheet('expanded');
+
+    } else if (view === 'nearby') {
+      if (!state.userLat) { requestLocation(); return; }
+      state.selectedId = null;
+      $('sheet-title').textContent = 'À proximité';
+      const sorted = BATIMENTS
+        .map(b => ({ ...b, _d: distKm(state.userLat, state.userLng, b.lat, b.lng) }))
+        .sort((a, c) => a._d - c._d);
+      $('sheet-tag-txt').textContent = 'Par distance';
+      $('sheet-body').innerHTML = '<div class="info-rows">'
+        + sorted.map(b =>
+            '<div class="info-row clickable" data-id="' + b.id + '" role="button" tabindex="0">'
+            + '<div class="row-ic">' + svgIcon('pin') + '</div>'
+            + '<div class="row-content"><div class="row-lbl">' + b.categorie + '</div>'
+            + '<div class="row-val" style="display:flex;align-items:center;justify-content:space-between;gap:8px">'
+            + '<span>' + b.nom + '</span>'
+            + '<span style="font-size:11px;color:var(--ink-3);flex-shrink:0">' + fmtDist(b._d) + '</span>'
+            + '</div></div>'
+            + '<div class="row-chev">' + svgIcon('chev', 14) + '</div>'
+            + '</div>'
+          ).join('')
+        + '</div>';
+      $('sheet-body').querySelectorAll('.info-row.clickable').forEach(row => {
+        row.addEventListener('click', () => openBuilding(row.dataset.id));
+        row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openBuilding(row.dataset.id); });
+      });
+      setSheet('expanded');
+    }
+  });
+});
+
+/* --- Localisation --- */
+$('btn-locate').addEventListener('click', requestLocation);
+$('badge-close').addEventListener('click', () => $('location-badge').classList.remove('visible'));
+
+/* --- Service Worker --- */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+/* --- Init --- */
+loadPhotos();
+initMap();
+</script>
+</body>
+</html>
