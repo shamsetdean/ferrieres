@@ -670,7 +670,7 @@ function openFiche(id) {
   $('fiche-cat').textContent = b.categorie.charAt(0).toUpperCase() + b.categorie.slice(1);
   $('fiche-name').textContent = b.nom;
 
-  var photo = S.photos[id] || b.photo || null;
+  var photo = S.photos[id] || null; // b.photo ignoré : aucune image statique disponible
 
   /* Photo block */
   var photoHtml = '';
