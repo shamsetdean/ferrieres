@@ -661,12 +661,16 @@ function cardHTML(b){
   var cat=CATEGORIES[b.categorie]||{label:b.categorie,color:"#475569"};
   var bg=rgba(cat.color,.1);
   var dist=S.lat!==null?'<div class="bcd">'+fd(hav(S.lat,S.lng,b.lat,b.lng))+'</div>':"";
-  var ds=dispoStyle(b.disponibilite);
-  var dsHtml=b.disponibilite?'<span class="bcs" style="background:'+ds.bg+';color:'+ds.col+'">'+b.disponibilite.split(" ")[0]+'</span>':"";
+  /* État badge : données PDF uniquement */
+  var etatBadge="";
+  if(b.etat&&b.etat!=="RAS"&&b.etat!=="Bon état"){
+    var ec=b.etat==="Moyen"?"#B45309":b.etat==="Vétuste"?"#DC2626":"#475569";
+    etatBadge='<span class="bcs" style="background:'+rgba(ec,.12)+';color:'+ec+'">'+b.etat+'</span>';
+  }
   return '<div class="bc" onclick="openDetail(\''+b.id+'\')">'+
     '<div class="bci" style="background:'+bg+'">'+catI(b.categorie).replace("<svg","<svg style='width:16px;height:16px;stroke:"+cat.color+";'")+'</div>'+
-    '<div class="bcn"><div class="nm">'+b.nom+'</div><div class="ct">'+cat.label+(b.capacite?' · '+b.capacite:'')+'</div></div>'+
-    '<div class="bcr">'+dist+dsHtml+'</div></div>';
+    '<div class="bcn"><div class="nm">'+b.nom+'</div><div class="ct">'+cat.label+(b.capacite&&b.capacite!=="0 personne"?' · '+b.capacite:'')+'</div></div>'+
+    '<div class="bcr">'+dist+etatBadge+'</div></div>';
 }
 
 function buildList(){
@@ -680,29 +684,67 @@ function buildSbList(){
   l.innerHTML=f.length?f.map(cardHTML).join(""):'<div style="padding:24px;text-align:center;color:var(--mute);font-size:13px;">Aucun bâtiment</div>';
 }
 
-/* DETAIL */
+/* DETAIL — données strictement issues du PDF officiel */
 function infoGridHTML(b){
-  function cell(lbl,val,ico,full){
-    if(!val)return"";
-    return'<div class="ic'+(full?" igf":"")+'">'+'<div class="il">'+lbl+'</div><div class="iv">'+val+'</div></div>';
+  function row(lbl,val){
+    if(val===null||val===undefined||val===""||val==="--"||val==="-")return"";
+    return'<div class="ic igf"><div class="il">'+lbl+'</div><div class="iv">'+val+'</div></div>';
   }
-  var ds=dispoStyle(b.disponibilite);
-  var dispoCell=b.disponibilite?'<div class="ic"><div class="il">Disponibilité</div><div class="iv"><span class="dispo" style="background:'+ds.bg+';color:'+ds.col+'">'+b.disponibilite+'</span></div></div>':"";
+  function rowHalf(lbl,val){
+    if(val===null||val===undefined||val===""||val==="--"||val==="-")return"";
+    return'<div class="ic"><div class="il">'+lbl+'</div><div class="iv">'+val+'</div></div>';
+  }
+
+  /* Équipements : construits depuis les champs individuels du PDF */
+  var equList=[];
+  if(b.wifi&&b.wifi!=="Non")equList.push("Wi-Fi"+( b.wifi!=="Oui"?" ("+b.wifi+")":""));
+  if(b.telephone==="Oui")equList.push("Téléphone");
+  if(b.videoprojecteur&&b.videoprojecteur!=="Non")equList.push(b.videoprojecteur==="Oui"?"Vidéoprojecteur":b.videoprojecteur);
+  if(b.sonorisation&&b.sonorisation!=="Non")equList.push("Sonorisation"+( b.sonorisation!=="Oui"?" ("+b.sonorisation+")":""));
+  if(b.cuisine==="Oui")equList.push("Cuisine");
+  if(b.chauffage==="Oui")equList.push("Chauffage");
+  if(b.climatisation==="Oui")equList.push("Climatisation");
   var equCell="";
-  if(b.equipements){
-    var chips=b.equipements.split(",").map(function(e){return'<span class="echip">'+e.trim()+'</span>';}).join("");
+  if(equList.length){
+    var chips=equList.map(function(e){return'<span class="echip">'+e+'</span>';}).join("");
     equCell='<div class="ic igf"><div class="il">Équipements</div><div class="echips">'+chips+'</div></div>';
   }
-  return'<div class="ig">'+
-    cell("Description",b.description,I.inf,true)+
-    cell("Adresse",b.adresse,I.pin,false)+
-    cell("Horaires",b.horaires,I.clk,false)+
-    cell("Capacité",b.capacite,I.usr,false)+
-    dispoCell+
-    cell("Accessibilité PMR",b.pmr,I.bldg,false)+
-    equCell+
-    cell("État",b.etat,I.inf,false)+
-  '</div>';
+
+  /* Accessibilité */
+  var accParts=[];
+  if(b.pmr)accParts.push("PMR : "+b.pmr);
+  if(b.ascenseur)accParts.push("Ascenseur : "+b.ascenseur);
+  if(b.parking)accParts.push("Parking : "+b.parking);
+  if(b.transports)accParts.push("Transports : "+b.transports);
+
+  /* État badge */
+  var etatVal=b.etat?b.etat:null;
+  var etatDisplay="";
+  if(etatVal){
+    var ec=etatVal==="Moyen"?"#B45309":etatVal==="Vétuste"?"#DC2626":etatVal==="RAS"||etatVal==="Bon état"?"#15803D":"#475569";
+    etatDisplay='<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;background:'+rgba(ec,.1)+';color:'+ec+'">'+etatVal+'</span>';
+  }
+
+  var h='<div class="ig">';
+  h+=row("Adresse",b.adresse);
+  if(b.capacite&&b.capacite!=="0 personne")h+=rowHalf("Capacité",b.capacite);
+  if(b.etages)h+=rowHalf("Étages",b.etages);
+  if(b.activites)h+=row("Activités",b.activites);
+  if(b.jours)h+=rowHalf("Jours d'utilisation",b.jours);
+  if(b.associations)h+=row("Associations",b.associations);
+  if(b.evenements)h+=row("Événements",b.evenements);
+  if(accParts.length)h+='<div class="ic igf"><div class="il">Accessibilité</div><div class="iv">'+accParts.join(" · ")+'</div></div>';
+  h+=equCell;
+  if(etatDisplay)h+='<div class="ic"><div class="il">État général</div><div class="iv">'+etatDisplay+'</div></div>';
+  if(b.travaux_recents&&b.travaux_recents!=="Aucun"&&b.travaux_recents!=="RAS")h+=rowHalf("Travaux récents",b.travaux_recents);
+  if(b.travaux_a_prevoir&&b.travaux_a_prevoir!=="Aucun"&&b.travaux_a_prevoir!=="RAS"){
+    var tc=b.travaux_a_prevoir==="En totalité"?"#DC2626":"#B45309";
+    h+='<div class="ic"><div class="il">Travaux à prévoir</div><div class="iv" style="color:'+tc+';font-weight:700;">'+b.travaux_a_prevoir+'</div></div>';
+  }
+  h+='</div>';
+  /* Si aucun champ disponible */
+  if(h==='<div class="ig"></div>')h='<div class="ig"><div class="ic igf"><div class="iv" style="color:var(--mute);font-style:italic;">Information non disponible</div></div></div>';
+  return h;
 }
 
 function openDetail(id){
