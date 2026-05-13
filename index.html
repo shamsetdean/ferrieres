@@ -609,8 +609,32 @@ const state = {
   activeFilter: 'all',
   activeSheet: 'collapsed',   // 'collapsed' | 'peek' | 'expanded'
   selectedId: null,
-  photos: {}
+  photos: {},
+  adminMode: false
 };
+
+// Hash SHA-256 du mot de passe administrateur
+// Pour changer le mot de passe : remplacer ce hash
+// Générer : https://emn178.github.io/online-tools/sha256.html
+const ADMIN_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // 'admin' par défaut — à changer
+
+async function checkAdminPassword(pwd) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pwd));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('') === ADMIN_HASH;
+}
+
+async function promptAdmin() {
+  const pwd = prompt('Mot de passe administrateur :');
+  if (!pwd) return;
+  const ok = await checkAdminPassword(pwd);
+  if (ok) {
+    state.adminMode = true;
+    showToast('Mode administrateur activé');
+    if (state.selectedId) openBuilding(state.selectedId);
+  } else {
+    showToast('Mot de passe incorrect.');
+  }
+}
 
 /* --- Utilitaires DOM --- */
 const $ = id => document.getElementById(id);
@@ -695,7 +719,8 @@ function sortedByDist(list) {
 /* --- Rendu liste par défaut --- */
 function renderDefaultSheet() {
   state.selectedId = null;
-  const list = sortedByDist(visibleBatiments());
+  // N'afficher que les bâtiments avec coordonnées GPS confirmées
+  const list = sortedByDist(visibleBatiments().filter(b => b.lat !== null && b.lng !== null));
   $('sheet-title').textContent = 'Bâtiments publics';
   $('sheet-tag-txt').textContent = list.length + ' lieu' + (list.length > 1 ? 'x' : '');
 
@@ -732,15 +757,21 @@ function openBuilding(id) {
   $('sheet-title').textContent = b.nom;
   $('sheet-tag-txt').textContent = b.categorie;
 
-  // Photo
-  const photo = state.photos[id] || null;
-  const photoHTML = '<div class="photo-section">'
-    + '<div class="photo-box" id="photo-box-' + id + '">'
-    + (photo
-        ? '<img class="photo-img" src="' + photo + '" alt="Photo de ' + b.nom + '">'
-          + '<div class="photo-change" aria-hidden="true">' + svgIcon('up', 13) + ' Changer</div>'
-        : '<div class="photo-empty">' + svgIcon('img', 26) + '<span>Ajouter une photo</span></div>')
-    + '</div></div>';
+  // Photo — lecture seule sauf admin
+  const photo = state.photos[id] || (typeof PHOTOS !== 'undefined' && PHOTOS[id] ? PHOTOS[id][0] : null) || null;
+  let photoHTML = '';
+  if (photo) {
+    photoHTML = '<div class="photo-section">'
+      + '<div class="photo-box" id="photo-box-' + id + '" style="cursor:default">'
+      + '<img class="photo-img" src="' + photo + '" alt="Photo de ' + b.nom + '">'
+      + (state.adminMode ? '<div class="photo-change" aria-hidden="true">' + svgIcon('up', 13) + ' Changer</div>' : '')
+      + '</div></div>';
+  } else if (state.adminMode) {
+    photoHTML = '<div class="photo-section">'
+      + '<div class="photo-box" id="photo-box-' + id + '">'
+      + '<div class="photo-empty">' + svgIcon('img', 26) + '<span>Ajouter une photo</span></div>'
+      + '</div></div>';
+  }
 
   // Informations
   const fields = [
@@ -797,9 +828,9 @@ function openBuilding(id) {
 
   $('sheet-body').innerHTML = photoHTML + infoHTML + nearbyHTML + arHTML;
 
-  // Attacher photo-box
+  // Attacher photo-box uniquement en mode admin
   const photoBox = $('photo-box-' + id);
-  if (photoBox) {
+  if (photoBox && state.adminMode) {
     photoBox.addEventListener('click', () => triggerPhotoInput(id));
   }
 
@@ -814,14 +845,16 @@ function openBuilding(id) {
   setSheet('peek');
 }
 
-/* --- Photo upload --- */
+/* --- Photo : lecture seule pour les visiteurs --- */
 function triggerPhotoInput(id) {
+  if (!state.adminMode) return; // Visiteurs : aucune action
   const inp = $('photo-input');
   inp.setAttribute('data-id', id);
   inp.click();
 }
 
 $('photo-input').addEventListener('change', function () {
+  if (!state.adminMode) return;
   const id = this.getAttribute('data-id');
   const file = this.files[0];
   if (!file || !id) return;
@@ -885,7 +918,7 @@ function requestLocation() {
 function initMap() {
   state.map = new maptilersdk.Map({
     container: 'map',
-    style: maptilersdk.MapStyle.STREETS,
+    style: 'https://api.maptiler.com/maps/streets/style.json?key=AhQ10drEx79exZrx0qNv',
     center: [2.7093, 48.8262],
     zoom: 14,
     pitch: 0,
@@ -895,15 +928,18 @@ function initMap() {
 
   state.map.on('load', () => {
     // Source GeoJSON
+    // Seuls les bâtiments avec GPS exact sont affichés sur la carte
     state.map.addSource('batiments', {
       type: 'geojson',
       data: {
         type: 'FeatureCollection',
-        features: BATIMENTS.map(b => ({
-          type: 'Feature',
-          properties: { id: b.id, nom: b.nom, categorie: b.categorie },
-          geometry: { type: 'Point', coordinates: [b.lng, b.lat] }
-        }))
+        features: BATIMENTS
+          .filter(b => b.lat !== null && b.lng !== null)
+          .map(b => ({
+            type: 'Feature',
+            properties: { id: b.id, nom: b.nom, categorie: b.categorie },
+            geometry: { type: 'Point', coordinates: [b.lng, b.lat] }
+          }))
       }
     });
 
@@ -1037,8 +1073,21 @@ $('badge-close').addEventListener('click', () => $('location-badge').classList.r
 /* --- Service Worker --- */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
+}
+
+/* --- Accès admin discret : tap long (1.5s) sur le titre --- */
+let adminTapTimer = null;
+const titleEl = document.querySelector('.header-title');
+if (titleEl) {
+  titleEl.addEventListener('pointerdown', () => {
+    adminTapTimer = setTimeout(() => {
+      $('btn-admin').style.display = 'flex';
+    }, 1500);
+  });
+  titleEl.addEventListener('pointerup', () => clearTimeout(adminTapTimer));
+  titleEl.addEventListener('pointercancel', () => clearTimeout(adminTapTimer));
 }
 
 /* --- Init --- */

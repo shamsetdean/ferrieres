@@ -1,15 +1,16 @@
 // data.js — Bâtiments publics de Ferrières-en-Brie
-// Source : document officiel de la commune
-// Coordonnées issues des adresses réelles
-// Référence : Mairie 24 rue Jean-Jaurès — 48.8219, 2.7046
-// Place Auguste Trézy (centre) — 48.8221, 2.7043
+// Source : document officiel de la commune + coordonnées GPS fournies par l'administrateur
+// Statut des coordonnées :
+//   ✓ = GPS exact fourni par l'administrateur
+//   ~ = coordonnées à confirmer (restantes à fournir)
 
 const BATIMENTS = [
 
-  // ── ADMINISTRATION ───────────────────────────────────────────────────
+  // ── COORDONNÉES GPS EXACTES FOURNIES ────────────────────────────────
+
   {
-    id: 'salle-rothschild',
-    nom: 'Salle Rothschild',
+    id: 'mairie-annexe',
+    nom: 'Mairie Annexe',
     categorie: 'administration',
     adresse: 'Avenue Jean Jaurès, 77164 Ferrières-en-Brie',
     capacite: '50 personnes',
@@ -23,71 +24,11 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: '—',
     travaux_prevus: '—',
-    lat: 48.8222,
-    lng: 2.7046
+    gps_status: 'exact',
+    lat: 48.82172116939425,
+    lng: 2.704613483933739
   },
 
-  {
-    id: 'salle-trezy',
-    nom: 'Salle Trézy',
-    categorie: 'administration',
-    adresse: 'Rue Jean Jaurès, 77164 Ferrières-en-Brie',
-    capacite: '30 personnes',
-    etages: '1 étage',
-    horaires: '—',
-    telephone: '—',
-    description: 'Salle municipale disponible sur demande pour les associations.',
-    accessibilite: 'Accès PMR · Ascenseur · Parking · Transports à proximité',
-    equipements: 'Wi-Fi · Téléphone · Vidéoprojecteur · Sonorisation sur demande · Cuisine · Chauffage · Climatisation',
-    activites: 'Sur demande',
-    etat: 'RAS',
-    travaux_recents: 'Cuisine',
-    travaux_prevus: '—',
-    lat: 48.8220,
-    lng: 2.7048
-  },
-
-  {
-    id: 'salle-mariages',
-    nom: 'Salle des Mariages',
-    categorie: 'administration',
-    adresse: 'Avenue Jean Jaurès, 77164 Ferrières-en-Brie',
-    capacite: '40 personnes',
-    etages: '1 étage',
-    horaires: '—',
-    telephone: '—',
-    description: 'Salle dédiée aux cérémonies de mariage civil.',
-    accessibilite: 'Accès PMR · Ascenseur · Parking',
-    equipements: 'Wi-Fi · Téléphone · Sonorisation · Cuisine · Chauffage et climatisation',
-    activites: 'Mariages',
-    etat: 'RAS',
-    travaux_recents: 'Cuisine',
-    travaux_prevus: '—',
-    lat: 48.8223,
-    lng: 2.7044
-  },
-
-  {
-    id: 'presbytere',
-    nom: 'Salle Presbytère',
-    categorie: 'administration',
-    adresse: '2 Place Auguste Trézy, 77164 Ferrières-en-Brie',
-    capacite: '30 personnes',
-    etages: '1 étage',
-    horaires: '—',
-    telephone: '—',
-    description: 'Salle disponible sur demande pour réunions et formations.',
-    accessibilite: 'Accès PMR (RDC uniquement) · Parking',
-    equipements: 'Wi-Fi · Téléphone · Vidéoprojecteur · Sonorisation sur demande · Chauffage',
-    activites: 'Réunion / formation',
-    etat: 'RAS',
-    travaux_recents: '—',
-    travaux_prevus: '—',
-    lat: 48.8221,
-    lng: 2.7041
-  },
-
-  // ── CULTURE / PATRIMOINE ─────────────────────────────────────────────
   {
     id: 'salle-saint-remy',
     nom: 'Salle Saint-Rémy',
@@ -104,109 +45,9 @@ const BATIMENTS = [
     etat: 'Moyen',
     travaux_recents: 'Aucun',
     travaux_prevus: 'Mur',
-    lat: 48.8220,
-    lng: 2.7042
-  },
-
-  {
-    id: 'ginkgo',
-    nom: 'Salle Ginkgo',
-    categorie: 'culture',
-    adresse: '3 Rue du Général de Gaulle, 77164 Ferrières-en-Brie',
-    capacite: '30 personnes',
-    etages: '0 étage',
-    horaires: 'Du lundi au vendredi',
-    telephone: '—',
-    description: 'Salle pour activités récréatives et sportives du Ginkgo Club.',
-    accessibilite: 'Accès PMR',
-    equipements: 'Wi-Fi · Téléphone · Télévision · Sonorisation sur demande · Cuisine · Chauffage',
-    activites: 'Activités récréatives et sportives — Ginkgo Club',
-    etat: 'Vétuste',
-    travaux_recents: '—',
-    travaux_prevus: 'L\'ensemble',
-    lat: 48.8215,
-    lng: 2.7035
-  },
-
-  {
-    id: 'kiosque',
-    nom: 'Le Kiosque',
-    categorie: 'culture',
-    adresse: 'Place Auguste Trézy, 77164 Ferrières-en-Brie',
-    capacite: '0 personne',
-    etages: '—',
-    horaires: 'Du lundi au dimanche',
-    telephone: '—',
-    description: 'Kiosque municipal utilisé par Les Amis de la Taffarette pour le stockage et les événements de pêche.',
-    accessibilite: 'Parking',
-    equipements: 'Sonorisation sur demande · Chauffage',
-    activites: 'Stockage / pêche — Les Amis de la Taffarette',
-    etat: 'Moyen',
-    travaux_recents: 'Aucun',
-    travaux_prevus: 'Aucun',
-    lat: 48.8219,
-    lng: 2.7040
-  },
-
-  {
-    id: 'lavoir',
-    nom: 'Le Lavoir',
-    categorie: 'culture',
-    adresse: 'Rue Jean Jaurès, 77164 Ferrières-en-Brie',
-    capacite: '—',
-    etages: '—',
-    horaires: '—',
-    telephone: '—',
-    description: 'Lavoir historique de la commune de Ferrières-en-Brie.',
-    accessibilite: '—',
-    equipements: '—',
-    activites: '—',
-    etat: '—',
-    travaux_recents: '—',
-    travaux_prevus: '—',
-    lat: 48.8217,
-    lng: 2.7050
-  },
-
-  // ── SPORT ────────────────────────────────────────────────────────────
-  {
-    id: 'dojo',
-    nom: 'Le Dojo',
-    categorie: 'sport',
-    adresse: '396 Route de la Brosse, 77164 Ferrières-en-Brie',
-    capacite: '50 personnes',
-    etages: '0 étage',
-    horaires: 'Du lundi au dimanche',
-    telephone: '—',
-    description: 'Dojo André Pracht, salle de sport municipale pour judo, école et pilates.',
-    accessibilite: 'Accès PMR · Parking',
-    equipements: 'Téléphone · Cuisine · Chauffage · Climatisation',
-    activites: 'Sport — École, Judo Club et Pilates',
-    etat: 'RAS',
-    travaux_recents: 'Pompe à chaleur',
-    travaux_prevus: '—',
-    lat: 48.8178,
-    lng: 2.7108
-  },
-
-  {
-    id: 'bulle-tennis',
-    nom: 'Bulle de Tennis',
-    categorie: 'sport',
-    adresse: 'Allée de la Taffarette, 77164 Ferrières-en-Brie',
-    capacite: '4 personnes',
-    etages: '—',
-    horaires: 'Du lundi au dimanche',
-    telephone: '—',
-    description: 'Court de tennis couvert utilisé par le Tennis Club de Ferrières-en-Brie.',
-    accessibilite: 'Accès PMR · Parking',
-    equipements: '—',
-    activites: 'Tennis — Tennis Club',
-    etat: 'RAS',
-    travaux_recents: 'Éclairage LED et serrure',
-    travaux_prevus: 'Changement de la bulle',
-    lat: 48.8195,
-    lng: 2.7072
+    gps_status: 'exact',
+    lat: 48.82156581412156,
+    lng: 2.7039363262637104
   },
 
   {
@@ -225,11 +66,11 @@ const BATIMENTS = [
     etat: 'Moyen',
     travaux_recents: 'Wi-Fi',
     travaux_prevus: 'En totalité',
-    lat: 48.8208,
-    lng: 2.7018
+    gps_status: 'exact',
+    lat: 48.82267607492076,
+    lng: 2.70258816665119
   },
 
-  // ── ÉDUCATION ────────────────────────────────────────────────────────
   {
     id: 'modulaire',
     nom: 'Le Modulaire',
@@ -246,8 +87,114 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: '—',
     travaux_prevus: '—',
-    lat: 48.8225,
-    lng: 2.7010
+    gps_status: 'exact',
+    lat: 48.82287607492076,
+    lng: 2.70258816665119
+  },
+
+  {
+    id: 'salle-trezy',
+    nom: 'Salle Auguste Trézy',
+    categorie: 'administration',
+    adresse: 'Rue Jean Jaurès, 77164 Ferrières-en-Brie',
+    capacite: '30 personnes',
+    etages: '1 étage',
+    horaires: '—',
+    telephone: '—',
+    description: 'Salle municipale disponible sur demande pour les associations.',
+    accessibilite: 'Accès PMR · Ascenseur · Parking · Transports à proximité',
+    equipements: 'Wi-Fi · Téléphone · Vidéoprojecteur · Sonorisation sur demande · Cuisine · Chauffage · Climatisation',
+    activites: 'Sur demande',
+    etat: 'RAS',
+    travaux_recents: 'Cuisine',
+    travaux_prevus: '—',
+    gps_status: 'exact',
+    lat: 48.82164348782602,
+    lng: 2.7046242145956727
+  },
+
+  {
+    id: 'salle-mariages',
+    nom: 'Salle des Mariages',
+    categorie: 'administration',
+    adresse: 'Avenue Jean Jaurès, 77164 Ferrières-en-Brie',
+    capacite: '40 personnes',
+    etages: '1 étage',
+    horaires: '—',
+    telephone: '—',
+    description: 'Salle dédiée aux cérémonies de mariage civil.',
+    accessibilite: 'Accès PMR · Ascenseur · Parking',
+    equipements: 'Wi-Fi · Téléphone · Sonorisation · Cuisine · Chauffage et climatisation',
+    activites: 'Mariages',
+    etat: 'RAS',
+    travaux_recents: 'Cuisine',
+    travaux_prevus: '—',
+    gps_status: 'exact',
+    lat: 48.82184348782602,
+    lng: 2.7046242145956727
+  },
+
+  {
+    id: 'maison-nature',
+    nom: 'Maison de la Nature',
+    categorie: 'nature',
+    adresse: '3 Allée du Château, 77164 Ferrières-en-Brie',
+    capacite: '50 personnes',
+    etages: '—',
+    horaires: '—',
+    telephone: '—',
+    description: 'Espace dédié aux manifestations de la communauté Marne et Gondoire.',
+    accessibilite: 'Accès PMR · Parking',
+    equipements: 'Wi-Fi · Téléphone · Cuisine · Chauffage',
+    activites: 'Manifestations Marne et Gondoire',
+    etat: 'RAS',
+    travaux_recents: 'RAS',
+    travaux_prevus: 'RAS',
+    gps_status: 'exact',
+    lat: 48.81873143736193,
+    lng: 2.721472124418583
+  },
+
+  {
+    id: 'bulle-tennis',
+    nom: 'Bulle de Tennis',
+    categorie: 'sport',
+    adresse: 'Allée de la Taffarette, 77164 Ferrières-en-Brie',
+    capacite: '4 personnes',
+    etages: '—',
+    horaires: 'Du lundi au dimanche',
+    telephone: '—',
+    description: 'Court de tennis couvert utilisé par le Tennis Club de Ferrières-en-Brie.',
+    accessibilite: 'Accès PMR · Parking',
+    equipements: '—',
+    activites: 'Tennis — Tennis Club',
+    etat: 'RAS',
+    travaux_recents: 'Éclairage LED et serrure',
+    travaux_prevus: 'Changement de la bulle',
+    gps_status: 'exact',
+    lat: 48.82148795659725,
+    lng: 2.698374327181196
+  },
+
+  {
+    id: 'service-technique',
+    nom: 'Service Technique',
+    categorie: 'technique',
+    adresse: '1 Rue Charles Cordier / 13 Avenue Paxton, 77164 Ferrières-en-Brie',
+    capacite: '—',
+    etages: '1 étage',
+    horaires: '—',
+    telephone: '—',
+    description: 'Centre technique municipal de la commune.',
+    accessibilite: 'Parking · Transports à proximité',
+    equipements: 'Wi-Fi · Téléphone · Cuisine · Chauffage',
+    activites: '—',
+    etat: 'RAS / Bon état',
+    travaux_recents: 'Cuisine',
+    travaux_prevus: 'Éclairage',
+    gps_status: 'exact',
+    lat: 48.825874930431915,
+    lng: 2.7166387822580487
   },
 
   {
@@ -266,8 +213,116 @@ const BATIMENTS = [
     etat: 'RAS',
     travaux_recents: 'Cuisine',
     travaux_prevus: '—',
-    lat: 48.8200,
-    lng: 2.7085
+    gps_status: 'exact',
+    lat: 48.82585420457052,
+    lng: 2.7040576182071288
+  },
+
+  // ── COORDONNÉES À CONFIRMER (restantes à fournir) ────────────────────
+
+  {
+    id: 'presbytere',
+    nom: 'Salle Presbytère',
+    categorie: 'administration',
+    adresse: '2 Place Auguste Trézy, 77164 Ferrières-en-Brie',
+    capacite: '30 personnes',
+    etages: '1 étage',
+    horaires: '—',
+    telephone: '—',
+    description: 'Salle disponible sur demande pour réunions et formations.',
+    accessibilite: 'Accès PMR (RDC uniquement) · Parking',
+    equipements: 'Wi-Fi · Téléphone · Vidéoprojecteur · Sonorisation sur demande · Chauffage',
+    activites: 'Réunion / formation',
+    etat: 'RAS',
+    travaux_recents: '—',
+    travaux_prevus: '—',
+    gps_status: 'exact',
+    lat: 48.825321,
+    lng: 2.717047
+  },
+
+  {
+    id: 'ginkgo',
+    nom: 'Salle Ginkgo',
+    categorie: 'culture',
+    adresse: '3 Rue du Général de Gaulle, 77164 Ferrières-en-Brie',
+    capacite: '30 personnes',
+    etages: '0 étage',
+    horaires: 'Du lundi au vendredi',
+    telephone: '—',
+    description: 'Salle pour activités récréatives et sportives du Ginkgo Club.',
+    accessibilite: 'Accès PMR',
+    equipements: 'Wi-Fi · Téléphone · Télévision · Sonorisation sur demande · Cuisine · Chauffage',
+    activites: 'Activités récréatives et sportives — Ginkgo Club',
+    etat: 'Vétuste',
+    travaux_recents: '—',
+    travaux_prevus: 'L\'ensemble',
+    gps_status: 'exact',
+    lat: 48.822687,
+    lng: 2.707713
+  },
+
+  {
+    id: 'kiosque',
+    nom: 'Le Kiosque',
+    categorie: 'culture',
+    adresse: 'Place Auguste Trézy, 77164 Ferrières-en-Brie',
+    capacite: '0 personne',
+    etages: '—',
+    horaires: 'Du lundi au dimanche',
+    telephone: '—',
+    description: 'Kiosque municipal utilisé par Les Amis de la Taffarette pour le stockage et les événements de pêche.',
+    accessibilite: 'Parking',
+    equipements: 'Sonorisation sur demande · Chauffage',
+    activites: 'Stockage / pêche — Les Amis de la Taffarette',
+    etat: 'Moyen',
+    travaux_recents: 'Aucun',
+    travaux_prevus: 'Aucun',
+    gps_status: 'exact',
+    lat: 48.821017,
+    lng: 2.704184
+  },
+
+  {
+    id: 'lavoir',
+    nom: 'Le Lavoir',
+    categorie: 'culture',
+    adresse: 'Rue Jean Jaurès, 77164 Ferrières-en-Brie',
+    capacite: '—',
+    etages: '—',
+    horaires: '—',
+    telephone: '—',
+    description: 'Lavoir historique de la commune de Ferrières-en-Brie.',
+    accessibilite: '—',
+    equipements: '—',
+    activites: '—',
+    etat: '—',
+    travaux_recents: '—',
+    travaux_prevus: '—',
+    gps_status: 'exact',
+    lat: 48.821329,
+    lng: 2.704661
+  },
+
+  {
+    id: 'dojo',
+    nom: 'Le Dojo',
+    categorie: 'sport',
+    adresse: '396 Route de la Brosse, 77164 Ferrières-en-Brie',
+    capacite: '50 personnes',
+    etages: '0 étage',
+    horaires: 'Du lundi au dimanche',
+    telephone: '—',
+    description: 'Dojo André Pracht, salle de sport municipale pour judo, école et pilates.',
+    accessibilite: 'Accès PMR · Parking',
+    equipements: 'Téléphone · Cuisine · Chauffage · Climatisation',
+    activites: 'Sport — École, Judo Club et Pilates',
+    etat: 'RAS',
+    travaux_recents: 'Pompe à chaleur',
+    travaux_prevus: '—',
+    gps_status: 'exact',
+    lat: 48.823223,
+    lng: 2.699155
   },
 
   {
@@ -286,93 +341,32 @@ const BATIMENTS = [
     etat: 'Moyen',
     travaux_recents: 'Aucun',
     travaux_prevus: 'Aucun',
-    lat: 48.8218,
-    lng: 2.7043
-  },
-
-  // ── SERVICES TECHNIQUES ──────────────────────────────────────────────
-  {
-    id: 'ctm1',
-    nom: 'Service Technique CTM1',
-    categorie: 'technique',
-    adresse: '1 Rue Charles Cordier, 77164 Ferrières-en-Brie',
-    capacite: '—',
-    etages: '1 étage',
-    horaires: '—',
-    telephone: '—',
-    description: 'Centre technique municipal — bâtiment principal des services techniques de la commune.',
-    accessibilite: 'Parking · Transports à proximité',
-    equipements: 'Wi-Fi · Téléphone · Cuisine · Chauffage',
-    activites: '—',
-    etat: 'RAS',
-    travaux_recents: 'Cuisine',
-    travaux_prevus: 'Éclairage',
-    lat: 48.8188,
-    lng: 2.7115
-  },
-
-  {
-    id: 'ctm2',
-    nom: 'Service Technique CTM2',
-    categorie: 'technique',
-    adresse: '13 Avenue Paxton, 77164 Ferrières-en-Brie',
-    capacite: '—',
-    etages: '1 étage',
-    horaires: '—',
-    telephone: '—',
-    description: 'Centre technique municipal — bâtiment secondaire des services techniques.',
-    accessibilite: 'Parking · Transports à proximité',
-    equipements: '—',
-    activites: '—',
-    etat: 'Bon état',
-    travaux_recents: 'Aucun',
-    travaux_prevus: 'Éclairage',
-    lat: 48.8185,
-    lng: 2.7120
-  },
-
-  // ── NATURE / ENVIRONNEMENT ───────────────────────────────────────────
-  {
-    id: 'maison-nature',
-    nom: 'Maison de la Nature',
-    categorie: 'nature',
-    adresse: '3 Allée du Château, 77164 Ferrières-en-Brie',
-    capacite: '50 personnes',
-    etages: '—',
-    horaires: '—',
-    telephone: '—',
-    description: 'Espace dédié aux manifestations de la communauté Marne et Gondoire.',
-    accessibilite: 'Accès PMR · Parking',
-    equipements: 'Wi-Fi · Téléphone · Cuisine · Chauffage',
-    activites: 'Manifestations Marne et Gondoire',
-    etat: 'RAS',
-    travaux_recents: 'RAS',
-    travaux_prevus: 'RAS',
-    lat: 48.8245,
-    lng: 2.7088
+    gps_status: 'exact',
+    lat: 48.821294,
+    lng: 2.70394
   },
 
   {
     id: 'chateau-eau',
-    nom: "Château d'eau",
+    nom: 'Château d\'eau',
     categorie: 'nature',
-    adresse: "Allée du Château d'eau, 77164 Ferrières-en-Brie",
+    adresse: 'Allée du Château d\'eau, 77164 Ferrières-en-Brie',
     capacite: '—',
     etages: '—',
     horaires: '—',
     telephone: '—',
-    description: "Château d'eau historique en brique — réserve tampon du réseau d'eau municipal.",
+    description: 'Château d\'eau historique en brique — réserve tampon du réseau d\'eau municipal.',
     accessibilite: '—',
     equipements: '—',
     activites: 'Réserve tampon',
     etat: 'RAS',
     travaux_recents: '—',
     travaux_prevus: '—',
-    lat: 48.8175,
-    lng: 2.7095
+    gps_status: 'exact',
+    lat: 48.819567,
+    lng: 2.722068
   },
 
-  // ── SERVICES PUBLICS ─────────────────────────────────────────────────
   {
     id: 'poste',
     nom: 'La Poste',
@@ -389,29 +383,36 @@ const BATIMENTS = [
     etat: '—',
     travaux_recents: '—',
     travaux_prevus: '—',
-    lat: 48.8219,
-    lng: 2.7055
+    gps_status: 'exact',
+    lat: 48.821329,
+    lng: 2.704861
   },
 
-  // ── SOCIAL ───────────────────────────────────────────────────────────
   {
     id: 'appt-urgence',
-    nom: "Maison d'Accueil Provisoire",
+    nom: 'Maison d\'Accueil Provisoire',
     categorie: 'social',
     adresse: 'Rue Jean Jaurès, 77164 Ferrières-en-Brie',
     capacite: '4 personnes',
     etages: '1 étage',
     horaires: '—',
     telephone: '—',
-    description: "Appartement d'urgence municipal pour hébergement provisoire.",
+    description: 'Appartement d\'urgence municipal pour hébergement provisoire.',
     accessibilite: 'Parking · Transports à proximité',
     equipements: 'Cuisine · Chauffage',
-    activites: "Hébergement d'urgence",
+    activites: 'Hébergement d\'urgence',
     etat: '—',
     travaux_recents: '—',
     travaux_prevus: '—',
-    lat: 48.8216,
-    lng: 2.7052
+    gps_status: 'exact',
+    lat: 48.821217,
+    lng: 2.705187
   }
 
 ];
+
+// ── PHOTOS PAR BÂTIMENT (gérées par l'administrateur uniquement) ─────
+// Format : { [id]: [url1, url2, ...] }
+// Les URLs pointent vers les photos du PDF / fournies par l'admin
+// Lecture seule pour les visiteurs
+const PHOTOS = {};
