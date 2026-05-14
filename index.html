@@ -53,13 +53,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 */
 .mk{position:relative;width:48px;height:48px;
   display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.mk-c{width:13px;height:13px;border-radius:50%;position:relative;z-index:2;
-  /* Le dot est le point de référence GPS exact — taille fixe à l'état normal */
+.mk-c{
+  width:16px;height:16px;border-radius:50%;position:relative;z-index:2;
   flex-shrink:0;
-  transition:width .22s,height .22s;}
+  /* Bordure blanche + ombre pour lisibilité sur la carte détaillée */
+  border:2.5px solid rgba(255,255,255,.92);
+  box-shadow:0 2px 8px rgba(0,0,0,.32),0 0 0 1px rgba(0,0,0,.08);
+  transition:width .22s,height .22s,box-shadow .22s;
+}
 .mk-r{position:absolute;top:50%;left:50%;
   transform:translate(-50%,-50%);
-  width:13px;height:13px;border-radius:50%;border:1.5px solid;
+  width:16px;height:16px;border-radius:50%;border:1.5px solid;
   animation:pr 2.8s ease-out infinite;pointer-events:none;z-index:1;}
 .mk-lbl{position:absolute;bottom:calc(100% - 4px);left:50%;
   transform:translateX(-50%) translateY(4px);
@@ -69,7 +73,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
   white-space:nowrap;opacity:0;pointer-events:none;
   transition:opacity .2s,transform .2s;z-index:3;
   box-shadow:var(--dg-sh);}
-.mk.hi .mk-c{width:19px;height:19px;}
+.mk.hi .mk-c{
+  width:22px;height:22px;
+  box-shadow:0 4px 16px rgba(0,0,0,.35),0 0 0 3px rgba(255,255,255,.6);
+}
 .mk.hi .mk-lbl{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* ══ TOP BADGE ════════════════════════════════════ */
@@ -593,14 +600,33 @@ function initMap(){
   maptilersdk.config.apiKey=MAPTILER_KEY;
   S.map=new maptilersdk.Map({
     container:"map",
-    style:"https://api.maptiler.com/maps/dataviz-light/style.json?key="+MAPTILER_KEY,
-    center:[2.7050,48.8215],zoom:14,minZoom:11,maxZoom:19,
-    attributionControl:false,navigationControl:false
+    /* streets-v2 : bâtiments 2D, reliefs urbains, textures, profondeur visuelle */
+    style:"https://api.maptiler.com/maps/streets-v2/style.json?key="+MAPTILER_KEY,
+    center:[2.7050,48.8215],zoom:14.5,minZoom:12,maxZoom:19,
+    attributionControl:false,navigationControl:false,
+    /* Limites géographiques : Ferrières-en-Brie et alentours proches */
+    maxBounds:[2.660,48.795,2.780,48.855]
   });
   S.map.on("load",function(){
-    (S.map.getStyle().layers||[]).forEach(function(l){
-      if(/(poi|symbol|icon|label)/i.test(l.id)){try{S.map.setLayoutProperty(l.id,"visibility","none");}catch(e){}}
+    var layers=S.map.getStyle().layers||[];
+    layers.forEach(function(l){
+      var id=l.id.toLowerCase();
+      /* Masquer uniquement : icônes POI, labels de lieux génériques,
+         numéros de maison — tout ce qui entre en conflit avec nos marqueurs.
+         Garder : bâtiments, routes, parcs, eau, reliefs. */
+      var isPoi   = /^poi/.test(id);
+      var isHouseNum = /housenumber|house_number/.test(id);
+      var isGenericLabel = /place_label|settlement|locality|suburb|city|town|village|hamlet/.test(id);
+      var isTransitLabel = /transit|bus|train|metro|station/.test(id) && /label|text/.test(l.type||"");
+      if(isPoi||isHouseNum||isGenericLabel||isTransitLabel){
+        try{S.map.setLayoutProperty(l.id,"visibility","none");}catch(e){}
+      }
     });
+    /* Légère teinte sur le fond de carte pour mieux contraster avec les markers */
+    try{
+      var bgLayer=layers.find(function(l){return l.type==="background";});
+      if(bgLayer)S.map.setPaintProperty(bgLayer.id,"background-color","#F4F1EB");
+    }catch(e){}
     addMarkers();
   });
   S.map.on("click",function(){hlMk(null);});
@@ -616,12 +642,13 @@ function addMarkers(){
     ring.style.borderColor=co;ring.style.animationDelay=(i%7*0.44)+"s";
     var dot=document.createElement("div");dot.className="mk-c";
     dot.style.background=co;
-    dot.style.boxShadow="0 0 0 3px "+rgba(co,.22)+",0 0 0 7px "+rgba(co,.10);
+    /* La bordure blanche + ombre sont définies en CSS.
+       On ajoute ici uniquement la lueur colorée propre à chaque catégorie. */
+    dot.style.filter="drop-shadow(0 0 4px "+rgba(co,.55)+")";
     var lbl=document.createElement("div");lbl.className="mk-lbl";lbl.textContent=b.nom;
     wrap.appendChild(ring);wrap.appendChild(dot);wrap.appendChild(lbl);
     wrap.addEventListener("click",function(e){e.stopPropagation();openDetail(b.id);});
-    /* anchor:'center' force le point GPS exactement au centre du dot,
-       indépendamment de la taille de la zone tactile (48px wrapper) */
+    /* anchor:'center' force le point GPS exactement au centre du dot */
     var mk=new maptilersdk.Marker({element:wrap,anchor:'center'}).setLngLat([b.lng,b.lat]).addTo(S.map);
     S.markers[b.id]={mk:mk,el:wrap};
   });
