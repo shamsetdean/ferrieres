@@ -657,7 +657,9 @@ function initMap(){
   });
 
   S.map.on("click",function(e){
-    /* Clic dans le vide → désélectionner */
+    /* Clic dans le vide → désélectionner
+       Sauf si un POI layer a déjà traité ce clic (_poiHandled) */
+    if(e.originalEvent&&e.originalEvent._poiHandled)return;
     var f=S.map.queryRenderedFeatures(e.point,{layers:["poi-dot","poi-labels"]});
     if(!f.length)hlGlPoi(null);
   });
@@ -756,7 +758,9 @@ function buildGLPois(){
     S.map.on("mouseenter",lid,function(){S.map.getCanvas().style.cursor="pointer";});
     S.map.on("mouseleave",lid,function(){S.map.getCanvas().style.cursor="";});
     S.map.on("click",lid,function(e){
-      e.stopPropagation();
+      /* MapMouseEvent n'a pas stopPropagation() — on marque l'originalEvent
+         pour que le handler général "clic dans le vide" ne désélectionne pas */
+      if(e.originalEvent)e.originalEvent._poiHandled=true;
       if(e.features&&e.features.length)openDetail(e.features[0].properties.id);
     });
   });
