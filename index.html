@@ -46,13 +46,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 #map{position:fixed;inset:0;z-index:0;}
 
 /* ══ MARKERS ══════════════════════════════════════ */
+/*
+  MARKER ANCHOR — le point GPS exact correspond au centre du .mk-c (le dot).
+  La zone tactile (.mk 48×48) est plus large pour faciliter le tap mobile,
+  mais l'ancre MapTiler est forcée au centre exact du dot via offset.
+*/
 .mk{position:relative;width:48px;height:48px;
   display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .mk-c{width:13px;height:13px;border-radius:50%;position:relative;z-index:2;
+  /* Le dot est le point de référence GPS exact — taille fixe à l'état normal */
+  flex-shrink:0;
   transition:width .22s,height .22s;}
-.mk-r{position:absolute;inset:-6px;border-radius:50%;border:1.5px solid;
+.mk-r{position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:13px;height:13px;border-radius:50%;border:1.5px solid;
   animation:pr 2.8s ease-out infinite;pointer-events:none;z-index:1;}
-.mk-lbl{position:absolute;bottom:calc(100% + 2px);left:50%;
+.mk-lbl{position:absolute;bottom:calc(100% - 4px);left:50%;
   transform:translateX(-50%) translateY(4px);
   background:var(--dg);backdrop-filter:var(--dgb);-webkit-backdrop-filter:var(--dgb);
   border:var(--dg-brd);color:#fff;padding:5px 12px;
@@ -459,7 +468,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
   <div id="about-body">
     <div class="ab-sec">
       <h3>Ferrières-en-Brie</h3>
-      <p>Cartographie officielle des 20 bâtiments publics de la commune. Données issues exclusivement du document communal officiel. Aucune information inventée.</p>
+      <p>Cartographie des 20 bâtiments publics de la commune. Données issues du document communal officiel. Aucune information inventée ou extrapolée.</p>
       <div class="ab-stats">
         <div class="ab-stat"><div class="n">20</div><div class="l">Bâtiments</div></div>
         <div class="ab-stat"><div class="n">7</div><div class="l">Catégories</div></div>
@@ -467,23 +476,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
       </div>
     </div>
     <div class="ab-sec">
-      <h3>Ajouter des photos</h3>
-      <p>Les photos sont des fichiers statiques stockés dans le dépôt GitHub. Pour ajouter une photo à un bâtiment :</p>
-      <div class="ab-code">
-        1. Déposer le fichier dans :<br>
-        &nbsp;&nbsp;photos/[id-du-batiment].jpg<br><br>
-        2. Dans data.js, mettre à jour :<br>
-        &nbsp;&nbsp;photo: "mairie-annexe.jpg"
-      </div>
-      <p style="margin-top:10px;">Formats acceptés : jpg, jpeg, png, webp</p>
+      <h3>Projet non officiel</h3>
+      <p>Cette application est un <strong>projet personnel à caractère informatif et éducatif</strong>. Elle a été conçue dans le but de présenter les bâtiments et lieux publics de la commune de Ferrières-en-Brie de manière accessible et moderne.</p>
+      <p style="margin-top:10px;">Cette application <strong>ne représente pas officiellement</strong> la mairie de Ferrières-en-Brie, ni aucune institution locale, ni aucun service public. Elle n'est en aucun cas un outil administratif officiel.</p>
     </div>
     <div class="ab-sec">
-      <h3>Données officielles</h3>
-      <p>Source : "BÂTIMENTS FERRIÈRES-EN-BRIE". GPS fournis par la commune. Champ absent = "Information non disponible".</p>
+      <h3>Exactitude des informations</h3>
+      <p>Les informations présentées sont issues de documents communaux et de coordonnées GPS fournies par la commune. Malgré le soin apporté à leur exactitude, elles sont susceptibles d'évoluer, de contenir des imprécisions ou de ne pas refléter l'état actuel des lieux.</p>
+      <p style="margin-top:10px;">Pour toute information officielle et à jour, nous vous invitons à consulter directement la <strong>mairie de Ferrières-en-Brie</strong> ou son site internet officiel.</p>
     </div>
     <div class="ab-sec">
-      <h3>Confidentialité</h3>
-      <p>Aucune donnée personnelle collectée. La géolocalisation reste sur votre appareil.</p>
+      <h3>Responsabilité</h3>
+      <p>L'utilisation de cette application se fait sous l'entière responsabilité de l'utilisateur. Le développeur ne saurait être tenu responsable des décisions prises sur la base des informations fournies, ni d'éventuelles erreurs, omissions ou inexactitudes dans les données affichées.</p>
+    </div>
+    <div class="ab-sec">
+      <h3>Données personnelles</h3>
+      <p>Cette application ne collecte, ne stocke et ne transmet aucune donnée personnelle. La géolocalisation, si elle est activée, est traitée uniquement sur votre appareil et n'est jamais envoyée à un serveur externe.</p>
+    </div>
+    <div class="ab-sec">
+      <h3>Sources</h3>
+      <p>Document source : <em>« Bâtiments – Ferrières-en-Brie »</em>, commune de Ferrières-en-Brie (77164), Seine-et-Marne. Coordonnées GPS fournies par la commune. Les photos sont la propriété de leurs auteurs respectifs.</p>
     </div>
   </div>
 </div>
@@ -511,7 +523,16 @@ var IC = {
   chv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
   ph: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>'
 };
-function catIcon(c){return({administration:IC.bld,culture:IC.mus,sport:IC.spt,nature:IC.lf,technique:IC.wrn,social:IC.hrt,infrastructure:IC.drp})[c]||IC.bld;}
+function catIcon(c){
+  var map={
+    administration:IC.bld, "services-mun":IC.wrn, associations:IC.hrt,
+    evenements:IC.spt, sport:IC.spt, culture:IC.mus,
+    environnement:IC.lf, patrimoine:IC.drp, ceremonies:IC.bld,
+    social:IC.hrt, seniors:IC.hrt, "services-publics":IC.bld,
+    infrastructure:IC.drp
+  };
+  return map[c]||IC.bld;
+}
 function catColor(c){return(CATEGORIES[c]||{color:"#475569"}).color;}
 function catLabel(c){return(CATEGORIES[c]||{label:c}).label;}
 function rgba(h,a){var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return"rgba("+r+","+g+","+b+","+a+")";}
@@ -599,14 +620,17 @@ function addMarkers(){
     var lbl=document.createElement("div");lbl.className="mk-lbl";lbl.textContent=b.nom;
     wrap.appendChild(ring);wrap.appendChild(dot);wrap.appendChild(lbl);
     wrap.addEventListener("click",function(e){e.stopPropagation();openDetail(b.id);});
-    var mk=new maptilersdk.Marker({element:wrap}).setLngLat([b.lng,b.lat]).addTo(S.map);
+    /* anchor:'center' force le point GPS exactement au centre du dot,
+       indépendamment de la taille de la zone tactile (48px wrapper) */
+    var mk=new maptilersdk.Marker({element:wrap,anchor:'center'}).setLngLat([b.lng,b.lat]).addTo(S.map);
     S.markers[b.id]={mk:mk,el:wrap};
   });
 }
 function updateMarkers(){
   BATIMENTS.forEach(function(b){
     var m=S.markers[b.id];if(!m)return;
-    m.el.style.display=(S.filter==="all"||b.categorie===S.filter)?"flex":"none";
+    var show=S.filter==="all"||(b.filtres||[b.categorie]).indexOf(S.filter)>=0;
+    m.el.style.display=show?"flex":"none";
   });
 }
 function hlMk(id){
@@ -616,16 +640,28 @@ function hlMk(id){
 
 /* ─ CATEGORY RAIL ─ */
 var CATLIST=[
-  {cat:"all",icon:IC.grd},
-  {cat:"administration",icon:IC.bld},{cat:"culture",icon:IC.mus},
-  {cat:"sport",icon:IC.spt},{cat:"nature",icon:IC.lf},
-  {cat:"technique",icon:IC.wrn},{cat:"social",icon:IC.hrt},
-  {cat:"infrastructure",icon:IC.drp}
+  {cat:"all",        icon:IC.grd},
+  {cat:"administration",  icon:IC.bld},
+  {cat:"services-mun",    icon:IC.wrn},
+  {cat:"associations",    icon:IC.hrt},
+  {cat:"evenements",      icon:IC.spt},
+  {cat:"sport",           icon:IC.spt},
+  {cat:"culture",         icon:IC.mus},
+  {cat:"environnement",   icon:IC.lf},
+  {cat:"patrimoine",      icon:IC.drp},
+  {cat:"ceremonies",      icon:IC.bld},
+  {cat:"social",          icon:IC.hrt},
+  {cat:"seniors",         icon:IC.hrt},
+  {cat:"services-publics",icon:IC.bld},
+  {cat:"infrastructure",  icon:IC.drp}
 ];
 function buildRail(){
   var r=document.getElementById("filt-rail");r.innerHTML="";
   CATLIST.forEach(function(c){
-    var has=c.cat==="all"||BATIMENTS.some(function(b){return b.categorie===c.cat;});
+    /* Only show categories that have at least one building */
+    var has=c.cat==="all"||BATIMENTS.some(function(b){
+      return (b.filtres||[b.categorie]).indexOf(c.cat)>=0;
+    });
     if(!has)return;
     var btn=document.createElement("button");
     btn.className="fr-btn"+(S.filter===c.cat?" on":"");
@@ -650,7 +686,11 @@ function setFilter(cat){
 
 /* ─ FILTERED ─ */
 function getFiltered(){
-  var out=BATIMENTS.filter(function(b){return S.filter==="all"||b.categorie===S.filter;});
+  var out=BATIMENTS.filter(function(b){
+    if(S.filter==="all")return true;
+    var filtres=b.filtres||[b.categorie];
+    return filtres.indexOf(S.filter)>=0;
+  });
   if(S.lat!==null)out.sort(function(a,b){return hav(S.lat,S.lng,a.lat,a.lng)-hav(S.lat,S.lng,b.lat,b.lng);});
   return out;
 }
@@ -687,10 +727,39 @@ function buildShelf(){
 /* ─ INFO HTML ─ */
 function infoHTML(b){
   function row(l,v){if(skip(v))return"";return'<div class="dr"><div class="dl">'+l+'</div><div class="dv">'+v+'</div></div>';}
+  function linkRow(l,v){
+    if(skip(v))return"";
+    var display=v.replace(/^https?:\/\/(www\.)?/,"");
+    return'<div class="dr"><div class="dl">'+l+'</div><div class="dv"><a href="'+v+'" target="_blank" style="color:var(--acc);text-decoration:none;font-weight:600;">'+display+'</a></div></div>';
+  }
+  function phoneRow(l,v){
+    if(skip(v))return"";
+    return'<div class="dr"><div class="dl">'+l+'</div><div class="dv"><a href="tel:'+v+'" style="color:var(--acc);text-decoration:none;font-weight:600;">'+v+'</a></div></div>';
+  }
+
+  /* Section 1 — Présentation */
+  var s1='<div class="dp">'+
+    (b.description?'<div class="dr"><div class="dv" style="font-style:normal;color:var(--txt2);line-height:1.6;">'+b.description+'</div></div>':'')+
+    row("Public concerné", b.public)+
+    row("Horaires", b.horaires)+
+    row("Adresse", b.adresse)+
+    (b.capacite&&b.capacite!=="0 personne"?row("Capacité",b.capacite):"")+
+  '</div>';
+
+  /* Section 2 — Contact */
+  var contactContent=row("Email",b.contact)+phoneRow("Téléphone",b.telephone)+linkRow("Site web",b.site);
+  var s2=contactContent?'<div class="dp">'+contactContent+'</div>':"";
+
+  /* Section 3 — Activités */
+  var actContent=row("Activités",b.activites)+row("Associations",b.associations)+row("Événements",b.evenements);
+  var s3=actContent?'<div class="dp">'+actContent+'</div>':"";
+
+  /* Section 4 — Équipements */
   var eq=[];
   if(b.wifi&&b.wifi!=="Non")eq.push(b.wifi==="Oui"?"Wi-Fi":"Wi-Fi ("+b.wifi+")");
-  if(b.telephone==="Oui")eq.push("Téléphone");
-  if(b.videoprojecteur&&b.videoprojecteur!=="Non")eq.push(b.videoprojecteur==="Oui"?"Vidéoprojecteur":b.videoprojecteur);
+  if(b.telephone_equip==="Oui")eq.push("Téléphone");
+  if(b.videoprojecteur&&b.videoprojecteur!=="Non"&&b.videoprojecteur!=="Télévision")eq.push("Vidéoprojecteur");
+  if(b.videoprojecteur==="Télévision")eq.push("Télévision");
   if(b.sonorisation&&b.sonorisation!=="Non")eq.push(b.sonorisation==="Oui"?"Sonorisation":"Sono "+b.sonorisation);
   if(b.cuisine==="Oui")eq.push("Cuisine");if(b.chauffage==="Oui")eq.push("Chauffage");if(b.climatisation==="Oui")eq.push("Climatisation");
   var eqRow=eq.length?'<div class="dr"><div class="dl">Équipements</div><div class="chips">'+eq.map(function(e){return'<span class="chip">'+e+'</span>';}).join("")+'</div></div>':"";
@@ -700,15 +769,17 @@ function infoHTML(b){
   if(!skip(b.parking))acc.push("Parking : "+b.parking);
   if(!skip(b.transports))acc.push("Transports : "+b.transports);
   var accRow=acc.length?'<div class="dr"><div class="dl">Accessibilité</div><div class="dv">'+acc.join(" · ")+'</div></div>':"";
+  var s4=(accRow||eqRow)?'<div class="dp">'+accRow+eqRow+'</div>':"";
+
+  /* Section 5 — État */
   var etatRow="";
   if(!skip(b.etat)){var cls=b.etat==="RAS"||b.etat==="Bon état"?"e-ok":b.etat==="Moyen"?"e-mid":"e-bad";etatRow='<div class="dr"><div class="dl">État général</div><div class="dv"><span class="ebadge '+cls+'">'+b.etat+'</span></div></div>';}
   var trRow="";
   if(!skip(b.travaux_recents)&&b.travaux_recents!=="Aucun"&&b.travaux_recents!=="RAS")trRow+='<div class="dr"><div class="dl">Travaux récents</div><div class="dv">'+b.travaux_recents+'</div></div>';
   if(!skip(b.travaux_a_prevoir)&&b.travaux_a_prevoir!=="Aucun"&&b.travaux_a_prevoir!=="RAS")trRow+='<div class="dr"><div class="dl">Travaux à prévoir</div><div class="dv '+(b.travaux_a_prevoir==="En totalité"?"tw-bad":"tw-mid")+'">'+b.travaux_a_prevoir+'</div></div>';
-  var s1='<div class="dp">'+row("Adresse",b.adresse)+(b.capacite&&b.capacite!=="0 personne"?row("Capacité",b.capacite):"")+row("Activités",b.activites)+row("Jours d\'utilisation",b.jours)+row("Associations",b.associations)+row("Événements",b.evenements)+'</div>';
-  var s2=(accRow||eqRow)?'<div class="dp">'+accRow+eqRow+'</div>':"";
-  var s3=(etatRow||trRow)?'<div class="dp">'+etatRow+trRow+'</div>':"";
-  return s1+s2+s3;
+  var s5=(etatRow||trRow)?'<div class="dp">'+etatRow+trRow+'</div>':"";
+
+  return s1+s2+s3+s4+s5;
 }
 
 /* ─ DETAIL ─ */
@@ -718,7 +789,11 @@ function openDetail(id){
   if(!b){BATIMENTS.forEach(function(x){if(x.id===id)b=x;});if(!b)return;}
   S.cur=b;S.curIdx=idx;
   hlMk(id);
-  if(b.lat&&b.lng&&S.map)S.map.flyTo({center:[b.lng,b.lat],zoom:15.2,duration:700});
+  if(b.lat&&b.lng&&S.map){
+    /* easeTo : recentre sur le bâtiment sans modifier le zoom
+       → le marqueur ne "saute" pas, position GPS stable et lisible */
+    S.map.easeTo({center:[b.lng,b.lat],duration:500,easing:function(t){return t*(2-t);}});
+  }
   document.querySelectorAll(".sh-card").forEach(function(c,i){c.classList.toggle("sel",i===idx);});
   var co=catColor(b.categorie);
   document.getElementById("det-title").textContent=b.nom;
