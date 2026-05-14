@@ -18,24 +18,16 @@
 /* ══ TOKENS ══════════════════════════════════════ */
 :root{
   --f:'Manrope',system-ui,sans-serif;
-  /* Dark glass */
-  --dg:rgba(12,15,30,.82); --dgb:blur(32px) saturate(180%);
+  --dg:rgba(12,15,30,.82);--dgb:blur(32px) saturate(180%);
   --dg-brd:1px solid rgba(255,255,255,.10);
   --dg-sh:0 8px 32px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.18);
-  /* Light glass */
-  --lg:rgba(255,255,255,.76); --lgb:blur(40px) saturate(200%);
+  --lg:rgba(255,255,255,.76);--lgb:blur(40px) saturate(200%);
   --lg-brd:1px solid rgba(255,255,255,.60);
   --lg-sh:0 12px 48px rgba(0,0,0,.09),0 3px 12px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.85);
-  /* Colours */
-  --acc:#4F76FF; --acc-a:rgba(79,118,255,.16);
-  --ok:#30D158; --warn:#FF9F0A; --err:#FF453A;
-  --txt:#0C0F1E; --txt2:#454660; --mute:#8A8BA8;
-  --brd:rgba(0,0,0,.07);
-  /* Radii */
+  --acc:#4F76FF;--ok:#30D158;--warn:#FF9F0A;--err:#FF453A;
+  --txt:#0C0F1E;--txt2:#454660;--mute:#8A8BA8;--brd:rgba(0,0,0,.07);
   --r8:8px;--r12:12px;--r16:16px;--r20:20px;--r28:28px;--rpill:99px;
-  /* Safe areas */
-  --sat:env(safe-area-inset-top,0px);
-  --sab:env(safe-area-inset-bottom,0px);
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
@@ -49,7 +41,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 @keyframes fin{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes ppop{0%{transform:scale(.9);opacity:0}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 
 /* ══ MAP ══════════════════════════════════════════ */
 #map{position:fixed;inset:0;z-index:0;}
@@ -86,9 +77,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 #tb-ico svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;}
 .tb-n{font-size:14px;font-weight:800;color:#fff;letter-spacing:.1px;}
 .tb-s{font-size:9px;color:rgba(255,255,255,.36);text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
-#adm-dot{width:8px;height:8px;border-radius:50%;background:var(--acc);display:none;flex-shrink:0;}
 
-/* Locate + About buttons */
+/* MAP BUTTONS (top right) */
 #map-btns{
   position:fixed;top:calc(14px + var(--sat));right:16px;
   display:flex;gap:8px;z-index:100;
@@ -102,12 +92,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 .mab.on{color:var(--acc);}
 .mab svg{width:22px;height:22px;}
 
-/* ══ FILTER RAIL (right side) ═════════════════════ */
+/* ══ FILTER RAIL (right side vertical) ═══════════ */
 #filt-rail{
   position:fixed;right:16px;
   top:calc(14px + var(--sat) + 56px + 12px);
-  display:flex;flex-direction:column;gap:7px;
-  z-index:100;
+  display:flex;flex-direction:column;gap:7px;z-index:100;
 }
 .fr-btn{
   width:46px;height:46px;border-radius:var(--r16);
@@ -138,20 +127,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 #loc-badge.on{opacity:1;transform:translateX(-50%) translateY(0);}
 .ldot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex-shrink:0;}
 
-/* ══ BOTTOM SHELF ═════════════════════════════════
-   Horizontal snap-scroll cards + count badge
-══════════════════════════════════════════════════ */
+/* ══ BOTTOM SHELF (horizontal carousel) ══════════ */
 #shelf{
-  position:fixed;left:0;right:0;bottom:0;
-  z-index:100;
-  /* Gradient so map shows through top */
-  background:linear-gradient(to top,rgba(8,10,20,.7) 0%,rgba(8,10,20,.3) 55%,transparent 100%);
+  position:fixed;left:0;right:0;bottom:0;z-index:100;
+  background:linear-gradient(to top,rgba(8,10,20,.72) 0%,rgba(8,10,20,.32) 55%,transparent 100%);
   padding-top:22px;
   padding-bottom:calc(16px + var(--sab));
 }
-#shelf-count{
-  display:flex;align-items:center;gap:8px;padding:0 20px 12px;
-}
+#shelf-count{display:flex;align-items:center;gap:8px;padding:0 20px 12px;}
 .shelf-n{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px;}
 .shelf-lbl{font-size:11px;color:rgba(255,255,255,.45);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
 #shelf-cards{
@@ -162,7 +145,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 }
 #shelf-cards::-webkit-scrollbar{display:none;}
 
-/* ── Card ── */
+/* Card */
 .sh-card{
   flex-shrink:0;width:188px;height:140px;
   scroll-snap-align:start;
@@ -180,26 +163,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
   background:rgba(255,255,255,.94);
   box-shadow:0 16px 56px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.9);
 }
-/* Photo thumbnail strip */
-.sh-card-ph{
-  position:absolute;inset:0;border-radius:var(--r20);
-  overflow:hidden;
-}
-.sh-card-ph img{width:100%;height:100%;object-fit:cover;display:block;
-  filter:brightness(.85);}
-.sh-card-ph-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(0,0,0,.65) 0%,rgba(0,0,0,.1) 50%,transparent 100%);
-}
+/* Photo thumbnail in card */
+.sh-card-ph{position:absolute;inset:0;border-radius:var(--r20);overflow:hidden;}
+.sh-card-ph img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.82);}
+.sh-card-ph-ov{position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.68) 0%,rgba(0,0,0,.08) 50%,transparent 100%);}
 .sh-card.has-photo .sh-c-nm{color:#fff !important;}
 .sh-card.has-photo .sh-c-cat{color:rgba(255,255,255,.65) !important;}
-.sh-card.has-photo .sh-c-dot-wrap{opacity:.8;}
 .sh-c-top{display:flex;align-items:flex-start;justify-content:space-between;position:relative;z-index:1;}
-.sh-c-dot-wrap{display:flex;align-items:center;gap:5px;}
 .sh-c-dot{width:9px;height:9px;border-radius:50%;}
-.sh-c-cat-sm{font-size:10px;font-weight:600;color:var(--mute);}
 .sh-c-dist{font-size:10px;font-weight:600;color:var(--mute);
   background:rgba(0,0,0,.06);padding:2px 8px;border-radius:var(--rpill);}
+.sh-card.has-photo .sh-c-dist{background:rgba(0,0,0,.35);color:rgba(255,255,255,.75);}
 .sh-c-bot{position:relative;z-index:1;}
 .sh-c-nm{font-size:14px;font-weight:800;color:var(--txt);line-height:1.25;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
@@ -242,42 +217,43 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
   padding:0 16px calc(var(--sab) + 24px);}
 #det-body::-webkit-scrollbar{display:none;}
 
-/* Det category ribbon */
+/* Category ribbon */
 #det-ribbon{display:flex;align-items:center;gap:6px;padding:12px 0 0;}
 .det-rdot{width:8px;height:8px;border-radius:50%;}
 #det-rlbl{font-size:11px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;}
 
-/* Det photo */
-#det-ph-wrap{width:100%;height:220px;border-radius:var(--r20);
+/* ── PHOTO BLOCK ── */
+#det-ph-wrap{
+  width:100%;height:220px;border-radius:var(--r20);
   overflow:hidden;margin:12px 0;
   background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.06);
-  position:relative;}
-.det-ph-ph{width:100%;height:100%;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:9px;}
-.det-ph-ph svg{width:36px;height:36px;stroke:rgba(0,0,0,.18);fill:none;stroke-width:1.5;}
-.det-ph-ph span{font-size:12px;color:rgba(0,0,0,.28);font-weight:500;}
-.det-ph-ld{width:100%;height:100%;display:none;align-items:center;justify-content:center;}
+  position:relative;
+}
+/* Placeholder (shown when no photo) */
+.det-ph-empty{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
+}
+.det-ph-empty svg{width:36px;height:36px;stroke:rgba(0,0,0,.18);fill:none;stroke-width:1.5;}
+.det-ph-empty span{font-size:12px;color:rgba(0,0,0,.28);font-weight:500;}
+/* Spinner while loading */
+.det-ph-loading{
+  width:100%;height:100%;
+  display:none;align-items:center;justify-content:center;
+  position:absolute;inset:0;background:rgba(0,0,0,.03);
+}
 .ph-spin{width:24px;height:24px;border:3px solid rgba(0,0,0,.07);
   border-top-color:var(--txt);border-radius:50%;animation:spin .7s linear infinite;}
-#det-ph-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
-/* Read-only badge (always visible) */
-.det-ph-role{position:absolute;bottom:10px;left:10px;
-  background:rgba(0,0,0,.48);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  color:rgba(255,255,255,.75);font-size:10px;font-weight:700;
-  padding:3px 9px;border-radius:var(--rpill);pointer-events:none;
-  border:1px solid rgba(255,255,255,.15);}
-/* Admin edit shortcut (only visible in admin mode) */
-.det-ph-edit{position:absolute;bottom:10px;right:10px;
-  background:rgba(79,118,255,.9);color:#fff;border:none;
-  font-size:11px;font-weight:700;font-family:var(--f);
-  padding:5px 13px;border-radius:var(--rpill);cursor:pointer;
-  display:none;align-items:center;gap:5px;
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  transition:background .15s;}
-.det-ph-edit svg{width:12px;height:12px;}
-body.adm .det-ph-edit{display:flex;}
+/* Actual image */
+#det-ph-img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:none;
+  /* Smooth fade-in when loaded */
+  transition:opacity .3s;opacity:0;
+}
+#det-ph-img.loaded{opacity:1;}
 
-/* Det info panels */
+/* Info panels */
 .dp{background:rgba(255,255,255,.84);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border:1px solid rgba(255,255,255,.62);border-radius:var(--r20);
   box-shadow:0 6px 24px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.82);
@@ -296,7 +272,7 @@ body.adm .det-ph-edit{display:flex;}
 .tw-mid{color:#B25C00;font-weight:600;}
 .tw-bad{color:#C0392B;font-weight:600;}
 
-/* Det AR button */
+/* AR button */
 #det-ar{
   width:100%;height:54px;border:none;border-radius:var(--rpill);
   background:var(--txt);color:#fff;font-family:var(--f);
@@ -313,17 +289,16 @@ body.adm .det-ph-edit{display:flex;}
   position:fixed;inset:0;z-index:400;
   background:rgba(248,247,244,.97);backdrop-filter:blur(48px);-webkit-backdrop-filter:blur(48px);
   display:none;flex-direction:column;overflow:hidden;
-  animation:sup .4s cubic-bezier(0.32,0.72,0,1);
 }
 #about.on{display:flex;}
 #about-hdr{display:flex;align-items:center;gap:12px;
   padding:calc(18px + var(--sat)) 20px 14px;
   border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0;}
-#about-close{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.06);
+.scr-close{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.06);
   border:none;display:flex;align-items:center;justify-content:center;
   cursor:pointer;color:var(--txt);transition:background .14s;}
-#about-close:active{background:rgba(0,0,0,.10);}
-#about-close svg{width:18px;height:18px;}
+.scr-close:active{background:rgba(0,0,0,.10);}
+.scr-close svg{width:18px;height:18px;}
 .ab-ttl{font-size:18px;font-weight:800;color:var(--txt);}
 #about-body{flex:1;overflow-y:auto;padding:16px 16px calc(var(--sab)+24px);}
 #about-body::-webkit-scrollbar{display:none;}
@@ -333,166 +308,17 @@ body.adm .det-ph-edit{display:flex;}
   padding:20px;margin-bottom:10px;}
 .ab-sec h3{font-size:15px;font-weight:800;color:var(--txt);letter-spacing:-.1px;margin-bottom:8px;}
 .ab-sec p{font-size:14px;line-height:1.65;color:var(--txt2);}
+.ab-code{background:rgba(0,0,0,.05);border-radius:var(--r8);
+  padding:10px 14px;margin-top:8px;font-size:12px;
+  font-family:monospace;color:var(--txt2);line-height:1.6;
+  border:1px solid rgba(0,0,0,.07);}
 .ab-stats{display:flex;gap:8px;margin-top:12px;}
 .ab-stat{flex:1;background:rgba(0,0,0,.04);border-radius:var(--r12);padding:12px;text-align:center;}
 .ab-stat .n{font-size:26px;font-weight:800;color:var(--txt);}
 .ab-stat .l{font-size:9px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
 
-/* ══ ADMIN SCREEN ═════════════════════════════════ */
-#adm-scr{
-  position:fixed;inset:0;z-index:500;
-  background:rgba(12,15,30,.96);backdrop-filter:blur(48px);-webkit-backdrop-filter:blur(48px);
-  display:none;flex-direction:column;overflow:hidden;
-}
-#adm-scr.on{display:flex;}
-#adm-scr-hdr{display:flex;align-items:center;gap:12px;
-  padding:calc(20px + var(--sat)) 20px 16px;
-  border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
-.adm-close{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);
-  border:none;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:rgba(255,255,255,.7);transition:background .14s;}
-.adm-close:active{background:rgba(255,255,255,.14);}
-.adm-close svg{width:18px;height:18px;}
-.adm-scr-ttl{flex:1;font-size:18px;font-weight:800;color:#fff;letter-spacing:-.2px;}
-.adm-tag{font-size:10px;font-weight:700;color:var(--acc);
-  background:rgba(79,118,255,.18);padding:4px 10px;border-radius:var(--rpill);}
-
-/* Admin tabs */
-#adm-tabs{display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
-.atab{flex:1;height:46px;background:transparent;border:none;
-  font-family:var(--f);font-size:13px;font-weight:600;
-  color:rgba(255,255,255,.4);cursor:pointer;border-bottom:2px solid transparent;
-  transition:color .18s,border-color .18s;}
-.atab.on{color:var(--acc);border-bottom-color:var(--acc);}
-
-/* Tab content */
-.atab-content{display:none;flex:1;overflow-y:auto;padding:16px;}
-.atab-content.on{display:block;}
-.atab-content::-webkit-scrollbar{display:none;}
-
-/* Photos tab — building grid */
-#adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.ag-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
-  border-radius:var(--r16);overflow:hidden;cursor:pointer;
-  transition:background .16s,transform .13s;}
-.ag-card:active{background:rgba(255,255,255,.10);transform:scale(.97);}
-.ag-ph{width:100%;aspect-ratio:4/3;background:rgba(255,255,255,.04);
-  position:relative;display:flex;align-items:center;justify-content:center;}
-.ag-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-.ag-ph .ag-ph-ico svg{width:26px;height:26px;stroke:rgba(255,255,255,.25);fill:none;stroke-width:1.5;}
-.ag-synced{position:absolute;top:7px;right:7px;
-  background:rgba(48,209,88,.9);color:#fff;
-  font-size:9px;font-weight:700;padding:2px 7px;border-radius:var(--rpill);}
-.ag-info{padding:10px 12px 12px;}
-.ag-nm{font-size:12px;font-weight:700;color:rgba(255,255,255,.82);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ag-cat{font-size:10px;font-weight:500;margin-top:1px;}
-
-/* Photo manager */
-#pm-view{display:none;}
-#pm-view.on{display:block;}
-.pm-back{display:flex;align-items:center;gap:7px;background:none;border:none;
-  color:var(--acc);font-size:13px;font-weight:600;font-family:var(--f);
-  cursor:pointer;padding:0 0 18px;}
-.pm-back svg{width:18px;height:18px;stroke:var(--acc);}
-.pm-bldg{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px;}
-.pm-cat{font-size:12px;color:rgba(255,255,255,.38);margin-top:3px;margin-bottom:18px;}
-
-/* Current photo */
-.pm-ph-cur{width:100%;aspect-ratio:16/9;border-radius:var(--r16);overflow:hidden;
-  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);
-  position:relative;display:flex;align-items:center;justify-content:center;
-  margin-bottom:14px;}
-.pm-ph-cur img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
-.pm-ph-cur .pm-ico svg{width:42px;height:42px;stroke:rgba(255,255,255,.18);fill:none;stroke-width:1.5;}
-
-/* Preview box */
-.pm-preview{width:100%;border-radius:var(--r16);overflow:hidden;
-  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);
-  margin-bottom:12px;display:none;}
-.pm-preview.on{display:block;}
-.pm-preview img{width:100%;max-height:220px;object-fit:contain;display:block;}
-.pm-preview-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;}
-.pm-preview-bar span{font-size:11px;color:rgba(255,255,255,.4);font-weight:500;}
-.pm-preview-bar strong{color:rgba(255,255,255,.75);}
-
-/* Sync status banner */
-.pm-sync-status{
-  padding:10px 14px;border-radius:var(--r12);
-  font-size:12px;font-weight:600;margin-bottom:12px;
-  display:flex;align-items:center;gap:8px;
-}
-.pm-sync-status svg{width:16px;height:16px;flex-shrink:0;}
-.pm-ss-ok{background:rgba(48,209,88,.12);color:var(--ok);}
-.pm-ss-warn{background:rgba(255,159,10,.12);color:var(--warn);}
-.pm-ss-err{background:rgba(255,69,58,.12);color:var(--err);}
-.pm-ss-spin{background:rgba(79,118,255,.12);color:var(--acc);}
-
-/* Action buttons */
-.pm-actions{display:flex;flex-direction:column;gap:8px;}
-.pm-row{display:flex;gap:8px;}
-.ab-btn{height:52px;border-radius:var(--rpill);border:none;
-  font-family:var(--f);font-size:14px;font-weight:700;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:9px;
-  transition:transform .13s,opacity .13s;flex:1;}
-.ab-btn:active{transform:scale(.96);opacity:.86;}
-.ab-btn svg{width:17px;height:17px;flex-shrink:0;}
-.ab-btn.primary{background:var(--acc);color:#fff;}
-.ab-btn.secondary{background:rgba(255,255,255,.10);color:rgba(255,255,255,.8);}
-.ab-btn.save{background:var(--ok);color:#fff;}
-.ab-btn.danger{background:rgba(255,69,58,.16);color:var(--err);}
-.ab-btn.ghost{background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);}
-
-/* GitHub config tab */
-.cfg-section{margin-bottom:20px;}
-.cfg-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.35);
-  text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
-.cfg-input{width:100%;height:50px;background:rgba(255,255,255,.07);
-  border:1px solid rgba(255,255,255,.10);border-radius:var(--r12);
-  padding:0 16px;font-size:14px;font-family:var(--f);color:#fff;outline:none;
-  transition:border-color .2s;}
-.cfg-input::placeholder{color:rgba(255,255,255,.22);}
-.cfg-input:focus{border-color:var(--acc);}
-.cfg-hint{font-size:11px;color:rgba(255,255,255,.3);margin-top:6px;line-height:1.5;}
-.cfg-hint a{color:var(--acc);}
-.cfg-sep{height:1px;background:rgba(255,255,255,.07);margin:20px 0;}
-.cfg-test-banner{padding:10px 14px;border-radius:var(--r12);
-  font-size:12px;font-weight:600;margin-bottom:12px;
-  display:none;align-items:center;gap:8px;}
-.cfg-test-banner.ok{display:flex;background:rgba(48,209,88,.12);color:var(--ok);}
-.cfg-test-banner.err{display:flex;background:rgba(255,69,58,.12);color:var(--err);}
-.cfg-logout{background:rgba(255,69,58,.12);color:var(--err);border:1px solid rgba(255,69,58,.2);
-  font-family:var(--f);font-size:13px;font-weight:600;height:46px;
-  border-radius:var(--r12);cursor:pointer;width:100%;
-  transition:background .15s;display:none;}
-.cfg-logout:active{background:rgba(255,69,58,.2);}
-
-/* ══ ADMIN MODAL ══════════════════════════════════ */
-#adm-modal{position:fixed;inset:0;z-index:700;
-  background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  display:none;align-items:center;justify-content:center;padding:20px;}
-#adm-modal.on{display:flex;}
-#adm-mbox{width:100%;max-width:320px;
-  background:rgba(20,23,40,.96);border:var(--dg-brd);
-  border-radius:var(--r28);padding:28px 22px;
-  box-shadow:0 32px 80px rgba(0,0,0,.5);animation:ppop .28s ease;}
-#adm-mbox h3{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px;margin-bottom:5px;}
-#adm-mbox p{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:18px;line-height:1.55;}
-#adm-pwd{width:100%;height:52px;background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.12);border-radius:var(--r12);
-  padding:0 16px;font-size:16px;font-family:var(--f);color:#fff;outline:none;
-  transition:border-color .2s;}
-#adm-pwd::placeholder{color:rgba(255,255,255,.25);}
-#adm-pwd:focus{border-color:var(--acc);}
-#adm-err{font-size:11px;color:var(--err);min-height:14px;margin-top:5px;}
-.ambtns{display:flex;gap:8px;margin-top:14px;}
-.ambt{flex:1;height:50px;border-radius:var(--rpill);border:none;
-  font-size:14px;font-weight:700;font-family:var(--f);cursor:pointer;}
-.ambt.s{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);}
-.ambt.p{background:var(--acc);color:#fff;}
-
 /* ══ TOAST ════════════════════════════════════════ */
-#toast{position:fixed;bottom:calc(160px + var(--sab));left:50%;
+#toast{position:fixed;bottom:calc(165px + var(--sab));left:50%;
   transform:translateX(-50%) translateY(14px);
   background:rgba(12,15,30,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   border:var(--dg-brd);color:#fff;padding:11px 22px;border-radius:var(--rpill);
@@ -504,21 +330,21 @@ body.adm .det-ph-edit{display:flex;}
 /* ══ DESKTOP ≥ 1024px ═════════════════════════════ */
 #dp-side{display:none;}
 @media(min-width:1024px){
-  #dp-side{display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;width:340px;
+  #dp-side{
+    display:flex;flex-direction:column;
+    position:fixed;top:0;left:0;bottom:0;width:340px;
     background:rgba(12,15,30,.97);backdrop-filter:blur(48px);-webkit-backdrop-filter:blur(48px);
-    border-right:var(--dg-brd);z-index:150;overflow:hidden;}
+    border-right:var(--dg-brd);z-index:150;overflow:hidden;
+  }
   #map{left:340px;}
   #top-badge{left:356px;}
-  #map-btns{right:calc(var(--filt-rail-right,16px) + 0px);}
+  #map-btns{right:16px;}
   #filt-rail{right:16px;}
   #shelf{left:340px;}
   #det{left:340px;}
-  #adm-scr{left:340px;}
   #about{left:340px;}
   #loc-badge{left:calc(340px + 50%);}
   #toast{left:calc(340px + 50%);}
-  #adm-scr #adm-grid{grid-template-columns:1fr 1fr 1fr;}
-
   #dp-hdr{padding:calc(20px + var(--sat)) 20px 14px;border-bottom:var(--dg-brd);flex-shrink:0;}
   .dp-t{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.2px;}
   .dp-s{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;font-weight:500;}
@@ -528,29 +354,25 @@ body.adm .det-ph-edit{display:flex;}
   .dpf{flex-shrink:0;height:30px;padding:0 12px;border-radius:var(--rpill);
     background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);
     font-size:11px;font-weight:600;color:rgba(255,255,255,.48);font-family:var(--f);
-    cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .16s;}
+    cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .16s;white-space:nowrap;}
   .dpf.on{background:var(--acc);border-color:var(--acc);color:#fff;}
   .dpf .dfd{width:5px;height:5px;border-radius:50%;}
   #dp-list{flex:1;overflow-y:auto;}
   #dp-list::-webkit-scrollbar{display:none;}
-  .dp-row{display:flex;align-items:center;gap:12px;padding:13px 20px;
+  .dp-row{display:flex;align-items:center;gap:12px;padding:11px 20px;
     border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .12s;}
   .dp-row:active,.dp-row:hover{background:rgba(255,255,255,.05);}
-  .dp-row-ph{width:36px;height:36px;border-radius:var(--r8);overflow:hidden;
-    background:rgba(255,255,255,.07);flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;}
-  .dp-row-ph img{width:100%;height:100%;object-fit:cover;}
-  .dp-row-ph svg{width:16px;height:16px;stroke:rgba(255,255,255,.3);fill:none;stroke-width:1.5;}
-  .dp-row-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .dp-row-thumb{width:38px;height:38px;border-radius:var(--r8);overflow:hidden;flex-shrink:0;
+    background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;}
+  .dp-row-thumb img{width:100%;height:100%;object-fit:cover;display:none;}
+  .dp-row-thumb img.loaded{display:block;}
+  .dp-row-thumb svg{width:16px;height:16px;stroke:rgba(255,255,255,.25);fill:none;}
   .dp-row-body{flex:1;min-width:0;}
   .dp-row-nm{font-size:13px;font-weight:700;color:rgba(255,255,255,.82);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .dp-row-meta{font-size:10px;color:rgba(255,255,255,.32);margin-top:2px;}
   .dp-row-chev svg{width:13px;height:13px;stroke:rgba(255,255,255,.2);}
 }
-
-/* Hidden inputs */
-#ph-in{display:none;}
 </style>
 </head>
 <body>
@@ -568,16 +390,15 @@ body.adm .det-ph-edit{display:flex;}
 <!-- TOP BADGE -->
 <div id="top-badge">
   <div id="tb-ico"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-  <div><div class="tb-n" id="city-ttl">FERRIÈRES-EN-BRIE</div><div class="tb-s">Patrimoine communal</div></div>
-  <div id="adm-dot"></div>
+  <div><div class="tb-n">FERRIÈRES-EN-BRIE</div><div class="tb-s">Patrimoine communal</div></div>
 </div>
 
 <!-- MAP BUTTONS -->
 <div id="map-btns">
-  <button class="mab" id="btn-about" title="À propos">
+  <button class="mab" id="btn-about">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
   </button>
-  <button class="mab" id="btn-locate" title="Ma position">
+  <button class="mab" id="btn-locate">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
   </button>
 </div>
@@ -600,7 +421,9 @@ body.adm .det-ph-edit{display:flex;}
 <!-- DETAIL SCREEN -->
 <div id="det">
   <div id="det-hdr">
-    <button id="det-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <button id="det-close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
     <span id="det-title"></span>
     <div id="det-nav">
       <button class="dnb" id="det-prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -610,156 +433,71 @@ body.adm .det-ph-edit{display:flex;}
   <div id="det-body">
     <div id="det-ribbon"><div class="det-rdot" id="det-rdot"></div><span id="det-rlbl"></span></div>
     <div id="det-ph-wrap">
-      <div class="det-ph-ph" id="det-ph-ph"><svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg><span>Photo à venir</span></div>
-      <div class="det-ph-ld" id="det-ph-ld"><div class="ph-spin"></div></div>
+      <div class="det-ph-empty" id="det-ph-empty">
+        <svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        <span>Photo à venir</span>
+      </div>
+      <div class="det-ph-loading" id="det-ph-ld"><div class="ph-spin"></div></div>
       <img id="det-ph-img" alt="">
-      <div class="det-ph-role">Lecture seule</div>
-      <button class="det-ph-edit" id="det-ph-edit-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        Gérer la photo
-      </button>
     </div>
     <div id="det-info"></div>
-    <button id="det-ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Naviguer vers ce lieu</button>
+    <button id="det-ar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      Naviguer vers ce lieu
+    </button>
   </div>
 </div>
 
 <!-- ABOUT SCREEN -->
 <div id="about">
   <div id="about-hdr">
-    <button id="about-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <button class="scr-close" id="about-close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
     <span class="ab-ttl">À propos</span>
   </div>
   <div id="about-body">
-    <div class="ab-sec"><h3>Ferrières-en-Brie</h3><p>Cartographie officielle des 20 bâtiments publics. Toutes les données proviennent exclusivement du document communal officiel. Aucune information inventée.</p><div class="ab-stats"><div class="ab-stat"><div class="n">20</div><div class="l">Bâtiments</div></div><div class="ab-stat"><div class="n">7</div><div class="l">Catégories</div></div><div class="ab-stat"><div class="n">AR</div><div class="l">Réalité augm.</div></div></div></div>
-    <div class="ab-sec"><h3>Visibilité des photos</h3><p>Les photos publiées via le mode admin sont sauvegardées directement dans le fichier <strong>data.js</strong> du dépôt GitHub. Elles sont ainsi visibles pour <strong>tous les visiteurs</strong> sur tous les appareils, immédiatement après publication.</p></div>
-    <div class="ab-sec"><h3>Données officielles</h3><p>Source : document "BÂTIMENTS FERRIÈRES-EN-BRIE". GPS fournis par la commune. Champ absent = "Information non disponible".</p></div>
-    <div class="ab-sec"><h3>Confidentialité</h3><p>Aucune donnée personnelle collectée. La géolocalisation reste sur votre appareil.</p></div>
-  </div>
-</div>
-
-<!-- ADMIN SCREEN -->
-<div id="adm-scr">
-  <div id="adm-scr-hdr">
-    <button class="adm-close" id="adm-close-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    <span class="adm-scr-ttl" id="adm-scr-ttl">Administration</span>
-    <span class="adm-tag">Admin</span>
-  </div>
-  <div id="adm-tabs">
-    <button class="atab on" data-tab="photos">Photos</button>
-    <button class="atab" data-tab="config">Configuration</button>
-  </div>
-
-  <!-- PHOTOS TAB -->
-  <div class="atab-content on" id="tab-photos">
-    <!-- Building grid -->
-    <div id="adm-grid"></div>
-    <!-- Photo manager -->
-    <div id="pm-view">
-      <button class="pm-back" id="pm-back-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-        Tous les bâtiments
-      </button>
-      <div class="pm-bldg" id="pm-nm"></div>
-      <div class="pm-cat" id="pm-cat"></div>
-      <!-- Current photo -->
-      <div class="pm-ph-cur" id="pm-cur">
-        <img id="pm-cur-img" alt="">
-        <div class="pm-ico" id="pm-cur-ico">
-          <svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-        </div>
-      </div>
-      <!-- Sync status -->
-      <div id="pm-sync-status"></div>
-      <!-- Preview -->
-      <div class="pm-preview" id="pm-preview">
-        <img id="pm-preview-img" alt="">
-        <div class="pm-preview-bar">
-          <span>Original : <strong id="pm-orig-size">—</strong></span>
-          <span>Compressé : <strong id="pm-comp-size">—</strong></span>
-        </div>
-      </div>
-      <!-- Actions -->
-      <div class="pm-actions">
-        <div class="pm-row">
-          <button class="ab-btn primary" id="pm-choose-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Choisir une photo
-          </button>
-        </div>
-        <div class="pm-row" id="pm-save-row" style="display:none;">
-          <button class="ab-btn ghost" id="pm-cancel-btn">Annuler</button>
-          <button class="ab-btn save" id="pm-save-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            Publier pour tous
-          </button>
-        </div>
-        <div class="pm-row" id="pm-del-row" style="display:none;">
-          <button class="ab-btn danger" id="pm-delete-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-            Supprimer la photo
-          </button>
-        </div>
+    <div class="ab-sec">
+      <h3>Ferrières-en-Brie</h3>
+      <p>Cartographie officielle des 20 bâtiments publics de la commune. Données issues exclusivement du document communal officiel. Aucune information inventée.</p>
+      <div class="ab-stats">
+        <div class="ab-stat"><div class="n">20</div><div class="l">Bâtiments</div></div>
+        <div class="ab-stat"><div class="n">7</div><div class="l">Catégories</div></div>
+        <div class="ab-stat"><div class="n">AR</div><div class="l">Réalité augm.</div></div>
       </div>
     </div>
-  </div>
-
-  <!-- CONFIG TAB -->
-  <div class="atab-content" id="tab-config">
-    <div class="cfg-section">
-      <div class="cfg-label">Dépôt GitHub</div>
-      <input type="text" class="cfg-input" id="cfg-owner" placeholder="Propriétaire (ex: shamsetdean)">
-      <div class="cfg-hint" style="margin-top:4px;margin-bottom:8px;"></div>
-      <input type="text" class="cfg-input" id="cfg-repo" placeholder="Nom du dépôt (ex: ferrieres3d)">
-      <input type="text" class="cfg-input" id="cfg-branch" placeholder="Branche (ex: main)" style="margin-top:8px;">
-    </div>
-    <div class="cfg-section">
-      <div class="cfg-label">Token GitHub</div>
-      <input type="password" class="cfg-input" id="cfg-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-      <div class="cfg-hint">
-        Créer un token sur <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
-        Permissions requises : <strong>Contents → Write</strong><br>
-        Stocké uniquement sur cet appareil, jamais transmis.
+    <div class="ab-sec">
+      <h3>Ajouter des photos</h3>
+      <p>Les photos sont des fichiers statiques stockés dans le dépôt GitHub. Pour ajouter une photo à un bâtiment :</p>
+      <div class="ab-code">
+        1. Déposer le fichier dans :<br>
+        &nbsp;&nbsp;photos/[id-du-batiment].jpg<br><br>
+        2. Dans data.js, mettre à jour :<br>
+        &nbsp;&nbsp;photo: "mairie-annexe.jpg"
       </div>
+      <p style="margin-top:10px;">Formats acceptés : jpg, jpeg, png, webp</p>
     </div>
-    <div id="cfg-test-banner" class="cfg-test-banner"></div>
-    <div class="pm-row">
-      <button class="ab-btn secondary" id="cfg-test-btn">Tester la connexion</button>
-      <button class="ab-btn primary" id="cfg-save-btn">Enregistrer</button>
+    <div class="ab-sec">
+      <h3>Données officielles</h3>
+      <p>Source : "BÂTIMENTS FERRIÈRES-EN-BRIE". GPS fournis par la commune. Champ absent = "Information non disponible".</p>
     </div>
-    <div class="cfg-sep"></div>
-    <button class="cfg-logout" id="cfg-logout-btn" onclick="logout()">Quitter le mode admin</button>
-  </div>
-</div>
-
-<!-- ADMIN PASSWORD MODAL -->
-<div id="adm-modal">
-  <div id="adm-mbox">
-    <h3>Administration</h3>
-    <p>Mot de passe pour accéder à la gestion des photos.</p>
-    <input type="password" id="adm-pwd" placeholder="Mot de passe" autocomplete="off">
-    <div id="adm-err"></div>
-    <div class="ambtns">
-      <button class="ambt s" onclick="closeAdmModal()">Annuler</button>
-      <button class="ambt p" onclick="submitAdm()">Confirmer</button>
+    <div class="ab-sec">
+      <h3>Confidentialité</h3>
+      <p>Aucune donnée personnelle collectée. La géolocalisation reste sur votre appareil.</p>
     </div>
   </div>
 </div>
 
-<input type="file" id="ph-in" accept="image/*">
 <div id="toast"></div>
 
 <script>
-/* ════════════════════════════════════════════════════
-   FERRIÈRES-EN-BRIE · Patrimoine Communal
-   Photo system: GitHub API → data.js → all users
-════════════════════════════════════════════════════ */
-var ADMIN_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
-var IS_DK = window.matchMedia("(min-width:1024px)");
-var COMPRESS_MAX = 1280;
-var COMPRESS_Q   = 0.82;
+/* ══════════════════════════════════════════════════
+   FERRIÈRES-EN-BRIE · Bâtiments Publics
+   Architecture photos : fichiers statiques /photos/
+══════════════════════════════════════════════════ */
+var PHOTO_DIR = "./photos/";
 
-/* ─ SVG ICONS ─ */
+/* ─ ICONS ─ */
 var IC = {
   bld:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M10 6h4"/><path d="M10 10h4"/></svg>',
   mus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/></svg>',
@@ -777,190 +515,55 @@ function catColor(c){return(CATEGORIES[c]||{color:"#475569"}).color;}
 function catLabel(c){return(CATEGORIES[c]||{label:c}).label;}
 function rgba(h,a){var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return"rgba("+r+","+g+","+b+","+a+")";}
 function skip(v){return v===null||v===undefined||v===""||v==="--"||v==="-";}
-function fmtBytes(n){return n<1024?n+"o":n<1048576?Math.round(n/1024)+"Ko":(n/1048576).toFixed(1)+"Mo";}
 
 /* ─ STATE ─ */
-var S = {
-  map:null,markers:{},uMk:null,
-  lat:null,lng:null,
-  filter:"all",
-  cur:null,curIdx:0,
-  isAdm:false,
-  pmBuilding:null,pmPending:null,
-  pt:null
-};
+var S={map:null,markers:{},uMk:null,lat:null,lng:null,filter:"all",cur:null,curIdx:0};
 
 /* ─ UTILS ─ */
 function hav(a,b,c,d){var R=6371000,dl=(c-a)*Math.PI/180,dn=(d-b)*Math.PI/180,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dn/2)*Math.sin(dn/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 function fd(m){return m<1000?Math.round(m)+"m":(m/1000).toFixed(1)+"km";}
-function toast(msg,dur){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},dur||2800);}
-
-/* ─ IMAGE COMPRESSION ─ */
-function compress(file, cb){
-  var r=new FileReader();
-  r.onload=function(e){
-    var img=new Image();
-    img.onload=function(){
-      var w=img.width,h=img.height;
-      var sc=Math.min(COMPRESS_MAX/w,COMPRESS_MAX/h,1);
-      var cw=Math.round(w*sc),ch=Math.round(h*sc);
-      var cvs=document.createElement("canvas");
-      cvs.width=cw;cvs.height=ch;
-      cvs.getContext("2d").drawImage(img,0,0,cw,ch);
-      var out=cvs.toDataURL("image/jpeg",COMPRESS_Q);
-      cb(out,file.size,Math.round(out.length*0.75));
-    };
-    img.src=e.target.result;
-  };
-  r.readAsDataURL(file);
-}
-
-/* ─ PHOTO UTILS ─ */
-function getPhoto(b){
-  /* Single source of truth: data.js photoData field only.
-     No localStorage for photos — those would be device-specific.
-     localStorage is used only for admin GitHub config. */
-  if(b.photoData&&b.photoData.indexOf("data:image")===0)return b.photoData;
-  return null;
-}
-function applyPhoto(phEl,ldEl,imgEl,b){
-  var d=getPhoto(b);
-  imgEl.style.display="none";phEl.style.display="flex";if(ldEl)ldEl.style.display="none";
-  if(!d)return;
-  phEl.style.display="none";if(ldEl)ldEl.style.display="flex";
-  var t=new Image();
-  t.onload=function(){imgEl.src=d;imgEl.style.display="block";if(ldEl)ldEl.style.display="none";};
-  t.onerror=function(){phEl.style.display="flex";if(ldEl)ldEl.style.display="none";};
-  t.src=d;
-}
+function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},2800);}
 
 /* ═══════════════════════════════════════════════════
-   GITHUB API PHOTO SYSTEM
-   Architecture: compress → update data.js in repo
-   → GitHub Pages rebuilds → all users see the photo
+   PHOTO SYSTEM — Static files from /photos/ folder
+   
+   How it works:
+   1. Files are stored in /photos/<id>.jpg in the repo
+   2. data.js has: photo: "mairie-annexe.jpg" (or null)
+   3. getPhotoUrl() returns the full relative path
+   4. Images load with lazy loading + fallback placeholder
 ═══════════════════════════════════════════════════ */
-function getGhConfig(){
-  try{
-    return {
-      owner:  localStorage.getItem("gh_owner")||"",
-      repo:   localStorage.getItem("gh_repo")||"",
-      branch: localStorage.getItem("gh_branch")||"main",
-      token:  localStorage.getItem("gh_token")||""
-    };
-  }catch(e){return{owner:"",repo:"",branch:"main",token:""};}
-}
-function saveGhConfig(cfg){
-  try{
-    localStorage.setItem("gh_owner",  cfg.owner);
-    localStorage.setItem("gh_repo",   cfg.repo);
-    localStorage.setItem("gh_branch", cfg.branch);
-    localStorage.setItem("gh_token",  cfg.token);
-  }catch(e){}
-}
-function ghConfigured(){var c=getGhConfig();return !!(c.owner&&c.repo&&c.token);}
-
-/* Fetch current data.js SHA (required for update) */
-async function ghGetFileSha(cfg){
-  var url="https://api.github.com/repos/"+cfg.owner+"/"+cfg.repo+"/contents/data.js?ref="+cfg.branch;
-  var r=await fetch(url,{headers:{"Authorization":"token "+cfg.token,"Accept":"application/vnd.github+json"}});
-  if(!r.ok)throw new Error("HTTP "+r.status);
-  var j=await r.json();
-  return {sha:j.sha, content:atob(j.content.replace(/\n/g,""))};
+function getPhotoUrl(b){
+  if(!b.photo)return null;
+  return PHOTO_DIR + b.photo;
 }
 
-/* Test GitHub connection */
-async function ghTest(cfg){
-  var url="https://api.github.com/repos/"+cfg.owner+"/"+cfg.repo;
-  var r=await fetch(url,{headers:{"Authorization":"token "+cfg.token,"Accept":"application/vnd.github+json"}});
-  if(!r.ok)throw new Error("HTTP "+r.status+" — vérifiez les paramètres et le token");
-  var j=await r.json();
-  return j.full_name;
-}
-
-/* Update photoData for one building in data.js, commit to GitHub */
-async function ghPublishPhoto(buildingId, photoDataOrNull){
-  if(!S.isAdm)throw new Error("Permission refusée — accès administrateur requis");
-  var cfg=getGhConfig();
-  if(!cfg.owner||!cfg.repo||!cfg.token)throw new Error("GitHub non configuré (onglet Configuration)");
-
-  setSyncStatus("spin","Publication en cours...");
-
-  /* Get current file */
-  var file=await ghGetFileSha(cfg);
-  var content=file.sha?file.content:"";
-
-  /* Replace photoData for this building using a precise regex */
-  /* Match: id:"<id>", ... photoData: null  OR  photoData: "data:..." */
-  var newVal=photoDataOrNull?JSON.stringify(photoDataOrNull):"null";
-
-  /* Strategy: find the building block and replace its photoData field */
-  /* We use a pattern that matches across the building object */
-  var idPattern=new RegExp(
-    '(\\{[^{}]*?id:\\s*"'+buildingId+'"[^{}]*?photoData:\\s*)(?:null|"data:image[^"]*")',
-    "s"
-  );
-  var updated=content.replace(idPattern,"$1"+newVal);
-
-  /* Fallback: simpler single-line replace */
-  if(updated===content){
-    var simplePattern=new RegExp('(id:\\s*"'+buildingId+'"[^}]*photoData:\\s*)(?:null|"data:image[^"]*")');
-    updated=content.replace(simplePattern,"$1"+newVal);
-  }
-
-  if(updated===content){
-    throw new Error("Pattern non trouvé pour l'id: "+buildingId+". Vérifiez que data.js est bien formaté.");
-  }
-
-  /* Base64 encode new content for GitHub API */
-  var encoded=btoa(unescape(encodeURIComponent(updated)));
-
-  var body={
-    message: photoDataOrNull
-      ? "photo: ajouter photo pour "+buildingId
-      : "photo: supprimer photo pour "+buildingId,
-    content: encoded,
-    branch: cfg.branch,
-    sha: file.sha
+/* Load an image into elements with fallback */
+function loadPhoto(emptyEl, loadingEl, imgEl, b){
+  var url=getPhotoUrl(b);
+  /* Reset state */
+  imgEl.style.display="none";
+  imgEl.classList.remove("loaded");
+  emptyEl.style.display="flex";
+  if(loadingEl)loadingEl.style.display="none";
+  if(!url)return; /* no photo configured → show placeholder */
+  /* Show spinner */
+  emptyEl.style.display="none";
+  if(loadingEl)loadingEl.style.display="flex";
+  /* Load image */
+  imgEl.onload=function(){
+    if(loadingEl)loadingEl.style.display="none";
+    imgEl.style.display="block";
+    /* Trigger CSS fade-in */
+    requestAnimationFrame(function(){imgEl.classList.add("loaded");});
   };
-
-  var url="https://api.github.com/repos/"+cfg.owner+"/"+cfg.repo+"/contents/data.js";
-  var r=await fetch(url,{
-    method:"PUT",
-    headers:{
-      "Authorization":"token "+cfg.token,
-      "Content-Type":"application/json",
-      "Accept":"application/vnd.github+json"
-    },
-    body:JSON.stringify(body)
-  });
-
-  if(!r.ok){
-    var err=await r.json().catch(function(){return{message:"Erreur inconnue"};});
-    throw new Error("GitHub API: "+(err.message||r.status));
-  }
-
-  /* Optimistically update BATIMENTS in memory so the app reflects change immediately */
-  BATIMENTS.forEach(function(b){
-    if(b.id===buildingId)b.photoData=photoDataOrNull;
-  });
-
-  setSyncStatus("ok","Publié — visible par tous dans quelques secondes");
-  return true;
-}
-
-function setSyncStatus(type,msg){
-  var el=document.getElementById("pm-sync-status");
-  if(!el)return;
-  var icons={
-    ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
-    warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
-    err:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>',
-    spin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>'
+  imgEl.onerror=function(){
+    /* File missing → fall back to placeholder silently */
+    if(loadingEl)loadingEl.style.display="none";
+    imgEl.style.display="none";
+    emptyEl.style.display="flex";
   };
-  var classes={ok:"pm-ss-ok",warn:"pm-ss-warn",err:"pm-ss-err",spin:"pm-ss-spin"};
-  el.className="pm-sync-status "+(classes[type]||"pm-ss-warn");
-  el.innerHTML=(icons[type]||"")+msg;
-  el.style.display="flex";
+  imgEl.src=url;
 }
 
 /* ─ MAP ─ */
@@ -1010,7 +613,7 @@ function hlMk(id){
   if(id&&S.markers[id])S.markers[id].el.classList.add("hi");
 }
 
-/* ─ CATEGORY FILTER RAIL ─ */
+/* ─ CATEGORY RAIL ─ */
 var CATLIST=[
   {cat:"all",icon:IC.grd},
   {cat:"administration",icon:IC.bld},{cat:"culture",icon:IC.mus},
@@ -1023,39 +626,35 @@ function buildRail(){
   CATLIST.forEach(function(c){
     var has=c.cat==="all"||BATIMENTS.some(function(b){return b.categorie===c.cat;});
     if(!has)return;
-    var co=c.cat==="all"?"#4F76FF":catColor(c.cat);
     var btn=document.createElement("button");
     btn.className="fr-btn"+(S.filter===c.cat?" on":"");
-    btn.dataset.cat=c.cat;
-    btn.title=c.cat==="all"?"Tous":catLabel(c.cat);
+    btn.dataset.cat=c.cat;btn.title=c.cat==="all"?"Tous":catLabel(c.cat);
     if(c.cat!=="all"){
-      var dot=document.createElement("div");dot.className="fr-dot";dot.style.background=co;
-      btn.appendChild(dot);
+      var dot=document.createElement("div");dot.className="fr-dot";
+      dot.style.background=catColor(c.cat);btn.appendChild(dot);
     }
-    var svgWrap=document.createElement("div");
-    svgWrap.innerHTML=c.icon.replace("<svg","<svg style='width:17px;height:17px;'");
-    btn.appendChild(svgWrap.firstChild);
+    var w=document.createElement("div");
+    w.innerHTML=c.icon.replace("<svg","<svg style='width:17px;height:17px;'");
+    btn.appendChild(w.firstChild);
     btn.onclick=function(){setFilter(c.cat);};
     r.appendChild(btn);
   });
 }
 function setFilter(cat){
   S.filter=cat;
-  document.querySelectorAll(".fr-btn").forEach(function(b){
-    b.classList.toggle("on",b.dataset.cat===cat);
-  });
+  document.querySelectorAll(".fr-btn").forEach(function(b){b.classList.toggle("on",b.dataset.cat===cat);});
   document.querySelectorAll(".dpf").forEach(function(p){p.classList.toggle("on",p.dataset.cat===cat);});
   updateMarkers();buildShelf();buildDpList();
 }
 
-/* ─ FILTERED DATA ─ */
+/* ─ FILTERED ─ */
 function getFiltered(){
   var out=BATIMENTS.filter(function(b){return S.filter==="all"||b.categorie===S.filter;});
   if(S.lat!==null)out.sort(function(a,b){return hav(S.lat,S.lng,a.lat,a.lng)-hav(S.lat,S.lng,b.lat,b.lng);});
   return out;
 }
 
-/* ─ SHELF (horizontal carousel) ─ */
+/* ─ SHELF (carousel) ─ */
 function buildShelf(){
   var c=document.getElementById("shelf-cards"),f=getFiltered();
   document.getElementById("shelf-n").textContent=f.length;
@@ -1063,29 +662,28 @@ function buildShelf(){
   f.forEach(function(b,i){
     var co=catColor(b.categorie),la=catLabel(b.categorie);
     var dist=S.lat!==null?fd(hav(S.lat,S.lng,b.lat,b.lng)):"";
-    var ph=getPhoto(b);
+    var url=getPhotoUrl(b);
     var div=document.createElement("div");
-    div.className="sh-card"+(S.cur&&S.cur.id===b.id?" sel":"")+(ph?" has-photo":"");
+    div.className="sh-card"+(S.cur&&S.cur.id===b.id?" sel":"")+(url?" has-photo":"");
     div.style.animationDelay=(i*0.04)+"s";
-    var phHTML=ph?'<div class="sh-card-ph"><img src="'+ph+'" alt=""><div class="sh-card-ph-overlay"></div></div>':"";
+    var phHTML=url?
+      '<div class="sh-card-ph"><img src="'+url+'" alt="" loading="lazy" onerror="this.parentNode.remove()"><div class="sh-card-ph-ov"></div></div>'
+      :"";
     div.innerHTML=phHTML+
       '<div class="sh-c-top">'+
-        '<div class="sh-c-dot-wrap"><div class="sh-c-dot" style="background:'+co+'"></div><span class="sh-c-cat-sm">'+la+'</span></div>'+
+        '<div class="sh-c-dot" style="background:'+co+'"></div>'+
         (dist?'<div class="sh-c-dist">'+dist+'</div>':'')+
       '</div>'+
       '<div class="sh-c-bot">'+
         '<div class="sh-c-nm">'+b.nom+'</div>'+
-        '<div class="sh-c-row">'+
-          '<div class="sh-c-cat">'+la+'</div>'+
-          '<div class="sh-c-arr">'+IC.chv+'</div>'+
-        '</div>'+
+        '<div class="sh-c-row"><div class="sh-c-cat">'+la+'</div><div class="sh-c-arr">'+IC.chv+'</div></div>'+
       '</div>';
     div.onclick=function(){openDetail(b.id);};
     c.appendChild(div);
   });
 }
 
-/* ─ DETAIL INFO HTML ─ */
+/* ─ INFO HTML ─ */
 function infoHTML(b){
   function row(l,v){if(skip(v))return"";return'<div class="dr"><div class="dl">'+l+'</div><div class="dv">'+v+'</div></div>';}
   var eq=[];
@@ -1112,7 +710,7 @@ function infoHTML(b){
   return s1+s2+s3;
 }
 
-/* ─ DETAIL OPEN ─ */
+/* ─ DETAIL ─ */
 function openDetail(id){
   var f=getFiltered(),b=null,idx=0;
   for(var i=0;i<f.length;i++){if(f[i].id===id){b=f[i];idx=i;break;}}
@@ -1120,27 +718,22 @@ function openDetail(id){
   S.cur=b;S.curIdx=idx;
   hlMk(id);
   if(b.lat&&b.lng&&S.map)S.map.flyTo({center:[b.lng,b.lat],zoom:15.2,duration:700});
-  /* Update carousel */
   document.querySelectorAll(".sh-card").forEach(function(c,i){c.classList.toggle("sel",i===idx);});
-  /* Fill detail */
   var co=catColor(b.categorie);
   document.getElementById("det-title").textContent=b.nom;
   document.getElementById("det-rdot").style.background=co;
   document.getElementById("det-rdot").style.boxShadow="0 0 0 3px "+rgba(co,.2);
   document.getElementById("det-rlbl").textContent=catLabel(b.categorie).toUpperCase();
-  applyPhoto(document.getElementById("det-ph-ph"),document.getElementById("det-ph-ld"),document.getElementById("det-ph-img"),b);
+  /* Load photo */
+  loadPhoto(
+    document.getElementById("det-ph-empty"),
+    document.getElementById("det-ph-ld"),
+    document.getElementById("det-ph-img"),
+    b
+  );
   document.getElementById("det-info").innerHTML=infoHTML(b);
   document.getElementById("det-ar").onclick=function(){window.location.href="ar.html?id="+b.id;};
   document.getElementById("det").classList.add("on");
-  /* Wire admin edit shortcut — only works if admin */
-  document.getElementById("det-ph-edit-btn").onclick=function(){
-    if(!S.isAdm||!S.cur)return;
-    /* Open admin panel on this building */
-    buildAdmGrid();
-    document.getElementById("adm-scr").classList.add("on");
-    /* Small delay so panel is visible, then open PM */
-    setTimeout(function(){if(S.cur)openPM(S.cur.id);},60);
-  };
 }
 document.getElementById("det-close").onclick=function(){
   document.getElementById("det").classList.remove("on");
@@ -1192,230 +785,19 @@ function buildDpList(){
   var f=getFiltered();
   dl.innerHTML=f.map(function(b){
     var co=catColor(b.categorie),la=catLabel(b.categorie);
-    var ph=getPhoto(b);
-    var dist=S.lat!==null?'<span style="font-size:10px;color:rgba(255,255,255,.3);margin-right:4px;">'+fd(hav(S.lat,S.lng,b.lat,b.lng))+'</span>':"";
-    var phHTML=ph?'<div class="dp-row-ph"><img src="'+ph+'" alt=""></div>':
-      '<div class="dp-row-ph"><div class="dp-row-dot" style="background:'+co+'"></div></div>';
-    return '<div class="dp-row" onclick="openDetail(\''+b.id+'\')">'+phHTML+
+    var url=getPhotoUrl(b);
+    var dist=S.lat!==null?'<span style="font-size:10px;color:rgba(255,255,255,.3);flex-shrink:0;">'+fd(hav(S.lat,S.lng,b.lat,b.lng))+'</span>':"";
+    var thumbHTML=url
+      ?'<div class="dp-row-thumb"><img src="'+url+'" alt="" loading="lazy" onload="this.classList.add(\'loaded\')" onerror="this.style.display=\'none\'"></div>'
+      :'<div class="dp-row-thumb">'+IC.ph.replace("<svg","<svg style='width:16px;height:16px;stroke:rgba(255,255,255,.25);fill:none;'")+'</div>';
+    return '<div class="dp-row" onclick="openDetail(\''+b.id+'\')">'+thumbHTML+
       '<div class="dp-row-body"><div class="dp-row-nm">'+b.nom+'</div><div class="dp-row-meta">'+la+(b.capacite&&b.capacite!=="0 personne"?" · "+b.capacite:"")+'</div></div>'+
       dist+'<div class="dp-row-chev">'+IC.chv+'</div></div>';
   }).join("");
 }
 
-/* ─ ADMIN TABS ─ */
-document.querySelectorAll(".atab").forEach(function(tab){
-  tab.onclick=function(){
-    document.querySelectorAll(".atab").forEach(function(t){t.classList.remove("on");});
-    document.querySelectorAll(".atab-content").forEach(function(c){c.classList.remove("on");});
-    tab.classList.add("on");
-    document.getElementById("tab-"+tab.dataset.tab).classList.add("on");
-  };
-});
-
-/* ─ ADMIN GRID ─ */
-function buildAdmGrid(){
-  var g=document.getElementById("adm-grid");
-  g.innerHTML=BATIMENTS.map(function(b){
-    var ph=getPhoto(b),co=catColor(b.categorie);
-    return '<div class="ag-card" data-bid="'+b.id+'">'+
-      '<div class="ag-ph">'+
-        (ph?'<img src="'+ph+'" alt=""><div class="ag-synced">OK</div>':
-          '<div class="ag-ph-ico">'+IC.ph.replace("<svg","<svg style='width:26px;height:26px;stroke:rgba(255,255,255,.25);'")+'</div>')+
-      '</div>'+
-      '<div class="ag-info">'+
-        '<div class="ag-nm">'+b.nom+'</div>'+
-        '<div class="ag-cat" style="color:'+rgba(co,.75)+'">'+catLabel(b.categorie)+'</div>'+
-      '</div></div>';
-  }).join("");
-  /* Event delegation — no global function needed */
-  g.onclick=function(e){
-    if(!S.isAdm)return;
-    var card=e.target.closest(".ag-card");
-    if(card&&card.dataset.bid)openPM(card.dataset.bid);
-  };
-}
-
-/* ─ PHOTO MANAGER ─ */
-function openPM(id){
-  if(!S.isAdm){console.warn("openPM: permission refusée");return;}
-  var b=null;BATIMENTS.forEach(function(x){if(x.id===id)b=x;});if(!b)return;
-  S.pmBuilding=b;S.pmPending=null;
-  document.getElementById("adm-grid").style.display="none";
-  document.getElementById("pm-view").classList.add("on");
-  document.getElementById("adm-scr-ttl").textContent=b.nom;
-  document.getElementById("pm-nm").textContent=b.nom;
-  document.getElementById("pm-cat").textContent=catLabel(b.categorie);
-  /* Current photo */
-  var ph=getPhoto(b);
-  var ci=document.getElementById("pm-cur-img"),ico=document.getElementById("pm-cur-ico");
-  if(ph){ci.src=ph;ci.style.display="block";ico.style.display="none";}
-  else{ci.style.display="none";ico.style.display="flex";}
-  /* Actions */
-  document.getElementById("pm-preview").classList.remove("on");
-  document.getElementById("pm-save-row").style.display="none";
-  document.getElementById("pm-del-row").style.display=ph?"flex":"none";
-  /* Sync status based on config */
-  if(!ghConfigured()){setSyncStatus("warn","GitHub non configuré — onglet Configuration requis");}
-  else{var el=document.getElementById("pm-sync-status");if(el)el.style.display="none";}
-}
-document.getElementById("pm-back-btn").onclick=function(){
-  document.getElementById("adm-grid").style.display="grid";
-  document.getElementById("pm-view").classList.remove("on");
-  document.getElementById("adm-scr-ttl").textContent="Administration";
-  buildAdmGrid();
-};
-
-/* Choose photo */
-document.getElementById("pm-choose-btn").onclick=function(){
-  if(!S.isAdm)return;
-  document.getElementById("ph-in").click();
-};
-document.getElementById("ph-in").addEventListener("change",function(e){
-  if(!S.isAdm){this.value="";return;}
-  var file=e.target.files[0];if(!file)return;this.value="";
-  compress(file,function(out,orig,comp){
-    S.pmPending=out;
-    document.getElementById("pm-preview-img").src=out;
-    document.getElementById("pm-orig-size").textContent=fmtBytes(orig);
-    document.getElementById("pm-comp-size").textContent=fmtBytes(comp);
-    document.getElementById("pm-preview").classList.add("on");
-    document.getElementById("pm-save-row").style.display="flex";
-    if(!ghConfigured())setSyncStatus("warn","Configurez GitHub pour publier pour tous les utilisateurs");
-    else{var el=document.getElementById("pm-sync-status");if(el)el.style.display="none";}
-  });
-});
-
-/* Publish (save to GitHub) */
-document.getElementById("pm-save-btn").onclick=async function(){
-  if(!S.isAdm)return;
-  if(!S.pmPending||!S.pmBuilding)return;
-  var btn=this;
-  btn.disabled=true;btn.textContent="Publication...";
-  try{
-    await ghPublishPhoto(S.pmBuilding.id,S.pmPending);
-    S.pmPending=null;
-    document.getElementById("pm-preview").classList.remove("on");
-    document.getElementById("pm-save-row").style.display="none";
-    document.getElementById("pm-del-row").style.display="flex";
-    var ph=getPhoto(S.pmBuilding);
-    var ci=document.getElementById("pm-cur-img"),ico=document.getElementById("pm-cur-ico");
-    if(ph){ci.src=ph;ci.style.display="block";ico.style.display="none";}
-    buildShelf();buildDpList();
-    if(S.cur&&S.cur.id===S.pmBuilding.id){applyPhoto(document.getElementById("det-ph-ph"),document.getElementById("det-ph-ld"),document.getElementById("det-ph-img"),S.pmBuilding);}
-  }catch(err){setSyncStatus("err",err.message);}
-  finally{btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Publier pour tous';}
-};
-
-/* Cancel preview */
-document.getElementById("pm-cancel-btn").onclick=function(){
-  if(!S.isAdm)return;
-  S.pmPending=null;
-  document.getElementById("pm-preview").classList.remove("on");
-  document.getElementById("pm-save-row").style.display="none";
-};
-
-/* Delete photo */
-document.getElementById("pm-delete-btn").onclick=async function(){
-  if(!S.isAdm)return;
-  if(!S.pmBuilding)return;
-  if(!confirm("Supprimer définitivement la photo de "+S.pmBuilding.nom+" ?"))return;
-  var btn=this;btn.disabled=true;
-  try{
-    await ghPublishPhoto(S.pmBuilding.id,null);
-    document.getElementById("pm-del-row").style.display="none";
-    var ci=document.getElementById("pm-cur-img"),ico=document.getElementById("pm-cur-ico");
-    ci.style.display="none";ico.style.display="flex";
-    buildShelf();buildDpList();
-    if(S.cur&&S.cur.id===S.pmBuilding.id){applyPhoto(document.getElementById("det-ph-ph"),null,document.getElementById("det-ph-img"),S.pmBuilding);}
-  }catch(err){setSyncStatus("err",err.message);}
-  finally{btn.disabled=false;}
-};
-
-/* ─ GITHUB CONFIG TAB ─ */
-function loadCfgForm(){
-  var c=getGhConfig();
-  document.getElementById("cfg-owner").value=c.owner;
-  document.getElementById("cfg-repo").value=c.repo;
-  document.getElementById("cfg-branch").value=c.branch||"main";
-  document.getElementById("cfg-token").value=c.token?c.token.slice(0,8)+"…":"";
-  document.getElementById("cfg-logout-btn").style.display="block";
-}
-document.getElementById("cfg-save-btn").onclick=function(){
-  if(!S.isAdm)return;
-  var cfg={
-    owner:  document.getElementById("cfg-owner").value.trim(),
-    repo:   document.getElementById("cfg-repo").value.trim(),
-    branch: document.getElementById("cfg-branch").value.trim()||"main",
-    token:  document.getElementById("cfg-token").value.trim()
-  };
-  if(cfg.token.indexOf("…")>=0){var old=getGhConfig();cfg.token=old.token;}
-  saveGhConfig(cfg);
-  toast("Configuration sauvegardée");
-};
-document.getElementById("cfg-test-btn").onclick=async function(){
-  if(!S.isAdm)return;
-  var cfg={
-    owner: document.getElementById("cfg-owner").value.trim(),
-    repo:  document.getElementById("cfg-repo").value.trim(),
-    branch:document.getElementById("cfg-branch").value.trim()||"main",
-    token: document.getElementById("cfg-token").value.trim()
-  };
-  if(cfg.token.indexOf("…")>=0){var old=getGhConfig();cfg.token=old.token;}
-  var banner=document.getElementById("cfg-test-banner");
-  banner.className="cfg-test-banner";banner.style.display="none";
-  this.textContent="Test en cours...";this.disabled=true;
-  try{
-    var name=await ghTest(cfg);
-    banner.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>Connexion OK — '+name;
-    banner.className="cfg-test-banner ok";
-  }catch(e){
-    banner.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>'+e.message;
-    banner.className="cfg-test-banner err";
-  }
-  finally{this.textContent="Tester la connexion";this.disabled=false;}
-};
-
-/* ─ ADMIN PASSWORD ─ */
-function openAdmModal(){document.getElementById("adm-modal").classList.add("on");setTimeout(function(){document.getElementById("adm-pwd").focus();},80);}
-function closeAdmModal(){document.getElementById("adm-modal").classList.remove("on");document.getElementById("adm-pwd").value="";document.getElementById("adm-err").textContent="";}
-async function hashP(p){var e=new TextEncoder(),b=await crypto.subtle.digest("SHA-256",e.encode(p));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0");}).join("");}
-async function submitAdm(){
-  var p=document.getElementById("adm-pwd").value;if(!p)return;
-  var h=await hashP(p);
-  if(h===ADMIN_HASH){
-    S.isAdm=true;document.body.classList.add("adm");
-    document.getElementById("adm-dot").style.display="flex";
-    closeAdmModal();
-    loadCfgForm();
-    buildAdmGrid();
-    document.getElementById("adm-scr").classList.add("on");
-  }else{
-    document.getElementById("adm-err").textContent="Mot de passe incorrect.";
-    document.getElementById("adm-pwd").value="";
-  }
-}
-function logout(){
-  S.isAdm=false;document.body.classList.remove("adm");
-  document.getElementById("adm-dot").style.display="none";
-  document.getElementById("adm-scr").classList.remove("on");
-  toast("Session admin terminée");
-}
-document.getElementById("adm-pwd").addEventListener("keydown",function(e){if(e.key==="Enter")submitAdm();});
-document.getElementById("adm-modal").addEventListener("click",function(e){if(e.target===this)closeAdmModal();});
-document.getElementById("adm-close-btn").onclick=function(){
-  document.getElementById("adm-scr").classList.remove("on");
-};
-
-/* Long-press on city badge → admin */
-var ct=document.getElementById("city-ttl");
-ct.addEventListener("touchstart",function(){S.pt=setTimeout(function(){S.isAdm?document.getElementById("adm-scr").classList.add("on"):openAdmModal();},1400);});
-ct.addEventListener("touchend",function(){clearTimeout(S.pt);});
-ct.addEventListener("dblclick",function(){S.isAdm?document.getElementById("adm-scr").classList.add("on"):openAdmModal();});
-
-/* ─ EXPOSE — only truly public functions ─ */
+/* ─ EXPOSE ─ */
 window.setFilter=setFilter;window.openDetail=openDetail;
-/* openPM is NOT exposed globally — only callable from admin UI */
-window.submitAdm=submitAdm;window.closeAdmModal=closeAdmModal;window.logout=logout;
 
 /* ─ INIT ─ */
 buildRail();buildShelf();buildDpFilt();buildDpList();initMap();
