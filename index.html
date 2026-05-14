@@ -35,8 +35,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
   -webkit-tap-highlight-color:transparent;color:var(--txt);}
 
 /* ══ KEYFRAMES ════════════════════════════════════ */
-@keyframes pr{0%{transform:scale(1);opacity:.55}100%{transform:scale(3.2);opacity:0}}
-@keyframes gw{0%,100%{filter:brightness(1)}50%{filter:brightness(1.15)}}
 @keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
 @keyframes fin{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -46,38 +44,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 #map{position:fixed;inset:0;z-index:0;}
 
 /* ══ MARKERS ══════════════════════════════════════ */
-/*
-  MARKER ANCHOR — le point GPS exact correspond au centre du .mk-c (le dot).
-  La zone tactile (.mk 48×48) est plus large pour faciliter le tap mobile,
-  mais l'ancre MapTiler est forcée au centre exact du dot via offset.
-*/
-.mk{position:relative;width:48px;height:48px;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.mk-c{
-  width:16px;height:16px;border-radius:50%;position:relative;z-index:2;
-  flex-shrink:0;
-  /* Bordure blanche + ombre pour lisibilité sur la carte détaillée */
-  border:2.5px solid rgba(255,255,255,.92);
-  box-shadow:0 2px 8px rgba(0,0,0,.32),0 0 0 1px rgba(0,0,0,.08);
-  transition:width .22s,height .22s,box-shadow .22s;
-}
-.mk-r{position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:16px;height:16px;border-radius:50%;border:1.5px solid;
-  animation:pr 2.8s ease-out infinite;pointer-events:none;z-index:1;}
-.mk-lbl{position:absolute;bottom:calc(100% - 4px);left:50%;
-  transform:translateX(-50%) translateY(4px);
-  background:var(--dg);backdrop-filter:var(--dgb);-webkit-backdrop-filter:var(--dgb);
-  border:var(--dg-brd);color:#fff;padding:5px 12px;
-  border-radius:var(--rpill);font-size:11px;font-weight:700;
-  white-space:nowrap;opacity:0;pointer-events:none;
-  transition:opacity .2s,transform .2s;z-index:3;
-  box-shadow:var(--dg-sh);}
-.mk.hi .mk-c{
-  width:22px;height:22px;
-  box-shadow:0 4px 16px rgba(0,0,0,.35),0 0 0 3px rgba(255,255,255,.6);
-}
-.mk.hi .mk-lbl{opacity:1;transform:translateX(-50%) translateY(0);}
+/* ══ MARKERS — note: POI markers are now GL native circle layers (no HTML/CSS) ══ */
 
 /* ══ TOP BADGE ════════════════════════════════════ */
 #top-badge{
@@ -546,7 +513,7 @@ function rgba(h,a){var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b
 function skip(v){return v===null||v===undefined||v===""||v==="--"||v==="-";}
 
 /* ─ STATE ─ */
-var S={map:null,markers:{},uMk:null,lat:null,lng:null,filter:"all",cur:null,curIdx:0};
+var S={map:null,markers:{},lat:null,lng:null,filter:"all",cur:null,curIdx:0,curSelId:null};
 
 /* ─ UTILS ─ */
 function hav(a,b,c,d){var R=6371000,dl=(c-a)*Math.PI/180,dn=(d-b)*Math.PI/180,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dn/2)*Math.sin(dn/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
@@ -595,128 +562,227 @@ function loadPhoto(emptyEl, loadingEl, imgEl, b){
   imgEl.src=url;
 }
 
-/* ─ MAP ─ */
+/* ═══════════════════════════════════════════════════════
+   SUPER-FILTRES — 5 groupes larges au lieu de 13 catégories
+   Chaque groupe correspond à des categories[] dans data.js
+═══════════════════════════════════════════════════════ */
+var SUPER = [
+  {
+    id:"all", label:"Tout",
+    cats:null,
+    color:"#4F76FF",
+    icon:IC.grd
+  },
+  {
+    id:"mairie", label:"Mairie & Services",
+    cats:["administration","services-mun","ceremonies"],
+    color:"#1E3A5F",
+    icon:IC.bld
+  },
+  {
+    id:"assoc", label:"Culture",
+    cats:["associations","evenements","culture","seniors"],
+    color:"#0369A1",
+    icon:IC.mus
+  },
+  {
+    id:"sport", label:"Sport",
+    cats:["sport"],
+    color:"#15803D",
+    icon:IC.spt
+  },
+  {
+    id:"social", label:"Social",
+    cats:["social"],
+    color:"#B45309",
+    icon:IC.hrt
+  },
+  {
+    id:"services", label:"Nature & Patrimoine",
+    cats:["services-publics","infrastructure","environnement","patrimoine"],
+    color:"#4D7C0F",
+    icon:IC.lf
+  }
+];
+
+/* Résoudre le super-groupe d'un bâtiment à partir de sa categorie */
+function superOf(b){
+  for(var i=1;i<SUPER.length;i++){
+    if(SUPER[i].cats.indexOf(b.categorie)>=0)return SUPER[i].id;
+  }
+  return "all";
+}
+
+/* ─ MAP — GL NATIVE LAYERS (GPU-anchored, jamais de déplacement) ─ */
 function initMap(){
   maptilersdk.config.apiKey=MAPTILER_KEY;
   S.map=new maptilersdk.Map({
     container:"map",
-    /* streets-v2 : bâtiments 2D, reliefs urbains, textures, profondeur visuelle */
     style:"https://api.maptiler.com/maps/streets-v2/style.json?key="+MAPTILER_KEY,
-    center:[2.7050,48.8215],zoom:14.5,minZoom:12,maxZoom:19,
+    center:[2.7050,48.8215],
+    zoom:14.5,minZoom:12,maxZoom:19,
     attributionControl:false,navigationControl:false,
-    /* Limites géographiques : Ferrières-en-Brie et alentours proches */
-    maxBounds:[2.660,48.795,2.780,48.855]
+    maxBounds:[2.640,48.790,2.790,48.860]
   });
+
+  /* ── Supprimer les warnings "Image X could not be loaded" ── */
+  S.map.on("styleimagemissing",function(e){
+    /* Créer un canvas 1×1 transparent comme placeholder */
+    var c=document.createElement("canvas");c.width=1;c.height=1;
+    try{S.map.addImage(e.id,c);}catch(err){}
+  });
+
   S.map.on("load",function(){
     var layers=S.map.getStyle().layers||[];
+
+    /* Masquer UNIQUEMENT les couches symbol (texte + icônes)
+       Garder : buildings, roads, landuse, water, parks — tout le rendu géométrique */
     layers.forEach(function(l){
-      var id=l.id.toLowerCase();
-      /* Masquer uniquement : icônes POI, labels de lieux génériques,
-         numéros de maison — tout ce qui entre en conflit avec nos marqueurs.
-         Garder : bâtiments, routes, parcs, eau, reliefs. */
-      var isPoi   = /^poi/.test(id);
-      var isHouseNum = /housenumber|house_number/.test(id);
-      var isGenericLabel = /place_label|settlement|locality|suburb|city|town|village|hamlet/.test(id);
-      var isTransitLabel = /transit|bus|train|metro|station/.test(id) && /label|text/.test(l.type||"");
-      if(isPoi||isHouseNum||isGenericLabel||isTransitLabel){
+      if(l.type==="symbol"){
         try{S.map.setLayoutProperty(l.id,"visibility","none");}catch(e){}
       }
     });
-    /* Légère teinte sur le fond de carte pour mieux contraster avec les markers */
+
+    /* Légère teinte crème pour le fond */
     try{
-      var bgLayer=layers.find(function(l){return l.type==="background";});
-      if(bgLayer)S.map.setPaintProperty(bgLayer.id,"background-color","#F4F1EB");
+      var bg=layers.find(function(l){return l.type==="background";});
+      if(bg)S.map.setPaintProperty(bg.id,"background-color","#F2EDE5");
     }catch(e){}
-    addMarkers();
+
+    buildGLPois();
   });
-  S.map.on("click",function(){hlMk(null);});
+
+  S.map.on("click",function(e){
+    /* Clic dans le vide → désélectionner */
+    var f=S.map.queryRenderedFeatures(e.point,{layers:["poi-dot","poi-halo"]});
+    if(!f.length)hlGlPoi(null);
+  });
 }
 
-/* ─ MARKERS ─ */
-function addMarkers(){
-  BATIMENTS.forEach(function(b,i){
-    if(!b.lat||!b.lng)return;
-    var co=catColor(b.categorie);
-    var wrap=document.createElement("div");wrap.className="mk";
-    var ring=document.createElement("div");ring.className="mk-r";
-    ring.style.borderColor=co;ring.style.animationDelay=(i%7*0.44)+"s";
-    var dot=document.createElement("div");dot.className="mk-c";
-    dot.style.background=co;
-    /* La bordure blanche + ombre sont définies en CSS.
-       On ajoute ici uniquement la lueur colorée propre à chaque catégorie. */
-    dot.style.filter="drop-shadow(0 0 4px "+rgba(co,.55)+")";
-    var lbl=document.createElement("div");lbl.className="mk-lbl";lbl.textContent=b.nom;
-    wrap.appendChild(ring);wrap.appendChild(dot);wrap.appendChild(lbl);
-    wrap.addEventListener("click",function(e){e.stopPropagation();openDetail(b.id);});
-    /* anchor:'center' force le point GPS exactement au centre du dot */
-    var mk=new maptilersdk.Marker({element:wrap,anchor:'center'}).setLngLat([b.lng,b.lat]).addTo(S.map);
-    S.markers[b.id]={mk:mk,el:wrap};
-  });
-}
-function updateMarkers(){
-  BATIMENTS.forEach(function(b){
-    var m=S.markers[b.id];if(!m)return;
-    var show=S.filter==="all"||(b.filtres||[b.categorie]).indexOf(S.filter)>=0;
-    m.el.style.display=show?"flex":"none";
-  });
-}
-function hlMk(id){
-  Object.keys(S.markers).forEach(function(k){S.markers[k].el.classList.remove("hi");});
-  if(id&&S.markers[id])S.markers[id].el.classList.add("hi");
+/* ─ GL POI LAYERS ─────────────────────────────────────────
+   Couches GPU — ancrées aux coordonnées WGS84.
+   Zéro HTML, zéro CSS transform, zéro déplacement au zoom.
+──────────────────────────────────────────────────────────── */
+function makeGeoJSON(filterSuper){
+  return {
+    type:"FeatureCollection",
+    features:BATIMENTS.filter(function(b){
+      if(!b.lat||!b.lng)return false;
+      if(filterSuper==="all")return true;
+      return superOf(b)===filterSuper;
+    }).map(function(b){
+      return {
+        type:"Feature",
+        geometry:{type:"Point",coordinates:[b.lng,b.lat]},
+        properties:{
+          id:b.id,
+          nom:b.nom,
+          color:catColor(b.categorie)
+        }
+      };
+    })
+  };
 }
 
-/* ─ CATEGORY RAIL ─ */
-var CATLIST=[
-  {cat:"all",        icon:IC.grd},
-  {cat:"administration",  icon:IC.bld},
-  {cat:"services-mun",    icon:IC.wrn},
-  {cat:"associations",    icon:IC.hrt},
-  {cat:"evenements",      icon:IC.spt},
-  {cat:"sport",           icon:IC.spt},
-  {cat:"culture",         icon:IC.mus},
-  {cat:"environnement",   icon:IC.lf},
-  {cat:"patrimoine",      icon:IC.drp},
-  {cat:"ceremonies",      icon:IC.bld},
-  {cat:"social",          icon:IC.hrt},
-  {cat:"seniors",         icon:IC.hrt},
-  {cat:"services-publics",icon:IC.bld},
-  {cat:"infrastructure",  icon:IC.drp}
-];
+function buildGLPois(){
+  /* Source */
+  S.map.addSource("pois",{type:"geojson",data:makeGeoJSON("all")});
+
+  /* Halo large (tap target 40px + effet glow) */
+  S.map.addLayer({
+    id:"poi-halo",type:"circle",source:"pois",
+    paint:{
+      "circle-radius":["interpolate",["linear"],["zoom"],12,14,18,28],
+      "circle-color":["get","color"],
+      "circle-opacity":0.12,
+      "circle-stroke-width":0
+    }
+  });
+
+  /* Dot principal (taille fixe en pixels-écran → stable à tout zoom) */
+  S.map.addLayer({
+    id:"poi-dot",type:"circle",source:"pois",
+    paint:{
+      "circle-radius":["interpolate",["linear"],["zoom"],12,7,16,9,19,12],
+      "circle-color":["get","color"],
+      "circle-stroke-width":2.5,
+      "circle-stroke-color":"#FFFFFF",
+      "circle-pitch-alignment":"map",
+      "circle-pitch-scale":"map"
+    }
+  });
+
+  /* Dot sélectionné (par-dessus, filtre sur id) */
+  S.map.addLayer({
+    id:"poi-sel",type:"circle",source:"pois",
+    filter:["==","id","__none__"],
+    paint:{
+      "circle-radius":["interpolate",["linear"],["zoom"],12,11,16,14,19,18],
+      "circle-color":["get","color"],
+      "circle-stroke-width":3.5,
+      "circle-stroke-color":"#FFFFFF",
+      "circle-pitch-alignment":"map"
+    }
+  });
+
+  /* Curseur pointer sur hover (desktop) */
+  S.map.on("mouseenter","poi-dot",function(){S.map.getCanvas().style.cursor="pointer";});
+  S.map.on("mouseleave","poi-dot",function(){S.map.getCanvas().style.cursor="";});
+
+  /* Clic sur POI */
+  S.map.on("click","poi-dot",function(e){
+    e.stopPropagation();
+    if(e.features&&e.features.length)openDetail(e.features[0].properties.id);
+  });
+  S.map.on("click","poi-halo",function(e){
+    e.stopPropagation();
+    if(e.features&&e.features.length)openDetail(e.features[0].properties.id);
+  });
+}
+
+function updateGLPois(){
+  if(!S.map||!S.map.getSource("pois"))return;
+  S.map.getSource("pois").setData(makeGeoJSON(S.filter));
+}
+
+function hlGlPoi(id){
+  S.curSelId=id;
+  if(!S.map||!S.map.getLayer("poi-sel"))return;
+  S.map.setFilter("poi-sel",id?["==","id",id]:["==","id","__none__"]);
+}
+
+/* ─ SUPER-FILTERS RAIL ─ */
 function buildRail(){
   var r=document.getElementById("filt-rail");r.innerHTML="";
-  CATLIST.forEach(function(c){
-    /* Only show categories that have at least one building */
-    var has=c.cat==="all"||BATIMENTS.some(function(b){
-      return (b.filtres||[b.categorie]).indexOf(c.cat)>=0;
-    });
-    if(!has)return;
+  SUPER.forEach(function(sf){
     var btn=document.createElement("button");
-    btn.className="fr-btn"+(S.filter===c.cat?" on":"");
-    btn.dataset.cat=c.cat;btn.title=c.cat==="all"?"Tous":catLabel(c.cat);
-    if(c.cat!=="all"){
+    btn.className="fr-btn"+(S.filter===sf.id?" on":"");
+    btn.dataset.cat=sf.id;
+    btn.title=sf.label;
+    if(sf.id!=="all"){
       var dot=document.createElement("div");dot.className="fr-dot";
-      dot.style.background=catColor(c.cat);btn.appendChild(dot);
+      dot.style.background=sf.color;btn.appendChild(dot);
     }
     var w=document.createElement("div");
-    w.innerHTML=c.icon.replace("<svg","<svg style='width:17px;height:17px;'");
+    w.innerHTML=sf.icon.replace("<svg","<svg style='width:17px;height:17px;'");
     btn.appendChild(w.firstChild);
-    btn.onclick=function(){setFilter(c.cat);};
+    btn.onclick=function(){setFilter(sf.id);};
     r.appendChild(btn);
   });
 }
+
 function setFilter(cat){
   S.filter=cat;
   document.querySelectorAll(".fr-btn").forEach(function(b){b.classList.toggle("on",b.dataset.cat===cat);});
   document.querySelectorAll(".dpf").forEach(function(p){p.classList.toggle("on",p.dataset.cat===cat);});
-  updateMarkers();buildShelf();buildDpList();
+  updateGLPois();buildShelf();buildDpList();
 }
 
 /* ─ FILTERED ─ */
 function getFiltered(){
   var out=BATIMENTS.filter(function(b){
     if(S.filter==="all")return true;
-    var filtres=b.filtres||[b.categorie];
-    return filtres.indexOf(S.filter)>=0;
+    return superOf(b)===S.filter;
   });
   if(S.lat!==null)out.sort(function(a,b){return hav(S.lat,S.lng,a.lat,a.lng)-hav(S.lat,S.lng,b.lat,b.lng);});
   return out;
@@ -815,10 +881,8 @@ function openDetail(id){
   for(var i=0;i<f.length;i++){if(f[i].id===id){b=f[i];idx=i;break;}}
   if(!b){BATIMENTS.forEach(function(x){if(x.id===id)b=x;});if(!b)return;}
   S.cur=b;S.curIdx=idx;
-  hlMk(id);
+  hlGlPoi(id);
   if(b.lat&&b.lng&&S.map){
-    /* easeTo : recentre sur le bâtiment sans modifier le zoom
-       → le marqueur ne "saute" pas, position GPS stable et lisible */
     S.map.easeTo({center:[b.lng,b.lat],duration:500,easing:function(t){return t*(2-t);}});
   }
   document.querySelectorAll(".sh-card").forEach(function(c,i){c.classList.toggle("sel",i===idx);});
@@ -827,7 +891,6 @@ function openDetail(id){
   document.getElementById("det-rdot").style.background=co;
   document.getElementById("det-rdot").style.boxShadow="0 0 0 3px "+rgba(co,.2);
   document.getElementById("det-rlbl").textContent=catLabel(b.categorie).toUpperCase();
-  /* Load photo */
   loadPhoto(
     document.getElementById("det-ph-empty"),
     document.getElementById("det-ph-ld"),
@@ -840,7 +903,7 @@ function openDetail(id){
 }
 document.getElementById("det-close").onclick=function(){
   document.getElementById("det").classList.remove("on");
-  S.cur=null;hlMk(null);
+  S.cur=null;hlGlPoi(null);
   document.querySelectorAll(".sh-card").forEach(function(c){c.classList.remove("sel");});
 };
 function detNav(dir){
@@ -861,10 +924,15 @@ document.getElementById("btn-locate").onclick=function(){
   var btn=this;btn.classList.add("on");
   navigator.geolocation.getCurrentPosition(function(p){
     S.lat=p.coords.latitude;S.lng=p.coords.longitude;
-    if(S.uMk)S.uMk.remove();
-    var el=document.createElement("div");
-    el.style.cssText="width:14px;height:14px;border-radius:50%;background:#4F76FF;border:3px solid #fff;box-shadow:0 2px 8px rgba(79,118,255,.5);";
-    S.uMk=new maptilersdk.Marker({element:el}).setLngLat([S.lng,S.lat]).addTo(S.map);
+    /* Marqueur position utilisateur via GL (stable, GPU-anchored) */
+    var userGJ={type:"FeatureCollection",features:[{type:"Feature",geometry:{type:"Point",coordinates:[S.lng,S.lat]},properties:{}}]};
+    if(S.map.getSource("user-loc")){
+      S.map.getSource("user-loc").setData(userGJ);
+    } else {
+      S.map.addSource("user-loc",{type:"geojson",data:userGJ});
+      S.map.addLayer({id:"user-loc-ring",type:"circle",source:"user-loc",paint:{"circle-radius":14,"circle-color":"#4F76FF","circle-opacity":0.18,"circle-stroke-width":0}});
+      S.map.addLayer({id:"user-loc-dot",type:"circle",source:"user-loc",paint:{"circle-radius":7,"circle-color":"#4F76FF","circle-stroke-width":3,"circle-stroke-color":"#FFFFFF"}});
+    }
     S.map.flyTo({center:[S.lng,S.lat],zoom:15,duration:800});
     var lb=document.getElementById("loc-badge");lb.classList.add("on");
     setTimeout(function(){lb.classList.remove("on");},3000);
@@ -875,11 +943,10 @@ document.getElementById("btn-locate").onclick=function(){
 /* ─ DESKTOP PANEL ─ */
 function buildDpFilt(){
   var df=document.getElementById("dp-filt");if(!df)return;
-  var h='<button class="dpf on" data-cat="all" onclick="setFilter(\'all\')">Tous</button>';
-  Object.keys(CATEGORIES).forEach(function(cat){
-    var n=BATIMENTS.filter(function(b){return b.categorie===cat;}).length;if(!n)return;
-    var co=catColor(cat);
-    h+='<button class="dpf" data-cat="'+cat+'" onclick="setFilter(\''+cat+'\')" ><span class="dfd" style="background:'+co+'"></span>'+catLabel(cat)+'</button>';
+  var h='<button class="dpf on" data-cat="all" onclick="setFilter(\'all\')">Tout</button>';
+  SUPER.forEach(function(sf){
+    if(sf.id==="all")return;
+    h+='<button class="dpf" data-cat="'+sf.id+'" onclick="setFilter(\''+sf.id+'\')" ><span class="dfd" style="background:'+sf.color+'"></span>'+sf.label+'</button>';
   });
   df.innerHTML=h;
 }
