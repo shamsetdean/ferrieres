@@ -3,13 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0C0F1E">
+<meta name="theme-color" content="#E8EEF5">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Ferrières-en-Brie · Bâtiments publics</title>
 <meta name="description" content="Explorez les 20 bâtiments publics de Ferrières-en-Brie. Carte interactive, filtres par catégorie, informations détaillées et géolocalisation.">
-
-<!-- Open Graph -->
 <meta property="og:type"        content="website">
 <meta property="og:url"         content="https://shamsetdean.github.io/ferrieres/">
 <meta property="og:title"       content="Ferrières-en-Brie · Bâtiments publics">
@@ -19,253 +17,254 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale"      content="fr_FR">
 <meta property="og:site_name"   content="Ferrières-en-Brie · Patrimoine communal">
-
-<!-- Twitter Card -->
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Ferrières-en-Brie · Bâtiments publics">
-<meta name="twitter:description" content="Explorez les 20 bâtiments publics de Ferrières-en-Brie. Carte interactive et géolocalisation.">
+<meta name="twitter:description" content="Explorez les 20 bâtiments publics de Ferrières-en-Brie.">
 <meta name="twitter:image"       content="https://shamsetdean.github.io/ferrieres/og-image.png">
 <link rel="manifest" href="./manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.0/maptiler-sdk.css" rel="stylesheet">
 <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.0.0/maptiler-sdk.umd.min.js"></script>
 <script src="./data.js"></script>
 <style>
-/* ══ TOKENS ══════════════════════════════════════ */
+/* ══ TOKENS ══════════════════════════════════════════ */
 :root{
   --f:'Manrope',system-ui,sans-serif;
-  --dg:rgba(12,15,30,.82);--dgb:blur(32px) saturate(180%);
-  --dg-brd:1px solid rgba(255,255,255,.10);
-  --dg-sh:0 8px 32px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.18);
-  --lg:rgba(255,255,255,.76);--lgb:blur(40px) saturate(200%);
-  --lg-brd:1px solid rgba(255,255,255,.60);
-  --lg-sh:0 12px 48px rgba(0,0,0,.09),0 3px 12px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.85);
-  --acc:#4F76FF;--ok:#30D158;--warn:#FF9F0A;--err:#FF453A;
-  --txt:#0C0F1E;--txt2:#454660;--mute:#8A8BA8;--brd:rgba(0,0,0,.07);
-  --r8:8px;--r12:12px;--r16:16px;--r20:20px;--r28:28px;--rpill:99px;
+  --fs:'Cormorant Garamond',serif;
+  /* Liquid Glass */
+  --gl:rgba(255,255,255,.60);
+  --glb:blur(28px) saturate(180%) brightness(1.02);
+  --gl-brd:1px solid rgba(255,255,255,.80);
+  --gl-sh:0 8px 32px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.95);
+  --gl-sh-sm:0 4px 16px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.9);
+  /* Colours */
+  --gold:#B08C50;--gold-a:rgba(176,140,80,.14);
+  --txt:#1A1420;--txt2:#4A4460;--mute:rgba(26,20,32,.38);
+  --brd:rgba(26,20,32,.07);
+  /* Radii */
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;--r24:24px;--rpill:99px;
+  /* Safe areas */
   --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
+html,body{width:100%;height:100%;overflow:hidden;
   font-family:var(--f);-webkit-font-smoothing:antialiased;
-  -webkit-tap-highlight-color:transparent;color:var(--txt);}
+  -webkit-tap-highlight-color:transparent;color:var(--txt);
+  background:linear-gradient(145deg,#E8EEF5 0%,#ECE8F2 45%,#F2EBE4 100%);}
 
-/* ══ KEYFRAMES ════════════════════════════════════ */
-@keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
-@keyframes fin{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes ppop{0%{transform:scale(.9);opacity:0}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
+/* ══ BACKGROUND BLOBS ════════════════════════════════ */
+#blobs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);}
+.b1{width:500px;height:500px;background:rgba(140,190,255,.28);top:-100px;left:5%;}
+.b2{width:380px;height:380px;background:rgba(190,150,255,.22);top:25%;right:2%;}
+.b3{width:340px;height:340px;background:rgba(255,190,150,.20);bottom:-60px;left:28%;}
 
-/* ══ MAP ══════════════════════════════════════════ */
-#map{position:fixed;inset:0;z-index:0;}
+/* ══ MAP ══════════════════════════════════════════════ */
+#map{position:fixed;inset:0;z-index:1;}
 
-/* ══ MARKERS ══════════════════════════════════════ */
-/* ══ MARKERS — note: POI markers are now GL native circle layers (no HTML/CSS) ══ */
+/* ══ LAYOUT ══════════════════════════════════════════ */
+#app{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;pointer-events:none;}
 
-/* ══ TOP BADGE ════════════════════════════════════ */
-#top-badge{
-  position:fixed;top:calc(14px + var(--sat));left:16px;
+/* ══ HEADER PILL ══════════════════════════════════════ */
+#hpill{
+  align-self:flex-start;
+  margin:calc(14px + var(--sat)) 0 0 14px;
   display:flex;align-items:center;gap:11px;
-  background:var(--dg);backdrop-filter:var(--dgb);-webkit-backdrop-filter:var(--dgb);
-  border:var(--dg-brd);border-radius:var(--rpill);
   padding:10px 16px 10px 10px;
-  box-shadow:var(--dg-sh);z-index:100;user-select:none;
+  background:var(--gl);backdrop-filter:var(--glb);-webkit-backdrop-filter:var(--glb);
+  border:var(--gl-brd);border-radius:var(--rpill);
+  box-shadow:var(--gl-sh);
+  pointer-events:auto;user-select:none;
 }
-#tb-ico{width:36px;height:36px;border-radius:var(--r12);
-  background:var(--acc);display:flex;align-items:center;justify-content:center;}
-#tb-ico svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;}
-.tb-n{font-size:14px;font-weight:800;color:#fff;letter-spacing:.1px;}
-.tb-s{font-size:9px;color:rgba(255,255,255,.36);text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+#hp-ico{width:38px;height:38px;border-radius:var(--r12);
+  background:linear-gradient(135deg,#B08C50,#D4AA6A);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 4px 12px rgba(176,140,80,.35);}
+#hp-ico i{color:#fff;font-size:18px;}
+.hp-t{font-size:13px;font-weight:800;color:var(--txt);letter-spacing:.1px;}
+.hp-s{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--mute);margin-top:1px;}
+#adm-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);display:none;flex-shrink:0;}
 
 /* MAP BUTTONS (top right) */
 #map-btns{
-  position:fixed;top:calc(14px + var(--sat));right:16px;
-  display:flex;gap:8px;z-index:100;
+  position:fixed;top:calc(14px + var(--sat));right:14px;
+  display:flex;gap:8px;z-index:11;
 }
-.mab{width:48px;height:48px;border-radius:var(--r16);
-  background:var(--dg);backdrop-filter:var(--dgb);-webkit-backdrop-filter:var(--dgb);
-  border:var(--dg-brd);display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:rgba(255,255,255,.65);box-shadow:var(--dg-sh);
-  transition:color .2s,transform .13s;}
+.mab{
+  width:48px;height:48px;border-radius:var(--r16);
+  background:var(--gl);backdrop-filter:var(--glb);-webkit-backdrop-filter:var(--glb);
+  border:var(--gl-brd);box-shadow:var(--gl-sh);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:rgba(26,20,32,.5);transition:color .18s,transform .13s;
+}
 .mab:active{transform:scale(.88);}
-.mab.on{color:var(--acc);}
-.mab svg{width:22px;height:22px;}
+.mab.on{color:var(--gold);}
+.mab i{font-size:22px;}
 
-/* ══ FILTER RAIL (right side vertical) ═══════════ */
+/* ══ FILTER RAIL (right side) ═══════════════════════ */
 #filt-rail{
-  position:fixed;right:16px;
-  top:calc(14px + var(--sat) + 56px + 12px);
-  display:flex;flex-direction:column;gap:7px;z-index:100;
+  position:fixed;right:14px;
+  top:calc(14px + var(--sat) + 56px + 10px);
+  display:flex;flex-direction:column;gap:7px;z-index:11;
 }
 .fr-btn{
   width:46px;height:46px;border-radius:var(--r16);
-  background:var(--dg);backdrop-filter:var(--dgb);-webkit-backdrop-filter:var(--dgb);
-  border:var(--dg-brd);display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:border-color .18s,transform .13s;
-  box-shadow:var(--dg-sh);position:relative;
+  background:var(--gl);backdrop-filter:var(--glb);-webkit-backdrop-filter:var(--glb);
+  border:var(--gl-brd);box-shadow:var(--gl-sh-sm);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .16s;position:relative;
 }
 .fr-btn:active{transform:scale(.88);}
-.fr-btn svg{width:17px;height:17px;stroke:rgba(255,255,255,.4);fill:none;
-  stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .18s;}
-.fr-btn.on svg{stroke:#fff;}
-.fr-btn .fr-dot{width:6px;height:6px;border-radius:50%;
-  position:absolute;top:8px;right:8px;}
+.fr-btn i{font-size:18px;color:rgba(26,20,32,.38);transition:color .16s;}
+.fr-btn.on{background:rgba(255,255,255,.85);box-shadow:0 6px 20px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.95);}
+.fr-btn.on i{color:var(--gold);}
+.fr-btn .fr-dot{width:6px;height:6px;border-radius:50%;position:absolute;top:8px;right:8px;}
 
 /* Loc badge */
 #loc-badge{
-  position:fixed;top:calc(var(--sat) + 78px);left:50%;
+  position:fixed;top:calc(var(--sat) + 76px);left:50%;
   transform:translateX(-50%) translateY(-8px);
-  background:var(--dg);backdrop-filter:var(--dgb);-webkit-backdrop-filter:var(--dgb);
-  border:var(--dg-brd);color:#fff;padding:8px 18px;border-radius:var(--rpill);
-  font-size:12px;font-weight:600;
+  background:var(--gl);backdrop-filter:var(--glb);-webkit-backdrop-filter:var(--glb);
+  border:var(--gl-brd);padding:8px 18px;border-radius:var(--rpill);
+  font-size:12px;font-weight:600;color:var(--txt);
   display:flex;align-items:center;gap:7px;
-  z-index:200;opacity:0;pointer-events:none;
+  z-index:20;opacity:0;pointer-events:none;
   transition:opacity .28s,transform .28s;white-space:nowrap;
-  box-shadow:var(--dg-sh);
+  box-shadow:var(--gl-sh);
 }
 #loc-badge.on{opacity:1;transform:translateX(-50%) translateY(0);}
-.ldot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex-shrink:0;}
+.ldot{width:8px;height:8px;border-radius:50%;background:#30D158;flex-shrink:0;}
 
-/* ══ BOTTOM SHELF (horizontal carousel) ══════════ */
+/* ══ BOTTOM SHELF ════════════════════════════════════ */
 #shelf{
-  position:fixed;left:0;right:0;bottom:0;z-index:100;
-  background:linear-gradient(to top,rgba(8,10,20,.72) 0%,rgba(8,10,20,.32) 55%,transparent 100%);
-  padding-top:22px;
-  padding-bottom:calc(16px + var(--sab));
+  position:fixed;left:0;right:0;bottom:0;z-index:11;
+  padding-bottom:calc(14px + var(--sab));
+  padding-top:20px;
+  background:linear-gradient(to top,rgba(232,238,245,.72) 0%,rgba(232,238,245,.3) 55%,transparent 100%);
 }
-#shelf-count{display:flex;align-items:center;gap:8px;padding:0 20px 12px;}
-.shelf-n{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px;}
-.shelf-lbl{font-size:11px;color:rgba(255,255,255,.45);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
 #shelf-cards{
-  display:flex;gap:11px;
+  display:flex;gap:10px;
   overflow-x:auto;scroll-snap-type:x mandatory;
   -webkit-overflow-scrolling:touch;scrollbar-width:none;
-  padding:0 16px 0;
+  padding:0 14px;
 }
 #shelf-cards::-webkit-scrollbar{display:none;}
 
-/* Card */
 .sh-card{
-  flex-shrink:0;width:188px;height:140px;
+  flex-shrink:0;width:170px;
   scroll-snap-align:start;
-  background:var(--lg);backdrop-filter:var(--lgb);-webkit-backdrop-filter:var(--lgb);
-  border:var(--lg-brd);border-radius:var(--r20);
-  box-shadow:var(--lg-sh);padding:15px;
-  cursor:pointer;
-  display:flex;flex-direction:column;justify-content:space-between;
-  transition:transform .18s,box-shadow .18s;
+  background:var(--gl);backdrop-filter:var(--glb);-webkit-backdrop-filter:var(--glb);
+  border:var(--gl-brd);border-radius:var(--r20);
+  box-shadow:var(--gl-sh);
+  padding:13px;cursor:pointer;
+  transition:transform .16s,box-shadow .16s;
   animation:fin .28s ease both;
-  position:relative;overflow:hidden;
+  pointer-events:auto;
 }
 .sh-card:active{transform:scale(.96);}
-.sh-card.sel{
-  background:rgba(255,255,255,.94);
-  box-shadow:0 16px 56px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.9);
-}
-/* Photo thumbnail in card */
-.sh-card-ph{position:absolute;inset:0;border-radius:var(--r20);overflow:hidden;}
-.sh-card-ph img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.82);}
-.sh-card-ph-ov{position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(0,0,0,.68) 0%,rgba(0,0,0,.08) 50%,transparent 100%);}
-.sh-card.has-photo .sh-c-nm{color:#fff !important;}
-.sh-card.has-photo .sh-c-cat{color:rgba(255,255,255,.65) !important;}
-.sh-c-top{display:flex;align-items:flex-start;justify-content:space-between;position:relative;z-index:1;}
-.sh-c-dot{width:9px;height:9px;border-radius:50%;}
-.sh-c-dist{font-size:10px;font-weight:600;color:var(--mute);
-  background:rgba(0,0,0,.06);padding:2px 8px;border-radius:var(--rpill);}
-.sh-card.has-photo .sh-c-dist{background:rgba(0,0,0,.35);color:rgba(255,255,255,.75);}
-.sh-c-bot{position:relative;z-index:1;}
-.sh-c-nm{font-size:14px;font-weight:800;color:var(--txt);line-height:1.25;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.sh-c-row{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
-.sh-c-cat{font-size:11px;font-weight:600;color:var(--mute);}
-.sh-c-arr svg{width:13px;height:13px;stroke:rgba(0,0,0,.22);fill:none;stroke-width:2.5;}
+.sh-card.sel{background:rgba(255,255,255,.90);box-shadow:0 12px 40px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.95);}
+@keyframes fin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 
-/* ══ DETAIL SCREEN ════════════════════════════════ */
+.sh-ico{width:36px;height:36px;border-radius:var(--r12);display:flex;align-items:center;justify-content:center;margin-bottom:9px;box-shadow:0 4px 10px rgba(0,0,0,.15);}
+.sh-ico i{font-size:17px;color:#fff;}
+.sh-cat{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.sh-name{font-size:12px;font-weight:700;color:var(--txt);line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.sh-card.sel .sh-name{color:var(--txt);}
+.sh-cap{font-size:9px;color:var(--mute);margin-top:4px;font-weight:500;}
+
+/* ══ ABOUT SCREEN ════════════════════════════════════ */
+#about{
+  position:fixed;inset:0;z-index:400;
+  background:rgba(236,232,242,.92);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
+  display:none;flex-direction:column;overflow:hidden;
+}
+#about.on{display:flex;}
+#about-hdr{display:flex;align-items:center;gap:12px;
+  padding:calc(18px + var(--sat)) 20px 14px;
+  border-bottom:1px solid var(--brd);flex-shrink:0;}
+.scr-close{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.06);
+  border:none;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--txt);transition:background .14s;}
+.scr-close:active{background:rgba(0,0,0,.1);}
+.scr-close i{font-size:18px;}
+.ab-ttl{font-size:18px;font-weight:800;color:var(--txt);}
+#about-body{flex:1;overflow-y:auto;padding:14px 14px calc(var(--sab)+20px);}
+#about-body::-webkit-scrollbar{display:none;}
+.ab-sec{
+  background:var(--gl);backdrop-filter:var(--glb);-webkit-backdrop-filter:var(--glb);
+  border:var(--gl-brd);border-radius:var(--r20);
+  box-shadow:var(--gl-sh);padding:18px;margin-bottom:10px;
+}
+.ab-sec h3{font-size:14px;font-weight:800;color:var(--txt);margin-bottom:7px;}
+.ab-sec p{font-size:13px;line-height:1.65;color:var(--txt2);}
+.ab-sec a{color:var(--gold);text-decoration:none;font-weight:600;}
+.ab-stats{display:flex;gap:8px;margin-top:12px;}
+.ab-stat{flex:1;background:rgba(255,255,255,.5);border-radius:var(--r12);padding:12px;text-align:center;}
+.ab-stat .n{font-size:24px;font-weight:800;color:var(--txt);}
+.ab-stat .l{font-size:8px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+
+/* ══ DETAIL SCREEN ═══════════════════════════════════ */
 #det{
   position:fixed;inset:0;z-index:300;
-  background:rgba(248,247,244,.97);
-  backdrop-filter:blur(48px);-webkit-backdrop-filter:blur(48px);
+  background:rgba(236,232,242,.94);backdrop-filter:blur(44px);-webkit-backdrop-filter:blur(44px);
   display:flex;flex-direction:column;overflow:hidden;
   transform:translateY(100%);
-  transition:transform .46s cubic-bezier(0.32,0.72,0,1);
+  transition:transform .44s cubic-bezier(0.32,0.72,0,1);
   will-change:transform;
 }
 #det.on{transform:translateY(0);}
-#det-hdr{
-  display:flex;align-items:center;gap:12px;
-  padding:calc(18px + var(--sat)) 20px 14px;
-  border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0;
-}
-#det-close{width:40px;height:40px;border-radius:50%;
-  background:rgba(0,0,0,.06);border:none;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--txt);transition:background .14s,transform .13s;}
-#det-close:active{background:rgba(0,0,0,.12);transform:scale(.9);}
-#det-close svg{width:18px;height:18px;}
+#det-hdr{display:flex;align-items:center;gap:12px;
+  padding:calc(18px + var(--sat)) 18px 14px;
+  border-bottom:1px solid var(--brd);flex-shrink:0;}
+#det-close{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.06);border:none;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt);}
+#det-close:active{background:rgba(0,0,0,.1);}
+#det-close i{font-size:18px;}
 #det-title{flex:1;font-size:18px;font-weight:800;color:var(--txt);
-  letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #det-nav{display:flex;gap:6px;}
 .dnb{width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.05);border:none;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  color:var(--txt2);transition:background .14s;}
-.dnb:active{background:rgba(0,0,0,.10);}
-.dnb svg{width:15px;height:15px;stroke-width:2.5;}
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt2);}
+.dnb:active{background:rgba(0,0,0,.09);}
+.dnb i{font-size:16px;}
 
-#det-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:0 16px calc(var(--sab) + 24px);}
+#det-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 14px calc(var(--sab)+20px);}
 #det-body::-webkit-scrollbar{display:none;}
 
-/* Category ribbon */
-#det-ribbon{display:flex;align-items:center;gap:6px;padding:12px 0 0;}
-.det-rdot{width:8px;height:8px;border-radius:50%;}
-#det-rlbl{font-size:11px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;}
+/* Det cat ribbon */
+#det-ribbon{display:flex;align-items:center;gap:8px;padding:12px 0 0;}
+#det-rbc{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#det-rbc i{font-size:14px;color:#fff;}
+#det-rlbl{font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;}
 
-/* ── PHOTO BLOCK ── */
-#det-ph-wrap{
-  width:100%;height:220px;border-radius:var(--r20);
-  overflow:hidden;margin:12px 0;
-  background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.06);
-  position:relative;
-}
-/* Placeholder (shown when no photo) */
-.det-ph-empty{
-  width:100%;height:100%;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
-}
-.det-ph-empty svg{width:36px;height:36px;stroke:rgba(0,0,0,.18);fill:none;stroke-width:1.5;}
-.det-ph-empty span{font-size:12px;color:rgba(0,0,0,.28);font-weight:500;}
-/* Spinner while loading */
-.det-ph-loading{
-  width:100%;height:100%;
-  display:none;align-items:center;justify-content:center;
-  position:absolute;inset:0;background:rgba(0,0,0,.03);
-}
-.ph-spin{width:24px;height:24px;border:3px solid rgba(0,0,0,.07);
-  border-top-color:var(--txt);border-radius:50%;animation:spin .7s linear infinite;}
-/* Actual image */
-#det-ph-img{
-  position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;display:none;
-  /* Smooth fade-in when loaded */
-  transition:opacity .3s;opacity:0;
-}
+/* Det photo */
+#det-ph-wrap{width:100%;height:210px;border-radius:var(--r20);overflow:hidden;
+  margin:12px 0;background:rgba(255,255,255,.4);border:var(--gl-brd);position:relative;}
+.det-ph-ph{width:100%;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:9px;}
+.det-ph-ph i{font-size:36px;color:rgba(26,20,32,.18);}
+.det-ph-ph span{font-size:12px;color:rgba(26,20,32,.3);font-weight:500;}
+.det-ph-ld{width:100%;height:100%;display:none;align-items:center;justify-content:center;}
+.ph-spin{width:24px;height:24px;border:3px solid rgba(0,0,0,.07);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#det-ph-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;transition:opacity .3s;opacity:0;}
 #det-ph-img.loaded{opacity:1;}
 
-/* Info panels */
-.dp{background:rgba(255,255,255,.84);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,.62);border-radius:var(--r20);
-  box-shadow:0 6px 24px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.82);
-  margin-bottom:10px;overflow:hidden;}
-.dr{padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.055);}
+/* Det info panels */
+.dp{
+  background:var(--gl);backdrop-filter:var(--glb);-webkit-backdrop-filter:var(--glb);
+  border:var(--gl-brd);border-radius:var(--r20);
+  box-shadow:var(--gl-sh-sm);margin-bottom:10px;overflow:hidden;
+}
+.dr{padding:13px 16px;border-bottom:1px solid var(--brd);}
 .dr:last-child{border-bottom:none;}
-.dl{font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;}
+.dl{font-size:9px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;}
 .dv{font-size:14px;font-weight:500;color:var(--txt);line-height:1.45;}
 .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
-.chip{font-size:10px;font-weight:600;padding:3px 10px;border-radius:var(--rpill);
-  background:rgba(0,0,0,.06);color:var(--txt2);}
+.chip{font-size:10px;font-weight:600;padding:3px 10px;border-radius:var(--rpill);background:rgba(0,0,0,.06);color:var(--txt2);}
 .ebadge{padding:3px 10px;border-radius:var(--rpill);font-size:11px;font-weight:700;display:inline-block;}
 .e-ok{background:rgba(48,209,88,.12);color:#1A7D36;}
 .e-mid{background:rgba(255,159,10,.14);color:#8B5A00;}
@@ -273,135 +272,119 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 .tw-mid{color:#B25C00;font-weight:600;}
 .tw-bad{color:#C0392B;font-weight:600;}
 
-/* AR button */
-#det-ar{
-  width:100%;height:54px;border:none;border-radius:var(--rpill);
+/* Det AR */
+#det-ar{width:100%;height:52px;border:none;border-radius:var(--rpill);
   background:var(--txt);color:#fff;font-family:var(--f);
   font-size:14px;font-weight:700;letter-spacing:.2px;
   display:flex;align-items:center;justify-content:center;gap:10px;
-  cursor:pointer;box-shadow:0 12px 36px rgba(0,0,0,.16);
-  transition:transform .14s,opacity .14s;margin-top:4px;
-}
+  cursor:pointer;box-shadow:0 8px 28px rgba(0,0,0,.14);
+  transition:transform .14s,opacity .14s;margin-top:4px;}
 #det-ar:active{transform:scale(.97);opacity:.9;}
-#det-ar svg{width:17px;height:17px;}
+#det-ar i{font-size:18px;}
 
-/* ══ ABOUT SCREEN ═════════════════════════════════ */
-#about{
-  position:fixed;inset:0;z-index:400;
-  background:rgba(248,247,244,.97);backdrop-filter:blur(48px);-webkit-backdrop-filter:blur(48px);
-  display:none;flex-direction:column;overflow:hidden;
-}
-#about.on{display:flex;}
-#about-hdr{display:flex;align-items:center;gap:12px;
-  padding:calc(18px + var(--sat)) 20px 14px;
-  border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0;}
-.scr-close{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.06);
-  border:none;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--txt);transition:background .14s;}
-.scr-close:active{background:rgba(0,0,0,.10);}
-.scr-close svg{width:18px;height:18px;}
-.ab-ttl{font-size:18px;font-weight:800;color:var(--txt);}
-#about-body{flex:1;overflow-y:auto;padding:16px 16px calc(var(--sab)+24px);}
-#about-body::-webkit-scrollbar{display:none;}
-.ab-sec{background:rgba(255,255,255,.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border:var(--lg-brd);border-radius:var(--r20);
-  box-shadow:0 6px 24px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.8);
-  padding:20px;margin-bottom:10px;}
-.ab-sec h3{font-size:15px;font-weight:800;color:var(--txt);letter-spacing:-.1px;margin-bottom:8px;}
-.ab-sec p{font-size:14px;line-height:1.65;color:var(--txt2);}
-.ab-code{background:rgba(0,0,0,.05);border-radius:var(--r8);
-  padding:10px 14px;margin-top:8px;font-size:12px;
-  font-family:monospace;color:var(--txt2);line-height:1.6;
-  border:1px solid rgba(0,0,0,.07);}
-.ab-stats{display:flex;gap:8px;margin-top:12px;}
-.ab-stat{flex:1;background:rgba(0,0,0,.04);border-radius:var(--r12);padding:12px;text-align:center;}
-.ab-stat .n{font-size:26px;font-weight:800;color:var(--txt);}
-.ab-stat .l{font-size:9px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
-
-/* ══ TOAST ════════════════════════════════════════ */
+/* ══ TOAST ═══════════════════════════════════════════ */
 #toast{position:fixed;bottom:calc(165px + var(--sab));left:50%;
   transform:translateX(-50%) translateY(14px);
-  background:rgba(12,15,30,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  border:var(--dg-brd);color:#fff;padding:11px 22px;border-radius:var(--rpill);
+  background:rgba(26,20,32,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.12);color:#fff;
+  padding:11px 22px;border-radius:var(--rpill);
   font-size:13px;font-weight:600;z-index:800;
   opacity:0;transition:opacity .24s,transform .24s;pointer-events:none;white-space:nowrap;
-  box-shadow:var(--dg-sh);}
+  box-shadow:0 8px 24px rgba(0,0,0,.2);}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ══ DESKTOP ≥ 1024px ═════════════════════════════ */
+/* ══ DESKTOP ≥ 1024px ════════════════════════════════ */
 #dp-side{display:none;}
 @media(min-width:1024px){
   #dp-side{
     display:flex;flex-direction:column;
-    position:fixed;top:0;left:0;bottom:0;width:340px;
-    background:rgba(12,15,30,.97);backdrop-filter:blur(48px);-webkit-backdrop-filter:blur(48px);
-    border-right:var(--dg-brd);z-index:150;overflow:hidden;
+    position:fixed;top:0;left:0;bottom:0;width:320px;
+    background:rgba(236,232,242,.82);
+    backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
+    border-right:1px solid rgba(255,255,255,.65);
+    z-index:100;overflow:hidden;
+    box-shadow:4px 0 24px rgba(0,0,0,.05);
   }
-  #map{left:340px;}
-  #top-badge{left:356px;}
-  #map-btns{right:16px;}
-  #filt-rail{right:16px;}
-  #shelf{left:340px;}
-  #det{left:340px;}
-  #about{left:340px;}
-  #loc-badge{left:calc(340px + 50%);}
-  #toast{left:calc(340px + 50%);}
-  #dp-hdr{padding:calc(20px + var(--sat)) 20px 14px;border-bottom:var(--dg-brd);flex-shrink:0;}
-  .dp-t{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.2px;}
-  .dp-s{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;font-weight:500;}
-  #dp-filt{padding:10px 14px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;
-    border-bottom:var(--dg-brd);flex-shrink:0;}
-  #dp-filt::-webkit-scrollbar{display:none;}
-  .dpf{flex-shrink:0;height:30px;padding:0 12px;border-radius:var(--rpill);
-    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);
-    font-size:11px;font-weight:600;color:rgba(255,255,255,.48);font-family:var(--f);
-    cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .16s;white-space:nowrap;}
-  .dpf.on{background:var(--acc);border-color:var(--acc);color:#fff;}
-  .dpf .dfd{width:5px;height:5px;border-radius:50%;}
-  #dp-list{flex:1;overflow-y:auto;}
-  #dp-list::-webkit-scrollbar{display:none;}
-  .dp-row{display:flex;align-items:center;gap:12px;padding:11px 20px;
-    border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .12s;}
-  .dp-row:active,.dp-row:hover{background:rgba(255,255,255,.05);}
-  .dp-row-thumb{width:38px;height:38px;border-radius:var(--r8);overflow:hidden;flex-shrink:0;
-    background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;}
-  .dp-row-thumb img{width:100%;height:100%;object-fit:cover;display:none;}
-  .dp-row-thumb img.loaded{display:block;}
-  .dp-row-thumb svg{width:16px;height:16px;stroke:rgba(255,255,255,.25);fill:none;}
+  #map{left:320px;}
+  #hpill{display:none;}
+  #map-btns{right:14px;}
+  #filt-rail{right:14px;}
+  #shelf{left:320px;}
+  #det{left:320px;}
+  #about{left:320px;}
+  #loc-badge{left:calc(320px + 50%);}
+  #toast{left:calc(320px + 50%);}
+  #app{display:none;}
+
+  /* Desktop header */
+  #dp-hdr{padding:calc(18px + var(--sat)) 16px 14px;border-bottom:1px solid rgba(255,255,255,.5);flex-shrink:0;}
+  .dp-ico-row{display:flex;align-items:center;gap:11px;margin-bottom:3px;}
+  .dp-hico{width:38px;height:38px;border-radius:var(--r12);background:linear-gradient(135deg,#B08C50,#D4AA6A);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(176,140,80,.3);}
+  .dp-hico i{color:#fff;font-size:18px;}
+  .dp-t{font-size:15px;font-weight:800;color:var(--txt);}
+  .dp-s{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--mute);margin-top:2px;}
+  /* Filter chips */
+  #dp-filt{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.5);flex-shrink:0;}
+  .dp-frow{display:flex;flex-wrap:wrap;gap:5px;}
+  .dpf{height:28px;padding:0 10px;border-radius:var(--rpill);
+    background:rgba(255,255,255,.5);border:var(--gl-brd);
+    font-size:9px;font-weight:700;color:var(--mute);font-family:var(--f);
+    cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
+  .dpf i{font-size:13px;}
+  .dpf.on{background:var(--gold-a);border-color:rgba(176,140,80,.4);color:var(--gold);}
+  /* List */
+  #dp-list{flex:1;overflow-y:auto;padding:8px 10px 16px;}
+  #dp-list::-webkit-scrollbar{width:3px;}
+  #dp-list::-webkit-scrollbar-thumb{background:rgba(176,140,80,.2);border-radius:99px;}
+  .dp-row{display:flex;align-items:center;gap:10px;
+    padding:10px;border-radius:var(--r16);cursor:pointer;transition:background .12s;margin-bottom:3px;}
+  .dp-row:hover,.dp-row.sel{background:rgba(255,255,255,.55);}
+  .dp-row-ico{width:38px;height:38px;border-radius:var(--r12);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(0,0,0,.12);}
+  .dp-row-ico i{font-size:17px;color:#fff;}
+  .dp-row-ph{width:38px;height:38px;border-radius:var(--r12);overflow:hidden;flex-shrink:0;background:rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;}
+  .dp-row-ph img{width:100%;height:100%;object-fit:cover;display:none;}
+  .dp-row-ph img.loaded{display:block;}
+  .dp-row-ph i{font-size:16px;color:rgba(26,20,32,.3);}
   .dp-row-body{flex:1;min-width:0;}
-  .dp-row-nm{font-size:13px;font-weight:700;color:rgba(255,255,255,.82);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .dp-row-meta{font-size:10px;color:rgba(255,255,255,.32);margin-top:2px;}
-  .dp-row-chev svg{width:13px;height:13px;stroke:rgba(255,255,255,.2);}
+  .dp-row-nm{font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .dp-row-meta{font-size:10px;color:var(--mute);margin-top:1px;}
+  .dp-row-chev i{font-size:15px;color:rgba(26,20,32,.2);}
 }
 </style>
 </head>
 <body>
+
+<!-- BLOBS -->
+<div id="blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
 <!-- MAP -->
 <div id="map"></div>
 
 <!-- DESKTOP SIDE PANEL -->
 <div id="dp-side">
-  <div id="dp-hdr"><div class="dp-t">Ferrières-en-Brie</div><div class="dp-s">Bâtiments publics</div></div>
-  <div id="dp-filt"></div>
+  <div id="dp-hdr">
+    <div class="dp-ico-row">
+      <div class="dp-hico"><i class="ti ti-building-community" aria-hidden="true"></i></div>
+      <div><div class="dp-t">Ferrières-en-Brie</div><div class="dp-s">Patrimoine communal</div></div>
+    </div>
+  </div>
+  <div id="dp-filt"><div class="dp-frow"></div></div>
   <div id="dp-list"></div>
 </div>
 
-<!-- TOP BADGE -->
-<div id="top-badge">
-  <div id="tb-ico"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-  <div><div class="tb-n">FERRIÈRES-EN-BRIE</div><div class="tb-s">Patrimoine communal</div></div>
+<!-- MOBILE HEADER PILL -->
+<div id="app">
+  <div id="hpill">
+    <div id="hp-ico"><i class="ti ti-building-community" aria-hidden="true"></i></div>
+    <div><div class="hp-t">Ferrières-en-Brie</div><div class="hp-s">Patrimoine communal</div></div>
+    <div id="adm-dot"></div>
+  </div>
 </div>
 
 <!-- MAP BUTTONS -->
 <div id="map-btns">
-  <button class="mab" id="btn-about">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-  </button>
-  <button class="mab" id="btn-locate">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
-  </button>
+  <button class="mab" id="btn-about"><i class="ti ti-info-circle" aria-hidden="true"></i></button>
+  <button class="mab" id="btn-locate"><i class="ti ti-current-location" aria-hidden="true"></i></button>
 </div>
 
 <!-- FILTER RAIL -->
@@ -410,95 +393,67 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 <!-- LOC BADGE -->
 <div id="loc-badge"><div class="ldot"></div><span>Position obtenue</span></div>
 
-<!-- SHELF (carousel) -->
-<div id="shelf">
-  <div id="shelf-count">
-    <span class="shelf-n" id="shelf-n">20</span>
-    <span class="shelf-lbl">bâtiments</span>
-  </div>
-  <div id="shelf-cards"></div>
-</div>
+<!-- SHELF -->
+<div id="shelf"><div id="shelf-cards"></div></div>
 
 <!-- DETAIL SCREEN -->
 <div id="det">
   <div id="det-hdr">
-    <button id="det-close">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
+    <button id="det-close"><i class="ti ti-x" aria-hidden="true"></i></button>
     <span id="det-title"></span>
     <div id="det-nav">
-      <button class="dnb" id="det-prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <button class="dnb" id="det-next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <button class="dnb" id="det-prev"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+      <button class="dnb" id="det-next"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
     </div>
   </div>
   <div id="det-body">
-    <div id="det-ribbon"><div class="det-rdot" id="det-rdot"></div><span id="det-rlbl"></span></div>
+    <div id="det-ribbon">
+      <div id="det-rbc"><i class="ti ti-calendar-event" aria-hidden="true"></i></div>
+      <span id="det-rlbl"></span>
+    </div>
     <div id="det-ph-wrap">
-      <div class="det-ph-empty" id="det-ph-empty">
-        <svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-        <span>Photo à venir</span>
-      </div>
-      <div class="det-ph-loading" id="det-ph-ld"><div class="ph-spin"></div></div>
+      <div class="det-ph-ph" id="det-ph-ph"><i class="ti ti-camera" aria-hidden="true"></i><span>Photo à venir</span></div>
+      <div class="det-ph-ld" id="det-ph-ld"><div class="ph-spin"></div></div>
       <img id="det-ph-img" alt="">
     </div>
     <div id="det-info"></div>
-    <button id="det-ar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-      Naviguer vers ce lieu
-    </button>
+    <button id="det-ar"><i class="ti ti-navigation" aria-hidden="true"></i>Naviguer vers ce lieu</button>
   </div>
 </div>
 
 <!-- ABOUT SCREEN -->
 <div id="about">
   <div id="about-hdr">
-    <button class="scr-close" id="about-close">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
+    <button class="scr-close" id="about-close"><i class="ti ti-x" aria-hidden="true"></i></button>
     <span class="ab-ttl">À propos</span>
   </div>
   <div id="about-body">
     <div class="ab-sec">
       <h3>Ferrières-en-Brie</h3>
-      <p>Application de présentation des 20 bâtiments publics de la commune, destinée aux élus. Données issues du document communal officiel. Aucune information inventée ou extrapolée.</p>
+      <p>Application de présentation des 20 bâtiments publics de la commune, destinée aux élus. Données issues du document communal officiel.</p>
       <div class="ab-stats">
         <div class="ab-stat"><div class="n">20</div><div class="l">Bâtiments</div></div>
         <div class="ab-stat"><div class="n">5</div><div class="l">Catégories</div></div>
         <div class="ab-stat"><div class="n">AR</div><div class="l">Réalité augm.</div></div>
       </div>
     </div>
-
     <div class="ab-sec">
       <h3>Contacts</h3>
-      <p>
-        <strong>Associations</strong><br>
-        <a href="mailto:associations@ferrieresenbrie.fr" style="color:var(--acc);text-decoration:none;font-weight:600;">associations@ferrieresenbrie.fr</a>
-      </p>
-      <p style="margin-top:12px;">
-        <strong>Mairie</strong><br>
-        <a href="mailto:mairie@ferrieresenbrie.fr" style="color:var(--acc);text-decoration:none;font-weight:600;">mairie@ferrieresenbrie.fr</a>
-      </p>
-      <p style="margin-top:12px;">
-        <strong>Application &amp; Communication</strong><br>
-        <a href="mailto:communication@ferrieresenbrie.fr" style="color:var(--acc);text-decoration:none;font-weight:600;">communication@ferrieresenbrie.fr</a>
-      </p>
+      <p><strong>Associations</strong><br><a href="mailto:associations@ferrieresenbrie.fr">associations@ferrieresenbrie.fr</a></p>
+      <p style="margin-top:10px;"><strong>Mairie</strong><br><a href="mailto:mairie@ferrieresenbrie.fr">mairie@ferrieresenbrie.fr</a></p>
+      <p style="margin-top:10px;"><strong>Application & Communication</strong><br><a href="mailto:communication@ferrieresenbrie.fr">communication@ferrieresenbrie.fr</a></p>
     </div>
-
     <div class="ab-sec">
       <h3>À propos de cette application</h3>
-      <p>Cette application est un <strong>projet personnel réalisé par Shams Guettaf</strong>. Elle a été conçue pour présenter les bâtiments et lieux publics de la commune de Ferrières-en-Brie aux élus de la commune.</p>
-      <p style="margin-top:10px;">Les contenus et les photos présents dans l'application sont la <strong>propriété exclusive de Shams Guettaf</strong>. Le code de l'application est protégé par le droit d'auteur. Toute reproduction, même partielle, est interdite sans autorisation préalable.</p>
+      <p>Cette application est un <strong>projet personnel réalisé par Shams Guettaf</strong>. Les contenus et photos sont sa propriété exclusive. Le code est protégé par le droit d'auteur.</p>
     </div>
-
     <div class="ab-sec">
       <h3>Données personnelles — RGPD</h3>
-      <p>Cette application est susceptible de stocker certaines informations sur votre appareil, conformément à la législation en vigueur (RGPD). La géolocalisation, si elle est activée, est traitée localement et n'est jamais transmise à un serveur externe.</p>
-      <p style="margin-top:10px;">Conformément au Règlement Général sur la Protection des Données, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour toute demande, contactez : <a href="mailto:communication@ferrieresenbrie.fr" style="color:var(--acc);text-decoration:none;font-weight:600;">communication@ferrieresenbrie.fr</a></p>
+      <p>Cette application est susceptible de stocker certaines informations sur votre appareil, conformément au RGPD. La géolocalisation reste locale et n'est jamais transmise. Contact : <a href="mailto:communication@ferrieresenbrie.fr">communication@ferrieresenbrie.fr</a></p>
     </div>
-
     <div class="ab-sec">
-      <h3>Sources &amp; exactitude</h3>
-      <p>Document source : <em>« Bâtiments – Ferrières-en-Brie »</em>, commune de Ferrières-en-Brie (77164), Seine-et-Marne. Coordonnées GPS fournies par la commune. Les informations sont susceptibles d'évoluer ; consulter la mairie pour toute donnée officielle à jour.</p>
+      <h3>Sources</h3>
+      <p>Document « Bâtiments – Ferrières-en-Brie », commune de Ferrières-en-Brie (77164). GPS fournis par la commune.</p>
     </div>
   </div>
 </div>
@@ -506,452 +461,237 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10141F;
 <div id="toast"></div>
 
 <script>
-/* ══════════════════════════════════════════════════
-   FERRIÈRES-EN-BRIE · Bâtiments Publics
-   Architecture photos : fichiers statiques /photos/
-══════════════════════════════════════════════════ */
-/* Dossier des photos — modifier si tu crées un sous-dossier ex: "./photos/" */
-var PHOTO_DIR = "./photos/";
+var PHOTO_DIR="./photos/";
 
-/* ─ ICONS ─ */
-var IC = {
-  bld:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M10 6h4"/><path d="M10 10h4"/></svg>',
-  mus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/></svg>',
-  spt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93a10 10 0 0 1 14.14 0"/></svg>',
-  lf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/></svg>',
-  wrn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
-  hrt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
-  drp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/></svg>',
-  grd:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>',
-  chv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
-  ph: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>'
+/* ── CATEGORY CONFIG with icons ── */
+var CAT_CFG={
+  "administration":   {icon:"ti-building",       grad:"135deg,#B08C50,#D4AA6A"},
+  "services-mun":     {icon:"ti-tool",            grad:"135deg,#6B7280,#9CA3AF"},
+  "associations":     {icon:"ti-users",           grad:"135deg,#0369A1,#38BDF8"},
+  "evenements":       {icon:"ti-calendar-event",  grad:"135deg,#7C3AED,#A78BFA"},
+  "sport":            {icon:"ti-run",             grad:"135deg,#15803D,#4ADE80"},
+  "culture":          {icon:"ti-music",           grad:"135deg,#1D4ED8,#60A5FA"},
+  "environnement":    {icon:"ti-leaf",            grad:"135deg,#166534,#4ADE80"},
+  "patrimoine":       {icon:"ti-arch",            grad:"135deg,#92400E,#F59E0B"},
+  "ceremonies":       {icon:"ti-rings",           grad:"135deg,#9D174D,#F472B6"},
+  "social":           {icon:"ti-heart",           grad:"135deg,#B45309,#FCD34D"},
+  "seniors":          {icon:"ti-armchair",        grad:"135deg,#C2410C,#FB923C"},
+  "services-publics": {icon:"ti-mail",            grad:"135deg,#0F766E,#2DD4BF"},
+  "infrastructure":   {icon:"ti-droplet",         grad:"135deg,#6D28D9,#A78BFA"}
 };
-function catIcon(c){
-  var map={
-    administration:IC.bld, "services-mun":IC.wrn, associations:IC.hrt,
-    evenements:IC.spt, sport:IC.spt, culture:IC.mus,
-    environnement:IC.lf, patrimoine:IC.drp, ceremonies:IC.bld,
-    social:IC.hrt, seniors:IC.hrt, "services-publics":IC.bld,
-    infrastructure:IC.drp
-  };
-  return map[c]||IC.bld;
-}
+function catIcon(c){return(CAT_CFG[c]||{icon:"ti-building"}).icon;}
+function catGrad(c){return(CAT_CFG[c]||{grad:"135deg,#6B7280,#9CA3AF"}).grad;}
 function catColor(c){return(CATEGORIES[c]||{color:"#475569"}).color;}
 function catLabel(c){return(CATEGORIES[c]||{label:c}).label;}
 function rgba(h,a){var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return"rgba("+r+","+g+","+b+","+a+")";}
 function skip(v){return v===null||v===undefined||v===""||v==="--"||v==="-";}
 
-/* ─ STATE ─ */
-var S={map:null,markers:{},lat:null,lng:null,filter:"all",cur:null,curIdx:0,curSelId:null};
+/* ── STATE ── */
+var S={map:null,lat:null,lng:null,filter:"all",cur:null,curIdx:0,curSelId:null};
 
-/* ─ UTILS ─ */
+/* ── UTILS ── */
 function hav(a,b,c,d){var R=6371000,dl=(c-a)*Math.PI/180,dn=(d-b)*Math.PI/180,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dn/2)*Math.sin(dn/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 function fd(m){return m<1000?Math.round(m)+"m":(m/1000).toFixed(1)+"km";}
 function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},2800);}
 
-/* ═══════════════════════════════════════════════════
-   PHOTO SYSTEM — Static files from /photos/ folder
-   
-   How it works:
-   1. Files are stored in /photos/<id>.jpg in the repo
-   2. data.js has: photo: "mairie-annexe.jpg" (or null)
-   3. getPhotoUrl() returns the full relative path
-   4. Images load with lazy loading + fallback placeholder
-═══════════════════════════════════════════════════ */
-function getPhotoUrl(b){
-  if(!b.photo)return null;
-  return PHOTO_DIR + b.photo;
-}
-
-/* Load an image into elements with fallback */
-function loadPhoto(emptyEl, loadingEl, imgEl, b){
+/* ── PHOTOS ── */
+function getPhotoUrl(b){return b.photo?PHOTO_DIR+b.photo:null;}
+function loadPhoto(phEl,ldEl,imgEl,b){
   var url=getPhotoUrl(b);
-  /* Reset state */
-  imgEl.style.display="none";
-  imgEl.classList.remove("loaded");
-  emptyEl.style.display="flex";
-  if(loadingEl)loadingEl.style.display="none";
-  if(!url)return; /* no photo configured → show placeholder */
-  /* Show spinner */
-  emptyEl.style.display="none";
-  if(loadingEl)loadingEl.style.display="flex";
-  /* Load image */
-  imgEl.onload=function(){
-    if(loadingEl)loadingEl.style.display="none";
-    imgEl.style.display="block";
-    /* Trigger CSS fade-in */
-    requestAnimationFrame(function(){imgEl.classList.add("loaded");});
-  };
-  imgEl.onerror=function(){
-    /* File missing → fall back to placeholder silently */
-    if(loadingEl)loadingEl.style.display="none";
-    imgEl.style.display="none";
-    emptyEl.style.display="flex";
-  };
-  imgEl.src=url;
+  imgEl.style.display="none";imgEl.classList.remove("loaded");
+  phEl.style.display="flex";if(ldEl)ldEl.style.display="none";
+  if(!url)return;
+  phEl.style.display="none";if(ldEl)ldEl.style.display="flex";
+  var t=new Image();
+  t.onload=function(){imgEl.src=url;imgEl.style.display="block";if(ldEl)ldEl.style.display="none";requestAnimationFrame(function(){imgEl.classList.add("loaded");});};
+  t.onerror=function(){phEl.style.display="flex";if(ldEl)ldEl.style.display="none";};
+  t.src=url;
 }
 
-/* ═══════════════════════════════════════════════════════
-   SUPER-FILTRES — 5 groupes larges au lieu de 13 catégories
-   Chaque groupe correspond à des categories[] dans data.js
-═══════════════════════════════════════════════════════ */
-var SUPER = [
-  {
-    id:"all", label:"Tout",
-    cats:null,
-    color:"#4F76FF",
-    icon:IC.grd
-  },
-  {
-    id:"mairie", label:"Mairie & Services",
-    cats:["administration","services-mun","ceremonies"],
-    color:"#1E3A5F",
-    icon:IC.bld
-  },
-  {
-    id:"assoc", label:"Culture",
-    cats:["associations","evenements","culture","seniors"],
-    color:"#0369A1",
-    icon:IC.mus
-  },
-  {
-    id:"sport", label:"Sport",
-    cats:["sport"],
-    color:"#15803D",
-    icon:IC.spt
-  },
-  {
-    id:"social", label:"Social",
-    cats:["social"],
-    color:"#B45309",
-    icon:IC.hrt
-  },
-  {
-    id:"services", label:"Nature & Patrimoine",
-    cats:["services-publics","infrastructure","environnement","patrimoine"],
-    color:"#4D7C0F",
-    icon:IC.lf
-  }
+/* ── SUPER-FILTERS ── */
+var SUPER=[
+  {id:"all",   label:"Tout",             cats:null,          icon:"ti-layout-grid",col:"#B08C50"},
+  {id:"mairie",label:"Mairie & Services",cats:["administration","services-mun","ceremonies"],icon:"ti-building",col:"#B08C50"},
+  {id:"assoc", label:"Culture",          cats:["associations","evenements","culture","seniors"],icon:"ti-music",col:"#1D4ED8"},
+  {id:"sport", label:"Sport",            cats:["sport"],     icon:"ti-run",col:"#15803D"},
+  {id:"social",label:"Social",           cats:["social"],    icon:"ti-heart",col:"#B45309"},
+  {id:"nature",label:"Nature & Patrimoine",cats:["services-publics","infrastructure","environnement","patrimoine"],icon:"ti-leaf",col:"#166534"}
 ];
+function superOf(b){for(var i=1;i<SUPER.length;i++){if(SUPER[i].cats.indexOf(b.categorie)>=0)return SUPER[i].id;}return"all";}
+function labelPriority(b){if(!b.capacite)return 50;var n=parseInt(b.capacite)||0;return n>100?1:n>40?2:n>20?3:n>10?4:5;}
 
-/* Résoudre le super-groupe d'un bâtiment à partir de sa categorie */
-function superOf(b){
-  for(var i=1;i<SUPER.length;i++){
-    if(SUPER[i].cats.indexOf(b.categorie)>=0)return SUPER[i].id;
-  }
-  return "all";
-}
-
-/* ─ MAP — GL NATIVE LAYERS (GPU-anchored, jamais de déplacement) ─ */
+/* ── MAP ── */
 function initMap(){
   maptilersdk.config.apiKey=MAPTILER_KEY;
   S.map=new maptilersdk.Map({
     container:"map",
     style:"https://api.maptiler.com/maps/streets-v2/style.json?key="+MAPTILER_KEY,
-    center:[2.7050,48.8215],
-    zoom:14.5,minZoom:12,maxZoom:19,
+    center:[2.7050,48.8215],zoom:14.5,minZoom:12,maxZoom:19,
     attributionControl:false,navigationControl:false,
     maxBounds:[2.640,48.790,2.790,48.860]
   });
-
-  /* ── Supprimer les warnings "Image X could not be loaded" ── */
   S.map.on("styleimagemissing",function(e){
-    /* MapLibre attend un objet {data, width, height} ou un HTMLImageElement
-       Un canvas vide déclenche parfois une erreur selon la version — on passe ImageData */
-    try{
-      var c=document.createElement("canvas");c.width=2;c.height=2;
-      var id=c.getContext("2d").getImageData(0,0,2,2);
-      S.map.addImage(e.id,{data:id.data,width:2,height:2});
-    }catch(err){}
+    try{var c=document.createElement("canvas");c.width=2;c.height=2;var id=c.getContext("2d").getImageData(0,0,2,2);S.map.addImage(e.id,{data:id.data,width:2,height:2});}catch(err){}
   });
-
   S.map.on("load",function(){
-    var layers=S.map.getStyle().layers||[];
-
-    /* Masquer UNIQUEMENT les couches symbol (texte + icônes)
-       Garder : buildings, roads, landuse, water, parks — tout le rendu géométrique */
-    layers.forEach(function(l){
-      if(l.type==="symbol"){
-        try{S.map.setLayoutProperty(l.id,"visibility","none");}catch(e){}
-      }
+    (S.map.getStyle().layers||[]).forEach(function(l){
+      if(l.type==="symbol"){try{S.map.setLayoutProperty(l.id,"visibility","none");}catch(e){}}
     });
-
-    /* Légère teinte crème pour le fond */
-    try{
-      var bg=layers.find(function(l){return l.type==="background";});
-      if(bg)S.map.setPaintProperty(bg.id,"background-color","#F2EDE5");
-    }catch(e){}
-
+    try{var bg=(S.map.getStyle().layers||[]).find(function(l){return l.type==="background";});if(bg)S.map.setPaintProperty(bg.id,"background-color","#EAE5DC");}catch(e){}
     buildGLPois();
   });
-
   S.map.on("click",function(e){
-    /* Clic dans le vide → désélectionner
-       Sauf si un POI layer a déjà traité ce clic (_poiHandled) */
     if(e.originalEvent&&e.originalEvent._poiHandled)return;
     var f=S.map.queryRenderedFeatures(e.point,{layers:["poi-dot","poi-labels"]});
     if(!f.length)hlGlPoi(null);
   });
 }
 
-/* ─ GL POI LAYERS ─────────────────────────────────────────
-   Couches GPU — ancrées aux coordonnées WGS84.
-   Zéro HTML, zéro CSS transform, zéro déplacement au zoom.
-──────────────────────────────────────────────────────────── */
-/* Priorité d'affichage des labels : les salles à grande capacité apparaissent en premier */
-function labelPriority(b){
-  if(!b.capacite)return 50;
-  var n=parseInt(b.capacite)||0;
-  return n>100?1:n>40?2:n>20?3:n>10?4:5;
-}
-
+/* ── GL POIs ── */
 function makeGeoJSON(filterSuper){
-  return {
-    type:"FeatureCollection",
-    features:BATIMENTS.filter(function(b){
-      if(!b.lat||!b.lng)return false;
-      if(filterSuper==="all")return true;
-      return superOf(b)===filterSuper;
-    }).map(function(b){
-      return {
-        type:"Feature",
-        geometry:{type:"Point",coordinates:[b.lng,b.lat]},
-        properties:{
-          id:b.id,
-          nom:b.nom,
-          color:catColor(b.categorie),
-          priority:labelPriority(b)
-        }
-      };
-    })
-  };
+  return{type:"FeatureCollection",features:BATIMENTS.filter(function(b){
+    if(!b.lat||!b.lng)return false;
+    return filterSuper==="all"||superOf(b)===filterSuper;
+  }).map(function(b){
+    return{type:"Feature",geometry:{type:"Point",coordinates:[b.lng,b.lat]},
+      properties:{id:b.id,nom:b.nom,color:catColor(b.categorie),priority:labelPriority(b)}};
+  })};
 }
-
 function buildGLPois(){
   S.map.addSource("pois",{type:"geojson",data:makeGeoJSON("all")});
-
-  /* Dot discret — visible à partir du zoom 13, taille croissante */
-  S.map.addLayer({
-    id:"poi-dot",type:"circle",source:"pois",
-    minzoom:13,
-    paint:{
-      "circle-radius":["interpolate",["linear"],["zoom"],13,4,16,7,19,10],
-      "circle-color":["get","color"],
-      "circle-stroke-width":["interpolate",["linear"],["zoom"],13,1.5,16,2.5],
-      "circle-stroke-color":"#FFFFFF",
-      "circle-opacity":["interpolate",["linear"],["zoom"],13,0,14,1],
-      "circle-stroke-opacity":["interpolate",["linear"],["zoom"],13,0,14,1]
-    }
-  });
-
-  /* Dot sélectionné */
-  S.map.addLayer({
-    id:"poi-sel",type:"circle",source:"pois",
-    minzoom:13,
-    filter:["==","id","__none__"],
-    paint:{
-      "circle-radius":["interpolate",["linear"],["zoom"],13,7,16,11,19,15],
-      "circle-color":["get","color"],
-      "circle-stroke-width":3,
-      "circle-stroke-color":"#FFFFFF",
-      "circle-opacity":["interpolate",["linear"],["zoom"],13,0,14,1]
-    }
-  });
-
-  /* Texte simple — uniquement à zoom ≥ 15, un par un par collision detection */
-  S.map.addLayer({
-    id:"poi-labels",type:"symbol",source:"pois",
-    minzoom:15,
-    layout:{
-      "text-field":["get","nom"],
-      "text-font":["Open Sans Bold","Arial Unicode MS Bold"],
-      "text-size":11,
-      "text-anchor":"top",
-      "text-offset":[0,0.9],
-      "text-max-width":10,
-      "text-allow-overlap":false,
-      "text-ignore-placement":false,
-      "symbol-sort-key":["get","priority"],
-      "symbol-avoid-edges":true
-    },
-    paint:{
-      "text-color":"#1A1B2E",
-      "text-halo-color":"rgba(255,255,255,0.92)",
-      "text-halo-width":1.8,
-      "text-opacity":["interpolate",["linear"],["zoom"],15,0,16,1]
-    }
-  });
-
-  /* Interactions */
+  S.map.addLayer({id:"poi-dot",type:"circle",source:"pois",minzoom:13,paint:{
+    "circle-radius":["interpolate",["linear"],["zoom"],13,4,16,7,19,10],
+    "circle-color":["get","color"],
+    "circle-stroke-width":["interpolate",["linear"],["zoom"],13,1.5,16,2.5],
+    "circle-stroke-color":"#FFFFFF",
+    "circle-opacity":["interpolate",["linear"],["zoom"],13,0,14,1],
+    "circle-stroke-opacity":["interpolate",["linear"],["zoom"],13,0,14,1]
+  }});
+  S.map.addLayer({id:"poi-sel",type:"circle",source:"pois",minzoom:13,filter:["==","id","__none__"],paint:{
+    "circle-radius":["interpolate",["linear"],["zoom"],13,7,16,11,19,15],
+    "circle-color":["get","color"],
+    "circle-stroke-width":3,
+    "circle-stroke-color":"#FFFFFF",
+    "circle-opacity":["interpolate",["linear"],["zoom"],13,0,14,1]
+  }});
+  S.map.addLayer({id:"poi-labels",type:"symbol",source:"pois",minzoom:15,layout:{
+    "text-field":["get","nom"],"text-font":["Open Sans Bold","Arial Unicode MS Bold"],
+    "text-size":11,"text-anchor":"top","text-offset":[0,0.9],"text-max-width":10,
+    "text-allow-overlap":false,"symbol-sort-key":["get","priority"],"symbol-avoid-edges":true
+  },paint:{
+    "text-color":"#1A1420","text-halo-color":"rgba(255,255,255,0.92)","text-halo-width":1.8,
+    "text-opacity":["interpolate",["linear"],["zoom"],15,0,16,1]
+  }});
   ["poi-dot","poi-labels"].forEach(function(lid){
     S.map.on("mouseenter",lid,function(){S.map.getCanvas().style.cursor="pointer";});
     S.map.on("mouseleave",lid,function(){S.map.getCanvas().style.cursor="";});
     S.map.on("click",lid,function(e){
-      /* MapMouseEvent n'a pas stopPropagation() — on marque l'originalEvent
-         pour que le handler général "clic dans le vide" ne désélectionne pas */
       if(e.originalEvent)e.originalEvent._poiHandled=true;
       if(e.features&&e.features.length)openDetail(e.features[0].properties.id);
     });
   });
 }
+function updateGLPois(){if(!S.map||!S.map.getSource("pois"))return;S.map.getSource("pois").setData(makeGeoJSON(S.filter));}
+function hlGlPoi(id){S.curSelId=id;if(!S.map||!S.map.getLayer("poi-sel"))return;S.map.setFilter("poi-sel",id?["==","id",id]:["==","id","__none__"]);}
 
-function updateGLPois(){
-  if(!S.map||!S.map.getSource("pois"))return;
-  S.map.getSource("pois").setData(makeGeoJSON(S.filter));
-}
-
-function hlGlPoi(id){
-  S.curSelId=id;
-  if(!S.map||!S.map.getLayer("poi-sel"))return;
-  S.map.setFilter("poi-sel",id?["==","id",id]:["==","id","__none__"]);
-}
-
-/* ─ SUPER-FILTERS RAIL ─ */
+/* ── FILTER RAIL ── */
 function buildRail(){
   var r=document.getElementById("filt-rail");r.innerHTML="";
   SUPER.forEach(function(sf){
     var btn=document.createElement("button");
     btn.className="fr-btn"+(S.filter===sf.id?" on":"");
-    btn.dataset.cat=sf.id;
-    btn.title=sf.label;
-    if(sf.id!=="all"){
-      var dot=document.createElement("div");dot.className="fr-dot";
-      dot.style.background=sf.color;btn.appendChild(dot);
-    }
-    var w=document.createElement("div");
-    w.innerHTML=sf.icon.replace("<svg","<svg style='width:17px;height:17px;'");
-    btn.appendChild(w.firstChild);
+    btn.dataset.cat=sf.id;btn.title=sf.label;
+    if(sf.id!=="all"){var dot=document.createElement("div");dot.className="fr-dot";dot.style.background=sf.col;btn.appendChild(dot);}
+    var i=document.createElement("i");i.className="ti "+sf.icon;i.setAttribute("aria-hidden","true");
+    btn.appendChild(i);
     btn.onclick=function(){setFilter(sf.id);};
     r.appendChild(btn);
   });
 }
-
 function setFilter(cat){
   S.filter=cat;
   document.querySelectorAll(".fr-btn").forEach(function(b){b.classList.toggle("on",b.dataset.cat===cat);});
   document.querySelectorAll(".dpf").forEach(function(p){p.classList.toggle("on",p.dataset.cat===cat);});
   updateGLPois();buildShelf();buildDpList();
 }
-
-/* ─ FILTERED ─ */
 function getFiltered(){
-  var out=BATIMENTS.filter(function(b){
-    if(S.filter==="all")return true;
-    return superOf(b)===S.filter;
-  });
+  var out=BATIMENTS.filter(function(b){return S.filter==="all"||superOf(b)===S.filter;});
   if(S.lat!==null)out.sort(function(a,b){return hav(S.lat,S.lng,a.lat,a.lng)-hav(S.lat,S.lng,b.lat,b.lng);});
   return out;
 }
 
-/* ─ SHELF (carousel) ─ */
+/* ── SHELF ── */
 function buildShelf(){
   var c=document.getElementById("shelf-cards"),f=getFiltered();
-  document.getElementById("shelf-n").textContent=f.length;
   c.innerHTML="";
   f.forEach(function(b,i){
-    var co=catColor(b.categorie),la=catLabel(b.categorie);
-    var dist=S.lat!==null?fd(hav(S.lat,S.lng,b.lat,b.lng)):"";
     var url=getPhotoUrl(b);
     var div=document.createElement("div");
-    div.className="sh-card"+(S.cur&&S.cur.id===b.id?" sel":"")+(url?" has-photo":"");
+    div.className="sh-card"+(S.cur&&S.cur.id===b.id?" sel":"");
     div.style.animationDelay=(i*0.04)+"s";
-    var phHTML=url?
-      '<div class="sh-card-ph"><img src="'+url+'" alt="" loading="lazy" onerror="this.parentNode.remove()"><div class="sh-card-ph-ov"></div></div>'
-      :"";
-    div.innerHTML=phHTML+
-      '<div class="sh-c-top">'+
-        '<div class="sh-c-dot" style="background:'+co+'"></div>'+
-        (dist?'<div class="sh-c-dist">'+dist+'</div>':'')+
+    var dist=S.lat!==null?'<div class="sh-cap">'+fd(hav(S.lat,S.lng,b.lat,b.lng))+'</div>':"";
+    var capText=b.capacite&&b.capacite!=="0 personne"?b.capacite:"";
+    div.innerHTML=
+      '<div class="sh-ico" style="background:linear-gradient('+catGrad(b.categorie)+')">'+
+        '<i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i>'+
       '</div>'+
-      '<div class="sh-c-bot">'+
-        '<div class="sh-c-nm">'+b.nom+'</div>'+
-        '<div class="sh-c-row"><div class="sh-c-cat">'+la+'</div><div class="sh-c-arr">'+IC.chv+'</div></div>'+
-      '</div>';
+      '<div class="sh-cat" style="color:'+catColor(b.categorie)+'">'+catLabel(b.categorie)+'</div>'+
+      '<div class="sh-name">'+b.nom+'</div>'+
+      (capText?'<div class="sh-cap">'+capText+'</div>':dist);
     div.onclick=function(){openDetail(b.id);};
     c.appendChild(div);
   });
 }
 
-/* ─ INFO HTML ─ */
+/* ── INFO HTML ── */
 function infoHTML(b){
   function row(l,v){if(skip(v))return"";return'<div class="dr"><div class="dl">'+l+'</div><div class="dv">'+v+'</div></div>';}
-  function linkRow(l,v){
-    if(skip(v))return"";
-    var display=v.replace(/^https?:\/\/(www\.)?/,"");
-    return'<div class="dr"><div class="dl">'+l+'</div><div class="dv"><a href="'+v+'" target="_blank" style="color:var(--acc);text-decoration:none;font-weight:600;">'+display+'</a></div></div>';
-  }
-  function phoneRow(l,v){
-    if(skip(v))return"";
-    return'<div class="dr"><div class="dl">'+l+'</div><div class="dv"><a href="tel:'+v+'" style="color:var(--acc);text-decoration:none;font-weight:600;">'+v+'</a></div></div>';
-  }
-
-  /* Section 1 — Présentation */
+  function linkRow(l,v){if(skip(v))return"";return'<div class="dr"><div class="dl">'+l+'</div><div class="dv"><a href="'+v+'" target="_blank" style="color:var(--gold);text-decoration:none;font-weight:600;">'+v.replace(/^https?:\/\/(www\.)?/,"")+'</a></div></div>';}
+  function phoneRow(l,v){if(skip(v))return"";return'<div class="dr"><div class="dl">'+l+'</div><div class="dv"><a href="tel:'+v+'" style="color:var(--gold);text-decoration:none;font-weight:600;">'+v+'</a></div></div>';}
   var s1='<div class="dp">'+
-    (b.description?'<div class="dr"><div class="dv" style="font-style:normal;color:var(--txt2);line-height:1.6;">'+b.description+'</div></div>':'')+
-    row("Public concerné", b.public)+
-    row("Horaires", b.horaires)+
-    row("Adresse", b.adresse)+
+    (b.description?'<div class="dr"><div class="dv" style="line-height:1.6;color:var(--txt2);">'+b.description+'</div></div>':'')+
+    row("Public concerné",b.public)+row("Horaires",b.horaires)+row("Adresse",b.adresse)+
     (b.capacite&&b.capacite!=="0 personne"?row("Capacité",b.capacite):"")+
   '</div>';
-
-  /* Section 2 — Contact */
-  var contactContent=row("Email",b.contact)+phoneRow("Téléphone",b.telephone)+linkRow("Site web",b.site);
-  var s2=contactContent?'<div class="dp">'+contactContent+'</div>':"";
-
-  /* Section 3 — Activités */
-  var actContent=row("Activités",b.activites)+row("Associations",b.associations)+row("Événements",b.evenements);
-  var s3=actContent?'<div class="dp">'+actContent+'</div>':"";
-
-  /* Section 4 — Équipements */
+  var cc=row("Email",b.contact)+phoneRow("Téléphone",b.telephone)+linkRow("Site web",b.site);
+  var s2=cc?'<div class="dp">'+cc+'</div>':"";
+  var ac=row("Activités",b.activites)+row("Associations",b.associations)+row("Événements",b.evenements);
+  var s3=ac?'<div class="dp">'+ac+'</div>':"";
   var eq=[];
   if(b.wifi&&b.wifi!=="Non")eq.push(b.wifi==="Oui"?"Wi-Fi":"Wi-Fi ("+b.wifi+")");
   if(b.telephone_equip==="Oui")eq.push("Téléphone");
-  if(b.videoprojecteur&&b.videoprojecteur!=="Non"&&b.videoprojecteur!=="Télévision")eq.push("Vidéoprojecteur");
-  if(b.videoprojecteur==="Télévision")eq.push("Télévision");
+  if(b.videoprojecteur&&b.videoprojecteur!=="Non")eq.push(b.videoprojecteur==="Télévision"?"Télévision":"Vidéoprojecteur");
   if(b.sonorisation&&b.sonorisation!=="Non")eq.push(b.sonorisation==="Oui"?"Sonorisation":"Sono "+b.sonorisation);
   if(b.cuisine==="Oui")eq.push("Cuisine");if(b.chauffage==="Oui")eq.push("Chauffage");if(b.climatisation==="Oui")eq.push("Climatisation");
-  var eqRow=eq.length?'<div class="dr"><div class="dl">Équipements</div><div class="chips">'+eq.map(function(e){return'<span class="chip">'+e+'</span>';}).join("")+'</div></div>':"";
   var acc=[];
-  if(!skip(b.pmr))acc.push("PMR : "+b.pmr);
-  if(!skip(b.ascenseur))acc.push("Ascenseur : "+b.ascenseur);
-  if(!skip(b.parking))acc.push("Parking : "+b.parking);
-  if(!skip(b.transports))acc.push("Transports : "+b.transports);
-  var accRow=acc.length?'<div class="dr"><div class="dl">Accessibilité</div><div class="dv">'+acc.join(" · ")+'</div></div>':"";
-  var s4=(accRow||eqRow)?'<div class="dp">'+accRow+eqRow+'</div>':"";
-
-  /* Section 5 — État */
-  var etatRow="";
-  if(!skip(b.etat)){var cls=b.etat==="RAS"||b.etat==="Bon état"?"e-ok":b.etat==="Moyen"?"e-mid":"e-bad";etatRow='<div class="dr"><div class="dl">État général</div><div class="dv"><span class="ebadge '+cls+'">'+b.etat+'</span></div></div>';}
-  var trRow="";
-  if(!skip(b.travaux_recents)&&b.travaux_recents!=="Aucun"&&b.travaux_recents!=="RAS")trRow+='<div class="dr"><div class="dl">Travaux récents</div><div class="dv">'+b.travaux_recents+'</div></div>';
-  if(!skip(b.travaux_a_prevoir)&&b.travaux_a_prevoir!=="Aucun"&&b.travaux_a_prevoir!=="RAS")trRow+='<div class="dr"><div class="dl">Travaux à prévoir</div><div class="dv '+(b.travaux_a_prevoir==="En totalité"?"tw-bad":"tw-mid")+'">'+b.travaux_a_prevoir+'</div></div>';
-  var s5=(etatRow||trRow)?'<div class="dp">'+etatRow+trRow+'</div>':"";
-
+  if(!skip(b.pmr))acc.push("PMR : "+b.pmr);if(!skip(b.ascenseur))acc.push("Ascenseur : "+b.ascenseur);
+  if(!skip(b.parking))acc.push("Parking : "+b.parking);if(!skip(b.transports))acc.push("Transports : "+b.transports);
+  var s4=(eq.length||acc.length)?'<div class="dp">'+(acc.length?'<div class="dr"><div class="dl">Accessibilité</div><div class="dv">'+acc.join(" · ")+'</div></div>':'')+(eq.length?'<div class="dr"><div class="dl">Équipements</div><div class="chips">'+eq.map(function(e){return'<span class="chip">'+e+'</span>';}).join("")+'</div></div>':'')+'</div>':"";
+  var er="";if(!skip(b.etat)){var cls=b.etat==="RAS"||b.etat==="Bon état"?"e-ok":b.etat==="Moyen"?"e-mid":"e-bad";er='<div class="dr"><div class="dl">État général</div><div class="dv"><span class="ebadge '+cls+'">'+b.etat+'</span></div></div>';}
+  var tr="";
+  if(!skip(b.travaux_recents)&&b.travaux_recents!=="Aucun"&&b.travaux_recents!=="RAS")tr+='<div class="dr"><div class="dl">Travaux récents</div><div class="dv">'+b.travaux_recents+'</div></div>';
+  if(!skip(b.travaux_a_prevoir)&&b.travaux_a_prevoir!=="Aucun"&&b.travaux_a_prevoir!=="RAS")tr+='<div class="dr"><div class="dl">Travaux à prévoir</div><div class="dv '+(b.travaux_a_prevoir==="En totalité"?"tw-bad":"tw-mid")+'">'+b.travaux_a_prevoir+'</div></div>';
+  var s5=(er||tr)?'<div class="dp">'+er+tr+'</div>':"";
   return s1+s2+s3+s4+s5;
 }
 
-/* ─ DETAIL ─ */
+/* ── OPEN DETAIL ── */
 function openDetail(id){
   var f=getFiltered(),b=null,idx=0;
   for(var i=0;i<f.length;i++){if(f[i].id===id){b=f[i];idx=i;break;}}
   if(!b){BATIMENTS.forEach(function(x){if(x.id===id)b=x;});if(!b)return;}
   S.cur=b;S.curIdx=idx;
   hlGlPoi(id);
-  if(b.lat&&b.lng&&S.map){
-    S.map.easeTo({center:[b.lng,b.lat],duration:500,easing:function(t){return t*(2-t);}});
-  }
+  if(b.lat&&b.lng&&S.map)S.map.easeTo({center:[b.lng,b.lat],duration:500});
   document.querySelectorAll(".sh-card").forEach(function(c,i){c.classList.toggle("sel",i===idx);});
-  var co=catColor(b.categorie);
+  document.querySelectorAll(".dp-row").forEach(function(r){r.classList.toggle("sel",r.dataset.bid===id);});
   document.getElementById("det-title").textContent=b.nom;
-  document.getElementById("det-rdot").style.background=co;
-  document.getElementById("det-rdot").style.boxShadow="0 0 0 3px "+rgba(co,.2);
+  var rbc=document.getElementById("det-rbc");
+  rbc.style.background="linear-gradient("+catGrad(b.categorie)+")";
+  rbc.style.boxShadow="0 3px 8px "+rgba(catColor(b.categorie),.3);
+  rbc.querySelector("i").className="ti "+catIcon(b.categorie);
   document.getElementById("det-rlbl").textContent=catLabel(b.categorie).toUpperCase();
-  loadPhoto(
-    document.getElementById("det-ph-empty"),
-    document.getElementById("det-ph-ld"),
-    document.getElementById("det-ph-img"),
-    b
-  );
+  loadPhoto(document.getElementById("det-ph-ph"),document.getElementById("det-ph-ld"),document.getElementById("det-ph-img"),b);
   document.getElementById("det-info").innerHTML=infoHTML(b);
   document.getElementById("det-ar").onclick=function(){window.location.href="ar.html?id="+b.id;};
   document.getElementById("det").classList.add("on");
@@ -959,72 +699,58 @@ function openDetail(id){
 document.getElementById("det-close").onclick=function(){
   document.getElementById("det").classList.remove("on");
   S.cur=null;hlGlPoi(null);
-  document.querySelectorAll(".sh-card").forEach(function(c){c.classList.remove("sel");});
+  document.querySelectorAll(".sh-card,.dp-row").forEach(function(c){c.classList.remove("sel");});
 };
-function detNav(dir){
-  var f=getFiltered();
-  var idx=(S.curIdx+dir+f.length)%f.length;
-  openDetail(f[idx].id);
-}
+function detNav(dir){var f=getFiltered();openDetail(f[(S.curIdx+dir+f.length)%f.length].id);}
 document.getElementById("det-prev").onclick=function(){detNav(-1);};
 document.getElementById("det-next").onclick=function(){detNav(1);};
 
-/* ─ ABOUT ─ */
+/* ── ABOUT ── */
 document.getElementById("btn-about").onclick=function(){document.getElementById("about").classList.add("on");};
 document.getElementById("about-close").onclick=function(){document.getElementById("about").classList.remove("on");};
 
-/* ─ GEOLOCATION ─ */
+/* ── GEOLOCATE ── */
 document.getElementById("btn-locate").onclick=function(){
   if(!navigator.geolocation){toast("Géolocalisation non disponible");return;}
   var btn=this;btn.classList.add("on");
   navigator.geolocation.getCurrentPosition(function(p){
     S.lat=p.coords.latitude;S.lng=p.coords.longitude;
-    /* Marqueur position utilisateur via GL (stable, GPU-anchored) */
-    var userGJ={type:"FeatureCollection",features:[{type:"Feature",geometry:{type:"Point",coordinates:[S.lng,S.lat]},properties:{}}]};
-    if(S.map.getSource("user-loc")){
-      S.map.getSource("user-loc").setData(userGJ);
-    } else {
-      S.map.addSource("user-loc",{type:"geojson",data:userGJ});
-      S.map.addLayer({id:"user-loc-ring",type:"circle",source:"user-loc",paint:{"circle-radius":14,"circle-color":"#4F76FF","circle-opacity":0.18,"circle-stroke-width":0}});
-      S.map.addLayer({id:"user-loc-dot",type:"circle",source:"user-loc",paint:{"circle-radius":7,"circle-color":"#4F76FF","circle-stroke-width":3,"circle-stroke-color":"#FFFFFF"}});
-    }
+    var gj={type:"FeatureCollection",features:[{type:"Feature",geometry:{type:"Point",coordinates:[S.lng,S.lat]},properties:{}}]};
+    if(S.map.getSource("user-loc")){S.map.getSource("user-loc").setData(gj);}
+    else{S.map.addSource("user-loc",{type:"geojson",data:gj});S.map.addLayer({id:"user-loc-ring",type:"circle",source:"user-loc",paint:{"circle-radius":14,"circle-color":"#B08C50","circle-opacity":.15}});S.map.addLayer({id:"user-loc-dot",type:"circle",source:"user-loc",paint:{"circle-radius":7,"circle-color":"#B08C50","circle-stroke-width":3,"circle-stroke-color":"#FFFFFF"}});}
     S.map.flyTo({center:[S.lng,S.lat],zoom:15,duration:800});
-    var lb=document.getElementById("loc-badge");lb.classList.add("on");
-    setTimeout(function(){lb.classList.remove("on");},3000);
+    var lb=document.getElementById("loc-badge");lb.classList.add("on");setTimeout(function(){lb.classList.remove("on");},3000);
     buildShelf();buildDpList();
   },function(){btn.classList.remove("on");toast("Position indisponible");},{enableHighAccuracy:true,timeout:8000});
 };
 
-/* ─ DESKTOP PANEL ─ */
+/* ── DESKTOP PANEL ── */
 function buildDpFilt(){
-  var df=document.getElementById("dp-filt");if(!df)return;
-  var h='<button class="dpf on" data-cat="all" onclick="setFilter(\'all\')">Tout</button>';
-  SUPER.forEach(function(sf){
-    if(sf.id==="all")return;
-    h+='<button class="dpf" data-cat="'+sf.id+'" onclick="setFilter(\''+sf.id+'\')" ><span class="dfd" style="background:'+sf.color+'"></span>'+sf.label+'</button>';
-  });
-  df.innerHTML=h;
+  var df=document.querySelector("#dp-filt .dp-frow");if(!df)return;
+  df.innerHTML=SUPER.map(function(sf){
+    return'<button class="dpf'+(S.filter===sf.id?" on":"")+'" data-cat="'+sf.id+'" onclick="setFilter(\''+sf.id+'\')">'
+      +'<i class="ti '+sf.icon+'" aria-hidden="true"></i>'+sf.label+'</button>';
+  }).join("");
 }
 function buildDpList(){
   var dl=document.getElementById("dp-list");if(!dl)return;
   var f=getFiltered();
   dl.innerHTML=f.map(function(b){
-    var co=catColor(b.categorie),la=catLabel(b.categorie);
     var url=getPhotoUrl(b);
-    var dist=S.lat!==null?'<span style="font-size:10px;color:rgba(255,255,255,.3);flex-shrink:0;">'+fd(hav(S.lat,S.lng,b.lat,b.lng))+'</span>':"";
-    var thumbHTML=url
-      ?'<div class="dp-row-thumb"><img src="'+url+'" alt="" loading="lazy" onload="this.classList.add(\'loaded\')" onerror="this.style.display=\'none\'"></div>'
-      :'<div class="dp-row-thumb">'+IC.ph.replace("<svg","<svg style='width:16px;height:16px;stroke:rgba(255,255,255,.25);fill:none;'")+'</div>';
-    return '<div class="dp-row" onclick="openDetail(\''+b.id+'\')">'+thumbHTML+
-      '<div class="dp-row-body"><div class="dp-row-nm">'+b.nom+'</div><div class="dp-row-meta">'+la+(b.capacite&&b.capacite!=="0 personne"?" · "+b.capacite:"")+'</div></div>'+
-      dist+'<div class="dp-row-chev">'+IC.chv+'</div></div>';
+    var dist=S.lat!==null?'<span style="font-size:10px;color:var(--mute);flex-shrink:0;">'+fd(hav(S.lat,S.lng,b.lat,b.lng))+'</span>':"";
+    var thumb=url
+      ?'<div class="dp-row-ph"><img src="'+url+'" alt="" loading="lazy" onload="this.classList.add(\'loaded\')" onerror="this.style.display=\'none\'"></div>'
+      :'<div class="dp-row-ico" style="background:linear-gradient('+catGrad(b.categorie)+');box-shadow:0 3px 8px '+rgba(catColor(b.categorie),.25)+'"><i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i></div>';
+    return'<div class="dp-row" data-bid="'+b.id+'" onclick="openDetail(\''+b.id+'\')">'
+      +thumb+'<div class="dp-row-body"><div class="dp-row-nm">'+b.nom+'</div><div class="dp-row-meta">'+catLabel(b.categorie)+(b.capacite&&b.capacite!=="0 personne"?" · "+b.capacite:"")+'</div></div>'
+      +dist+'<div class="dp-row-chev"><i class="ti ti-chevron-right" aria-hidden="true"></i></div></div>';
   }).join("");
 }
 
-/* ─ EXPOSE ─ */
+/* ── EXPOSE ── */
 window.setFilter=setFilter;window.openDetail=openDetail;
 
-/* ─ INIT ─ */
+/* ── INIT ── */
 buildRail();buildShelf();buildDpFilt();buildDpList();initMap();
 </script>
 </body>
