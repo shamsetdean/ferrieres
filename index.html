@@ -478,7 +478,7 @@ html,body{width:100%;height:100%;overflow:hidden;
       <h3>Ferrières-en-Brie</h3>
       <p>Application de présentation des 20 bâtiments publics de la commune, destinée aux élus. Données issues du document communal officiel.</p>
       <div class="ab-stats">
-        <div class="ab-stat"><div class="n">20</div><div class="l">Bâtiments</div></div>
+        <div class="ab-stat"><div class="n">21</div><div class="l">Bâtiments</div></div>
         <div class="ab-stat"><div class="n">5</div><div class="l">Catégories</div></div>
         <div class="ab-stat"><div class="n">AR</div><div class="l">Réalité augm.</div></div>
       </div>
@@ -523,7 +523,8 @@ var CAT_CFG={
   "social":           {icon:"ti-heart",           grad:"135deg,#B45309,#FCD34D"},
   "seniors":          {icon:"ti-armchair",        grad:"135deg,#C2410C,#FB923C"},
   "services-publics": {icon:"ti-mail",            grad:"135deg,#0F766E,#2DD4BF"},
-  "infrastructure":   {icon:"ti-droplet",         grad:"135deg,#6D28D9,#A78BFA"}
+  "infrastructure":   {icon:"ti-droplet",         grad:"135deg,#6D28D9,#A78BFA"},
+  "education":        {icon:"ti-school",           grad:"135deg,#0284C7,#38BDF8"}
 };
 function catIcon(c){return(CAT_CFG[c]||{icon:"ti-building"}).icon;}
 function catGrad(c){return(CAT_CFG[c]||{grad:"135deg,#6B7280,#9CA3AF"}).grad;}
@@ -557,7 +558,7 @@ function loadPhoto(phEl,ldEl,imgEl,b){
 /* ── SUPER-FILTERS ── */
 var SUPER=[
   {id:"all",   label:"Tout",             cats:null,          icon:"ti-layout-grid",col:"#B08C50"},
-  {id:"mairie",label:"Mairie & Services",cats:["administration","services-mun","ceremonies"],icon:"ti-building",col:"#B08C50"},
+  {id:"mairie",label:"Mairie & Services",cats:["administration","services-mun","ceremonies","education"],icon:"ti-building",col:"#B08C50"},
   {id:"assoc", label:"Culture",          cats:["associations","evenements","culture","seniors"],icon:"ti-music",col:"#1D4ED8"},
   {id:"sport", label:"Sport",            cats:["sport"],     icon:"ti-run",col:"#15803D"},
   {id:"social",label:"Social",           cats:["social"],    icon:"ti-heart",col:"#B45309"},

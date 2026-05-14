@@ -13,7 +13,8 @@ var CATEGORIES = {
   "social":            { label: "Social",            color: "#B45309" },
   "seniors":           { label: "Séniors",           color: "#C2410C" },
   "services-publics":  { label: "Services publics",  color: "#0F766E" },
-  "infrastructure":    { label: "Infrastructure",    color: "#6D28D9" }
+  "infrastructure":    { label: "Infrastructure",    color: "#6D28D9" },
+  "education":        { label: "Éducation",         color: "#0284C7" }
 };
 
 /*
@@ -584,6 +585,35 @@ var BATIMENTS = [
     activites: "Infrastructure eau potable, réserve tampon",
     evenements: null,
     etat: "RAS",
+    travaux_recents: null,
+    travaux_a_prevoir: null
+  }
+
+,
+  /* ── #21 ─ Groupe scolaire de la Taffarette ─────────── */
+  {
+    id: "groupe-scolaire-tafarette",
+    nom: "Groupe scolaire de la Taffarette",
+    categorie: "education",
+    filtres: ["education"],
+    description: "Groupe scolaire public accueillant 403 élèves répartis en 17 classes, de la maternelle au CM2. Situé dans le quartier de la Taffarette.",
+    public: "Élèves, parents et personnels enseignants",
+    horaires: "Selon le calendrier scolaire",
+    contact: "mairie@ferrieresenbrie.fr",
+    telephone: null,
+    site: null,
+    adresse: "Route de la Brosse, Ferrières-en-Brie",
+    lat: 48.822185766363845, lng: 2.70227255307119,
+    photo: null,
+    capacite: "403 élèves · 17 classes",
+    etages: null,
+    pmr: "Oui", ascenseur: "Non", parking: "Oui", transports: "Oui",
+    wifi: null, telephone_equip: null, videoprojecteur: null,
+    sonorisation: null, cuisine: "Oui", chauffage: "Oui", climatisation: null,
+    associations: null,
+    activites: "Enseignement primaire et maternelle",
+    evenements: null,
+    etat: null,
     travaux_recents: null,
     travaux_a_prevoir: null
   }
