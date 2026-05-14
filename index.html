@@ -282,6 +282,50 @@ html,body{width:100%;height:100%;overflow:hidden;
 #det-ar:active{transform:scale(.97);opacity:.9;}
 #det-ar i{font-size:18px;}
 
+/* ══ USER LOCATION MARKER ════════════════════════════ */
+.user-mk{
+  position:relative;
+  width:52px;height:52px;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+/* Outer accuracy halo */
+.user-mk-halo{
+  position:absolute;inset:0;border-radius:50%;
+  background:rgba(176,140,80,.12);
+  border:1px solid rgba(176,140,80,.25);
+}
+/* Pulsing ring */
+.user-mk-pulse{
+  position:absolute;
+  width:28px;height:28px;
+  border-radius:50%;
+  border:1.5px solid rgba(176,140,80,.6);
+  animation:user-pulse 2.2s ease-out infinite;
+}
+@keyframes user-pulse{
+  0%  {transform:scale(1);opacity:.7;}
+  70% {transform:scale(2.2);opacity:0;}
+  100%{transform:scale(2.2);opacity:0;}
+}
+/* Glass dot */
+.user-mk-dot{
+  width:20px;height:20px;border-radius:50%;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:2.5px solid #B08C50;
+  box-shadow:0 2px 12px rgba(176,140,80,.45),0 0 0 4px rgba(176,140,80,.12),inset 0 1px 0 rgba(255,255,255,.8);
+  position:relative;z-index:2;
+  display:flex;align-items:center;justify-content:center;
+}
+/* Inner fill dot */
+.user-mk-dot::after{
+  content:'';
+  width:8px;height:8px;border-radius:50%;
+  background:linear-gradient(135deg,#C8A950,#B08C50);
+  box-shadow:0 1px 4px rgba(176,140,80,.5);
+}
+
 /* ══ TOAST ═══════════════════════════════════════════ */
 #toast{position:fixed;bottom:calc(165px + var(--sab));left:50%;
   transform:translateX(-50%) translateY(14px);
@@ -487,7 +531,7 @@ function rgba(h,a){var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b
 function skip(v){return v===null||v===undefined||v===""||v==="--"||v==="-";}
 
 /* ── STATE ── */
-var S={map:null,lat:null,lng:null,filter:"all",cur:null,curIdx:0,curSelId:null};
+var S={map:null,uMk:null,lat:null,lng:null,filter:"all",cur:null,curIdx:0,curSelId:null};
 
 /* ── UTILS ── */
 function hav(a,b,c,d){var R=6371000,dl=(c-a)*Math.PI/180,dn=(d-b)*Math.PI/180,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dn/2)*Math.sin(dn/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
@@ -715,9 +759,22 @@ document.getElementById("btn-locate").onclick=function(){
   var btn=this;btn.classList.add("on");
   navigator.geolocation.getCurrentPosition(function(p){
     S.lat=p.coords.latitude;S.lng=p.coords.longitude;
-    var gj={type:"FeatureCollection",features:[{type:"Feature",geometry:{type:"Point",coordinates:[S.lng,S.lat]},properties:{}}]};
-    if(S.map.getSource("user-loc")){S.map.getSource("user-loc").setData(gj);}
-    else{S.map.addSource("user-loc",{type:"geojson",data:gj});S.map.addLayer({id:"user-loc-ring",type:"circle",source:"user-loc",paint:{"circle-radius":14,"circle-color":"#B08C50","circle-opacity":.15}});S.map.addLayer({id:"user-loc-dot",type:"circle",source:"user-loc",paint:{"circle-radius":7,"circle-color":"#B08C50","circle-stroke-width":3,"circle-stroke-color":"#FFFFFF"}});}
+
+    /* Supprimer l'ancien marqueur si existant */
+    if(S.uMk){S.uMk.remove();S.uMk=null;}
+
+    /* Créer le marqueur HTML liquid glass avec animation */
+    var el=document.createElement("div");
+    el.className="user-mk";
+    el.innerHTML=
+      '<div class="user-mk-halo"></div>'+
+      '<div class="user-mk-pulse"></div>'+
+      '<div class="user-mk-dot"></div>';
+
+    S.uMk=new maptilersdk.Marker({element:el,anchor:"center"})
+      .setLngLat([S.lng,S.lat])
+      .addTo(S.map);
+
     S.map.flyTo({center:[S.lng,S.lat],zoom:15,duration:800});
     var lb=document.getElementById("loc-badge");lb.classList.add("on");setTimeout(function(){lb.classList.remove("on");},3000);
     buildShelf();buildDpList();
