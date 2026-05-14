@@ -654,7 +654,7 @@ function initMap(){
 
   S.map.on("click",function(e){
     /* Clic dans le vide → désélectionner */
-    var f=S.map.queryRenderedFeatures(e.point,{layers:["poi-dot","poi-halo"]});
+    var f=S.map.queryRenderedFeatures(e.point,{layers:["poi-dot","poi-halo","poi-labels"]});
     if(!f.length)hlGlPoi(null);
   });
 }
@@ -663,6 +663,57 @@ function initMap(){
    Couches GPU — ancrées aux coordonnées WGS84.
    Zéro HTML, zéro CSS transform, zéro déplacement au zoom.
 ──────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────
+   CALLOUT SPRITE — bulle blanche avec flèche vers le bas
+   Image 9-slice stretchable → s'adapte à n'importe quel nom
+───────────────────────────────────────────────────────── */
+function makeCalloutImg(){
+  var W=38,H=46,R=11,AW=9,AH=13,BH=H-AH,PX=2;
+  var c=document.createElement("canvas");
+  c.width=W*2;c.height=H*2; /* @2x */
+  var ctx=c.getContext("2d");
+  ctx.scale(2,2);
+
+  /* Ombre portée */
+  ctx.shadowColor="rgba(0,0,0,.24)";
+  ctx.shadowBlur=7;
+  ctx.shadowOffsetY=3;
+
+  ctx.fillStyle="rgba(255,255,255,.97)";
+  ctx.beginPath();
+  ctx.moveTo(R+PX,PX);
+  ctx.lineTo(W-R-PX,PX);
+  ctx.arcTo(W-PX,PX,W-PX,R+PX,R);
+  ctx.lineTo(W-PX,BH-R-PX);
+  ctx.arcTo(W-PX,BH-PX,W-R-PX,BH-PX,R);
+  ctx.lineTo(W/2+AW,BH-PX);
+  ctx.lineTo(W/2,H-PX-1);
+  ctx.lineTo(W/2-AW,BH-PX);
+  ctx.lineTo(R+PX,BH-PX);
+  ctx.arcTo(PX,BH-PX,PX,BH-R-PX,R);
+  ctx.lineTo(PX,R+PX);
+  ctx.arcTo(PX,PX,R+PX,PX,R);
+  ctx.closePath();
+  ctx.fill();
+
+  return {
+    data: ctx.getImageData(0,0,W*2,H*2).data,
+    width: W*2, height: H*2,
+    /* Zones de stretch (en px logiques) */
+    stretchX: [[R+PX+2, W-R-PX-2]],
+    stretchY: [[R+PX+2, BH-R-PX-2]],
+    /* Zone de contenu texte (sans la flèche) */
+    content:  [PX+4, PX+4, W-PX-4, BH-PX-4]
+  };
+}
+
+/* Priorité d'affichage : plus la capacité est grande, plus le label apparaît tôt */
+function labelPriority(b){
+  if(!b.capacite)return 50;
+  var n=parseInt(b.capacite)||0;
+  return n>100?1:n>40?2:n>20?3:n>10?4:5;
+}
+
 function makeGeoJSON(filterSuper){
   return {
     type:"FeatureCollection",
@@ -677,7 +728,8 @@ function makeGeoJSON(filterSuper){
         properties:{
           id:b.id,
           nom:b.nom,
-          color:catColor(b.categorie)
+          color:catColor(b.categorie),
+          priority:labelPriority(b)
         }
       };
     })
@@ -685,10 +737,21 @@ function makeGeoJSON(filterSuper){
 }
 
 function buildGLPois(){
+  /* ── Enregistrer le sprite callout ── */
+  try{
+    var img=makeCalloutImg();
+    S.map.addImage("callout",img,{
+      pixelRatio:2,
+      stretchX:img.stretchX,
+      stretchY:img.stretchY,
+      content:img.content
+    });
+  }catch(e){console.warn("callout sprite:",e);}
+
   /* Source */
   S.map.addSource("pois",{type:"geojson",data:makeGeoJSON("all")});
 
-  /* Halo large (tap target 40px + effet glow) */
+  /* Halo large (tap target + glow) */
   S.map.addLayer({
     id:"poi-halo",type:"circle",source:"pois",
     paint:{
@@ -699,7 +762,7 @@ function buildGLPois(){
     }
   });
 
-  /* Dot principal (taille fixe en pixels-écran → stable à tout zoom) */
+  /* Dot principal */
   S.map.addLayer({
     id:"poi-dot",type:"circle",source:"pois",
     paint:{
@@ -712,7 +775,7 @@ function buildGLPois(){
     }
   });
 
-  /* Dot sélectionné (par-dessus, filtre sur id) */
+  /* Dot sélectionné */
   S.map.addLayer({
     id:"poi-sel",type:"circle",source:"pois",
     filter:["==","id","__none__"],
@@ -725,18 +788,64 @@ function buildGLPois(){
     }
   });
 
-  /* Curseur pointer sur hover (desktop) */
-  S.map.on("mouseenter","poi-dot",function(){S.map.getCanvas().style.cursor="pointer";});
-  S.map.on("mouseleave","poi-dot",function(){S.map.getCanvas().style.cursor="";});
-
-  /* Clic sur POI */
-  S.map.on("click","poi-dot",function(e){
-    e.stopPropagation();
-    if(e.features&&e.features.length)openDetail(e.features[0].properties.id);
+  /* ── Labels callout (symbol layer) ──────────────────────────
+     Apparaissent progressivement :
+     - Zoom < 13   → invisible
+     - Zoom 13→14  → fade in
+     - text-allow-overlap:false → MapLibre gère la collision seul
+       → les labels se découvrent UN PAR UN en zoomant
+     - symbol-sort-key → les salles importantes apparaissent en premier
+  ────────────────────────────────────────────────────────── */
+  S.map.addLayer({
+    id:"poi-labels",
+    type:"symbol",
+    source:"pois",
+    minzoom:13,
+    layout:{
+      /* Texte */
+      "text-field":["get","nom"],
+      "text-font":["Open Sans Bold","Arial Unicode MS Bold"],
+      "text-size":12,
+      "text-anchor":"bottom",
+      "text-offset":[0,-1.6],
+      "text-max-width":12,
+      /* Icône callout (bulle blanche + flèche) */
+      "icon-image":"callout",
+      "icon-anchor":"bottom",
+      "icon-offset":[0,-1.6],
+      "icon-text-fit":"both",
+      "icon-text-fit-padding":[7,11,7,11],
+      /* Pas de chevauchement : progressif au zoom */
+      "text-allow-overlap":false,
+      "icon-allow-overlap":false,
+      "text-ignore-placement":false,
+      /* Priorité : plus petit = plus important = affiché en premier */
+      "symbol-sort-key":["get","priority"],
+      "symbol-avoid-edges":true
+    },
+    paint:{
+      "text-color":"#1A1B2E",
+      "text-opacity":[
+        "interpolate",["linear"],["zoom"],
+        13,0,
+        14,1
+      ],
+      "icon-opacity":[
+        "interpolate",["linear"],["zoom"],
+        13,0,
+        14,1
+      ]
+    }
   });
-  S.map.on("click","poi-halo",function(e){
-    e.stopPropagation();
-    if(e.features&&e.features.length)openDetail(e.features[0].properties.id);
+
+  /* ── Interactions ── */
+  ["poi-dot","poi-halo","poi-labels"].forEach(function(lid){
+    S.map.on("mouseenter",lid,function(){S.map.getCanvas().style.cursor="pointer";});
+    S.map.on("mouseleave",lid,function(){S.map.getCanvas().style.cursor="";});
+    S.map.on("click",lid,function(e){
+      e.stopPropagation();
+      if(e.features&&e.features.length)openDetail(e.features[0].properties.id);
+    });
   });
 }
 
