@@ -627,9 +627,13 @@ function initMap(){
 
   /* ── Supprimer les warnings "Image X could not be loaded" ── */
   S.map.on("styleimagemissing",function(e){
-    /* Créer un canvas 1×1 transparent comme placeholder */
-    var c=document.createElement("canvas");c.width=1;c.height=1;
-    try{S.map.addImage(e.id,c);}catch(err){}
+    /* MapLibre attend un objet {data, width, height} ou un HTMLImageElement
+       Un canvas vide déclenche parfois une erreur selon la version — on passe ImageData */
+    try{
+      var c=document.createElement("canvas");c.width=2;c.height=2;
+      var id=c.getContext("2d").getImageData(0,0,2,2);
+      S.map.addImage(e.id,{data:id.data,width:2,height:2});
+    }catch(err){}
   });
 
   S.map.on("load",function(){
@@ -663,6 +667,13 @@ function initMap(){
    Couches GPU — ancrées aux coordonnées WGS84.
    Zéro HTML, zéro CSS transform, zéro déplacement au zoom.
 ──────────────────────────────────────────────────────────── */
+/* Priorité d'affichage des labels : les salles à grande capacité apparaissent en premier */
+function labelPriority(b){
+  if(!b.capacite)return 50;
+  var n=parseInt(b.capacite)||0;
+  return n>100?1:n>40?2:n>20?3:n>10?4:5;
+}
+
 function makeGeoJSON(filterSuper){
   return {
     type:"FeatureCollection",
