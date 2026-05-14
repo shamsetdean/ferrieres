@@ -349,7 +349,7 @@ var BATIMENTS = [
     telephone: null,
     site: null,
     adresse: "Rue Jean Jaurès, Ferrières-en-Brie",
-    lat: 48.822159310761165, lng: 2.699754626238832,
+    lat: 48.82027216253771, lng: 2.7060607527097678,
     photo: "lavoir.jpeg",
     capacite: null,
     etages: null,
