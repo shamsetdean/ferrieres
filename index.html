@@ -654,7 +654,7 @@ function initMap(){
 
   S.map.on("click",function(e){
     /* Clic dans le vide → désélectionner */
-    var f=S.map.queryRenderedFeatures(e.point,{layers:["poi-dot","poi-halo","poi-labels"]});
+    var f=S.map.queryRenderedFeatures(e.point,{layers:["poi-dot","poi-labels"]});
     if(!f.length)hlGlPoi(null);
   });
 }
@@ -663,57 +663,6 @@ function initMap(){
    Couches GPU — ancrées aux coordonnées WGS84.
    Zéro HTML, zéro CSS transform, zéro déplacement au zoom.
 ──────────────────────────────────────────────────────────── */
-/* ─────────────────────────────────────────────────────────
-   CALLOUT SPRITE — bulle blanche avec flèche vers le bas
-   Image 9-slice stretchable → s'adapte à n'importe quel nom
-───────────────────────────────────────────────────────── */
-function makeCalloutImg(){
-  var W=38,H=46,R=11,AW=9,AH=13,BH=H-AH,PX=2;
-  var c=document.createElement("canvas");
-  c.width=W*2;c.height=H*2; /* @2x */
-  var ctx=c.getContext("2d");
-  ctx.scale(2,2);
-
-  /* Ombre portée */
-  ctx.shadowColor="rgba(0,0,0,.24)";
-  ctx.shadowBlur=7;
-  ctx.shadowOffsetY=3;
-
-  ctx.fillStyle="rgba(255,255,255,.97)";
-  ctx.beginPath();
-  ctx.moveTo(R+PX,PX);
-  ctx.lineTo(W-R-PX,PX);
-  ctx.arcTo(W-PX,PX,W-PX,R+PX,R);
-  ctx.lineTo(W-PX,BH-R-PX);
-  ctx.arcTo(W-PX,BH-PX,W-R-PX,BH-PX,R);
-  ctx.lineTo(W/2+AW,BH-PX);
-  ctx.lineTo(W/2,H-PX-1);
-  ctx.lineTo(W/2-AW,BH-PX);
-  ctx.lineTo(R+PX,BH-PX);
-  ctx.arcTo(PX,BH-PX,PX,BH-R-PX,R);
-  ctx.lineTo(PX,R+PX);
-  ctx.arcTo(PX,PX,R+PX,PX,R);
-  ctx.closePath();
-  ctx.fill();
-
-  return {
-    data: ctx.getImageData(0,0,W*2,H*2).data,
-    width: W*2, height: H*2,
-    /* Zones de stretch (en px logiques) */
-    stretchX: [[R+PX+2, W-R-PX-2]],
-    stretchY: [[R+PX+2, BH-R-PX-2]],
-    /* Zone de contenu texte (sans la flèche) */
-    content:  [PX+4, PX+4, W-PX-4, BH-PX-4]
-  };
-}
-
-/* Priorité d'affichage : plus la capacité est grande, plus le label apparaît tôt */
-function labelPriority(b){
-  if(!b.capacite)return 50;
-  var n=parseInt(b.capacite)||0;
-  return n>100?1:n>40?2:n>20?3:n>10?4:5;
-}
-
 function makeGeoJSON(filterSuper){
   return {
     type:"FeatureCollection",
@@ -737,109 +686,62 @@ function makeGeoJSON(filterSuper){
 }
 
 function buildGLPois(){
-  /* ── Enregistrer le sprite callout ── */
-  try{
-    var img=makeCalloutImg();
-    S.map.addImage("callout",img,{
-      pixelRatio:2,
-      stretchX:img.stretchX,
-      stretchY:img.stretchY,
-      content:img.content
-    });
-  }catch(e){console.warn("callout sprite:",e);}
-
-  /* Source */
   S.map.addSource("pois",{type:"geojson",data:makeGeoJSON("all")});
 
-  /* Halo large (tap target + glow) */
-  S.map.addLayer({
-    id:"poi-halo",type:"circle",source:"pois",
-    paint:{
-      "circle-radius":["interpolate",["linear"],["zoom"],12,14,18,28],
-      "circle-color":["get","color"],
-      "circle-opacity":0.12,
-      "circle-stroke-width":0
-    }
-  });
-
-  /* Dot principal */
+  /* Dot discret — visible à partir du zoom 13, taille croissante */
   S.map.addLayer({
     id:"poi-dot",type:"circle",source:"pois",
+    minzoom:13,
     paint:{
-      "circle-radius":["interpolate",["linear"],["zoom"],12,7,16,9,19,12],
+      "circle-radius":["interpolate",["linear"],["zoom"],13,4,16,7,19,10],
       "circle-color":["get","color"],
-      "circle-stroke-width":2.5,
+      "circle-stroke-width":["interpolate",["linear"],["zoom"],13,1.5,16,2.5],
       "circle-stroke-color":"#FFFFFF",
-      "circle-pitch-alignment":"map",
-      "circle-pitch-scale":"map"
+      "circle-opacity":["interpolate",["linear"],["zoom"],13,0,14,1],
+      "circle-stroke-opacity":["interpolate",["linear"],["zoom"],13,0,14,1]
     }
   });
 
   /* Dot sélectionné */
   S.map.addLayer({
     id:"poi-sel",type:"circle",source:"pois",
+    minzoom:13,
     filter:["==","id","__none__"],
     paint:{
-      "circle-radius":["interpolate",["linear"],["zoom"],12,11,16,14,19,18],
+      "circle-radius":["interpolate",["linear"],["zoom"],13,7,16,11,19,15],
       "circle-color":["get","color"],
-      "circle-stroke-width":3.5,
+      "circle-stroke-width":3,
       "circle-stroke-color":"#FFFFFF",
-      "circle-pitch-alignment":"map"
+      "circle-opacity":["interpolate",["linear"],["zoom"],13,0,14,1]
     }
   });
 
-  /* ── Labels callout (symbol layer) ──────────────────────────
-     Apparaissent progressivement :
-     - Zoom < 13   → invisible
-     - Zoom 13→14  → fade in
-     - text-allow-overlap:false → MapLibre gère la collision seul
-       → les labels se découvrent UN PAR UN en zoomant
-     - symbol-sort-key → les salles importantes apparaissent en premier
-  ────────────────────────────────────────────────────────── */
+  /* Texte simple — uniquement à zoom ≥ 15, un par un par collision detection */
   S.map.addLayer({
-    id:"poi-labels",
-    type:"symbol",
-    source:"pois",
-    minzoom:13,
+    id:"poi-labels",type:"symbol",source:"pois",
+    minzoom:15,
     layout:{
-      /* Texte */
       "text-field":["get","nom"],
       "text-font":["Open Sans Bold","Arial Unicode MS Bold"],
-      "text-size":12,
-      "text-anchor":"bottom",
-      "text-offset":[0,-1.6],
-      "text-max-width":12,
-      /* Icône callout (bulle blanche + flèche) */
-      "icon-image":"callout",
-      "icon-anchor":"bottom",
-      "icon-offset":[0,-1.6],
-      "icon-text-fit":"both",
-      "icon-text-fit-padding":[7,11,7,11],
-      /* Pas de chevauchement : progressif au zoom */
+      "text-size":11,
+      "text-anchor":"top",
+      "text-offset":[0,0.9],
+      "text-max-width":10,
       "text-allow-overlap":false,
-      "icon-allow-overlap":false,
       "text-ignore-placement":false,
-      /* Priorité : plus petit = plus important = affiché en premier */
       "symbol-sort-key":["get","priority"],
       "symbol-avoid-edges":true
     },
     paint:{
       "text-color":"#1A1B2E",
-      "text-opacity":[
-        "interpolate",["linear"],["zoom"],
-        13,0,
-        14,1
-      ],
-      "icon-opacity":[
-        "interpolate",["linear"],["zoom"],
-        13,0,
-        14,1
-      ]
+      "text-halo-color":"rgba(255,255,255,0.92)",
+      "text-halo-width":1.8,
+      "text-opacity":["interpolate",["linear"],["zoom"],15,0,16,1]
     }
   });
 
-  /* ── Interactions ── */
-  ["poi-dot","poi-halo","poi-labels"].forEach(function(lid){
+  /* Interactions */
+  ["poi-dot","poi-labels"].forEach(function(lid){
     S.map.on("mouseenter",lid,function(){S.map.getCanvas().style.cursor="pointer";});
     S.map.on("mouseleave",lid,function(){S.map.getCanvas().style.cursor="";});
     S.map.on("click",lid,function(e){
