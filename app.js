@@ -27,11 +27,11 @@ var CAT_CFG = {
 
 var SUPER = [
   {id:"all",    label:"Tout",                          cats:null,         icon:"ti-layout-grid"},
-  {id:"mairie", label:"Mairie & Services",             cats:["administration","services-mun","ceremonies","education"],icon:"ti-building"},
-  {id:"loisirs",label:"Loisirs",                      cats:["associations","evenements","culture","seniors"],icon:"ti-music"},
+  {id:"mairie", label:"Mairie & Services",             cats:["administration","services-mun","ceremonies","education"],icon:"ti-building-community"},
+  {id:"loisirs",label:"Loisirs",                      cats:["associations","evenements","culture","seniors"],icon:"ti-users"},
   {id:"sport",  label:"Sport",                        cats:["sport"],    icon:"ti-run"},
   {id:"social", label:"Social et intergénérationnel", cats:["social"],   icon:"ti-heart"},
-  {id:"nature", label:"Nature & Patrimoine",           cats:["services-publics","infrastructure","environnement","patrimoine"],icon:"ti-leaf"}
+  {id:"nature", label:"Nature & Patrimoine",           cats:["services-publics","infrastructure","environnement","patrimoine"],icon:"ti-building ti-leaf"}
 ];
 
 function catIcon(c){return (CAT_CFG[c]||{icon:"ti-building"}).icon;}
@@ -228,14 +228,19 @@ function highlightPin(id){
 /* ────────────────────────────────────────────────
    FILTER RAIL (mobile)
 ──────────────────────────────────────────────── */
+function superIconsHTML(sf){
+  return sf.icon.split(' ').map(function(ic,idx){
+    return '<i class="ti '+ic+'" aria-hidden="true"'+(idx===1?' style="font-size:11px;margin-left:1px"':'')+' ></i>';
+  }).join('');
+}
+
 function buildRail(){
   var r = document.getElementById("filt-rail"); r.innerHTML = "";
   SUPER.forEach(function(sf){
     var btn = document.createElement("button");
     btn.className = "fr-btn" + (S.filter===sf.id?" on":"");
     btn.dataset.cat = sf.id;
-    btn.innerHTML = '<i class="ti '+sf.icon+'" aria-hidden="true"></i>'+
-                    '<span class="fr-tip">'+sf.label+'</span>';
+    btn.innerHTML = superIconsHTML(sf)+'<span class="fr-tip">'+sf.label+'</span>';
     btn.onclick = function(){setFilter(sf.id);};
     r.appendChild(btn);
   });
@@ -426,7 +431,7 @@ function buildDpFilters(){
   var df = document.getElementById("dp-filt"); if(!df) return;
   df.innerHTML = SUPER.map(function(sf){
     return '<button class="dpf'+(S.filter===sf.id?" on":"")+'" data-cat="'+sf.id+'" onclick="setFilter(\''+sf.id+'\')">'+
-           '<i class="ti '+sf.icon+'" aria-hidden="true"></i>'+sf.label+'</button>';
+           superIconsHTML(sf)+sf.label+'</button>';
   }).join("");
 }
 
