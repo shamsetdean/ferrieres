@@ -1,5 +1,5 @@
 // Service Worker — Ferrières-en-Brie Patrimoine
-var CACHE = "ferrieres-v2";
+var CACHE = "ferrieres-v3";
 
 self.addEventListener("install", function(e) {
   self.skipWaiting();

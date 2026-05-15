@@ -1,636 +1,687 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Vue AR — Ferrières-en-Brie</title>
-  <meta name="theme-color" content="#1A2540">
-  <script src="./data.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      width: 100%; height: 100%; overflow: hidden;
-      background: #000;
-      font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      color: #fff;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vue AR — Ferrières-en-Brie</title>
+<meta name="theme-color" content="#FFFFFF">
 
-    /* CAMERA */
-    #camera {
-      position: fixed;
-      inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      z-index: 0;
-    }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 
-    /* OVERLAY */
-    #ar-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 10;
-      pointer-events: none;
-    }
+<script src="./data.js"></script>
 
-    /* AR MARKERS */
-    .ar-marker {
-      position: absolute;
-      transform: translate(-50%, -100%);
-      pointer-events: auto;
-      cursor: pointer;
-      transition: opacity 0.3s;
-    }
-    .ar-bubble {
-      background: rgba(26,37,64,0.88);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 14px;
-      padding: 10px 14px;
-      min-width: 120px;
-      max-width: 160px;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
-      transition: transform 0.15s;
-    }
-    .ar-marker:active .ar-bubble { transform: scale(0.95); }
-    .ar-name {
-      font-size: 13px;
-      font-weight: 700;
-      line-height: 1.3;
-      margin-bottom: 4px;
-    }
-    .ar-dist {
-      font-size: 11px;
-      opacity: 0.7;
-      font-weight: 500;
-    }
-    .ar-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      margin: 6px auto 0;
-    }
-    .ar-stem {
-      width: 2px;
-      height: 14px;
-      background: rgba(255,255,255,0.5);
-      margin: 0 auto;
-    }
-    .ar-tip {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #fff;
-      margin: 0 auto;
-      box-shadow: 0 0 8px #fff;
-    }
+<style>
+:root{
+  --f:'Manrope',system-ui,sans-serif;
+  --fs:'Newsreader',Georgia,serif;
+  --fm:'JetBrains Mono',ui-monospace,monospace;
+  --ink:#171719;
+  --ink-2:#4A4A52;
+  --ink-3:#8A8A92;
+  --gold:#A8763B;
+  --gold-soft:#C9A268;
+  --line:rgba(23,23,25,.10);
+  --glass:rgba(255,255,255,.55);
+  --glass-strong:rgba(255,255,255,.78);
+  --blur:saturate(140%) blur(22px);
+  --r-pill:999px;
+  --r-md:14px;
+  --r-lg:20px;
+  --shadow:0 8px 28px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.10);
+  --sat:env(safe-area-inset-top,0px);
+  --sab:env(safe-area-inset-bottom,0px);
+  --ease:cubic-bezier(.32,.72,0,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  width:100%;height:100%;overflow:hidden;
+  background:#0A0A0A;
+  font-family:var(--f);
+  -webkit-font-smoothing:antialiased;
+  color:var(--ink);
+  -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;border:none;background:none;cursor:pointer;}
 
-    /* COMPASS */
-    #compass {
-      position: fixed;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 50;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    #compass.active { display: flex; }
-    #compass-ring {
-      width: 70px; height: 70px;
-      border-radius: 50%;
-      background: rgba(26,37,64,0.88);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 2px solid rgba(255,255,255,0.2);
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-    }
-    #compass-arrow {
-      width: 4px; height: 28px;
-      background: linear-gradient(180deg, #ef4444 50%, rgba(255,255,255,0.4) 50%);
-      border-radius: 999px;
-      transform-origin: center bottom;
-      position: absolute;
-      bottom: 50%;
-      left: calc(50% - 2px);
-    }
-    #compass-dist-badge {
-      background: rgba(26,37,64,0.88);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 13px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    #compass-target {
-      font-size: 11px;
-      opacity: 0.7;
-      max-width: 80px;
-      text-align: center;
-      line-height: 1.3;
-    }
+/* ── CAMERA ──────────────────────────────────────── */
+#camera{
+  position:fixed;inset:0;width:100%;height:100%;
+  object-fit:cover;z-index:0;
+}
+/* Vignette douce sur la cam pour faire ressortir les marqueurs */
+#camera-overlay{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,.18) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.22) 0%, transparent 20%, transparent 75%, rgba(0,0,0,.32) 100%);
+}
 
-    /* HEADER */
-    #ar-header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      padding: 12px 16px;
-      padding-top: calc(12px + env(safe-area-inset-top, 0px));
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      z-index: 50;
-      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
-      pointer-events: auto;
-    }
-    #btn-ar-back {
-      width: 42px; height: 42px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: none;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: #fff;
-      flex-shrink: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #btn-ar-back svg { width: 20px; height: 20px; }
-    #ar-title {
-      font-size: 16px;
-      font-weight: 700;
-    }
-    #ar-subtitle {
-      font-size: 12px;
-      opacity: 0.6;
-      margin-top: 1px;
-    }
+/* ── OVERLAY AR ──────────────────────────────────── */
+#ar-overlay{position:fixed;inset:0;z-index:10;pointer-events:none;}
 
-    /* STATUS BAR */
-    #ar-status {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      padding: 16px;
-      padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-      background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%);
-      z-index: 50;
-      pointer-events: none;
-    }
-    #ar-status-text {
-      text-align: center;
-      font-size: 13px;
-      opacity: 0.75;
-    }
-    #ar-status-dots {
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .status-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      opacity: 0.4;
-    }
-    .status-dot.ok { opacity: 1; background: #4ADE80; }
-    .status-dot.pending { opacity: 1; background: #FBBF24; }
-    .status-dot.err { opacity: 1; background: #EF4444; }
-    .status-dot.idle { background: #fff; }
+/* ── AR MARKERS ──────────────────────────────────── */
+.ar-marker{
+  position:absolute;
+  transform:translate(-50%,-100%);
+  pointer-events:auto;cursor:pointer;
+  transition:opacity .3s var(--ease);
+  display:flex;flex-direction:column;align-items:center;
+  animation:markerIn .35s var(--ease) both;
+}
+@keyframes markerIn{
+  from{opacity:0;transform:translate(-50%,-100%) translateY(8px);}
+  to{opacity:var(--op, 1);transform:translate(-50%,-100%);}
+}
+.ar-bubble{
+  background:rgba(255,255,255,.78);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:var(--r-lg);
+  padding:10px 14px 12px;
+  min-width:140px;max-width:180px;
+  text-align:left;
+  box-shadow:0 8px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.6);
+  transition:transform .14s var(--ease);
+  display:flex;flex-direction:column;gap:4px;
+}
+.ar-marker:active .ar-bubble{transform:scale(.96);}
+.ar-cat{
+  display:flex;align-items:center;gap:6px;
+  font-size:10px;font-weight:700;letter-spacing:.5px;
+  color:var(--ink-2);text-transform:uppercase;
+}
+.ar-cat .dot{width:7px;height:7px;border-radius:50%;background:var(--c,var(--gold));}
+.ar-name{
+  font-size:14px;font-weight:700;
+  line-height:1.25;color:var(--ink);
+  text-wrap:pretty;
+  letter-spacing:-.005em;
+}
+.ar-dist{
+  font-size:11px;font-weight:600;
+  color:var(--gold);
+  font-feature-settings:"tnum";
+  display:flex;align-items:center;gap:4px;margin-top:2px;
+}
+.ar-dist i{font-size:13px;}
 
-    /* DETAIL SHEET */
-    #ar-sheet {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: #fff;
-      color: #111;
-      border-radius: 22px 22px 0 0;
-      z-index: 60;
-      transform: translateY(100%);
-      transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
-      padding: 0 0 env(safe-area-inset-bottom, 16px);
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-    #ar-sheet.open { transform: translateY(0); }
-    #ar-sheet::-webkit-scrollbar { display: none; }
-    .ar-sheet-handle {
-      padding: 12px 0 0;
-      display: flex; justify-content: center;
-    }
-    .ar-sheet-handle-bar {
-      width: 36px; height: 4px;
-      background: #E5E0D5;
-      border-radius: 999px;
-    }
-    #ar-sheet-content { padding: 12px 20px 24px; }
-    #ar-sheet-name {
-      font-size: 20px;
-      font-weight: 800;
-      color: #111;
-      margin-bottom: 6px;
-    }
-    #ar-sheet-cat {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-    #ar-sheet-desc {
-      font-size: 15px;
-      line-height: 1.6;
-      color: #4B5563;
-      margin-bottom: 16px;
-    }
-    #ar-sheet-btns {
-      display: flex;
-      gap: 10px;
-    }
-    .ar-sheet-btn {
-      flex: 1;
-      height: 50px;
-      border-radius: 12px;
-      border: none;
-      font-size: 14px;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .ar-sheet-btn.primary { background: #1A2540; color: #fff; }
-    .ar-sheet-btn.secondary { background: #F5F3EE; color: #1A2540; }
-    .ar-sheet-btn svg { width: 18px; height: 18px; }
+/* Tige + point d'ancrage */
+.ar-stem{
+  width:1.5px;height:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.95));
+  margin:0 auto;
+  border-radius:2px;
+  box-shadow:0 0 6px rgba(255,255,255,.5);
+}
+.ar-tip{
+  width:10px;height:10px;border-radius:50%;
+  background:#fff;
+  margin:0 auto;
+  box-shadow:0 0 10px rgba(255,255,255,.8), 0 0 0 2px rgba(255,255,255,.4);
+  position:relative;
+}
+.ar-tip::after{
+  content:"";position:absolute;inset:-6px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.55);
+  animation:tipPulse 2.2s ease-out infinite;
+}
+@keyframes tipPulse{
+  0%{transform:scale(1);opacity:.6;}
+  80%{transform:scale(2.4);opacity:0;}
+  100%{transform:scale(2.4);opacity:0;}
+}
 
-    /* PERMISSION SCREEN */
-    #perm-screen {
-      position: fixed;
-      inset: 0;
-      background: #1A2540;
-      z-index: 200;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 32px;
-      text-align: center;
-    }
-    #perm-screen.hidden { display: none; }
-    #perm-screen h2 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
-    #perm-screen p { font-size: 15px; opacity: 0.7; line-height: 1.6; margin-bottom: 28px; }
-    #btn-start-ar {
-      width: 100%;
-      max-width: 320px;
-      height: 54px;
-      background: #fff;
-      color: #1A2540;
-      border: none;
-      border-radius: 14px;
-      font-size: 16px;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    #btn-start-ar:active { opacity: 0.85; }
-  </style>
+/* ── COMPASS ─────────────────────────────────────── */
+#compass{
+  position:fixed;
+  right:16px;top:50%;
+  transform:translateY(-50%);
+  z-index:50;
+  display:none;flex-direction:column;align-items:center;gap:10px;
+  animation:compassIn .42s var(--ease);
+}
+@keyframes compassIn{from{opacity:0;transform:translateY(-50%) translateX(20px);}to{opacity:1;transform:translateY(-50%);}}
+#compass.active{display:flex;}
+#compass-ring{
+  width:76px;height:76px;border-radius:50%;
+  background:rgba(255,255,255,.55);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border:1px solid rgba(255,255,255,.7);
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.7);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+#compass-ring::before{
+  content:"N";
+  position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  font-family:var(--fm);font-size:9px;font-weight:500;
+  color:var(--ink-3);letter-spacing:1px;
+}
+#compass-arrow{
+  width:0;height:0;
+  border-left:7px solid transparent;
+  border-right:7px solid transparent;
+  border-bottom:26px solid var(--gold);
+  transform-origin:center 70%;
+  filter:drop-shadow(0 2px 4px rgba(168,118,59,.4));
+  transition:transform .25s var(--ease);
+}
+#compass-dist-badge{
+  background:rgba(255,255,255,.78);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:var(--r-pill);
+  padding:6px 14px;
+  font-size:13px;font-weight:700;
+  color:var(--ink);
+  white-space:nowrap;
+  font-feature-settings:"tnum";
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+}
+#compass-target{
+  font-size:11px;
+  color:#fff;font-weight:600;
+  max-width:90px;text-align:center;line-height:1.3;
+  text-shadow:0 1px 2px rgba(0,0,0,.5);
+  letter-spacing:.2px;
+}
+
+/* ── HEADER ──────────────────────────────────────── */
+#ar-header{
+  position:fixed;top:0;left:0;right:0;
+  padding:14px 16px;
+  padding-top:calc(14px + var(--sat));
+  display:flex;align-items:center;gap:12px;
+  z-index:50;pointer-events:auto;
+  background:linear-gradient(180deg, rgba(0,0,0,.42) 0%, transparent 100%);
+}
+#btn-ar-back{
+  width:44px;height:44px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.55);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border:1px solid rgba(255,255,255,.65);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink);font-size:20px;
+  flex-shrink:0;
+  box-shadow:0 4px 12px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.7);
+  transition:transform .12s var(--ease);
+}
+#btn-ar-back:active{transform:scale(.92);}
+#ar-head-info{flex:1;color:#fff;}
+#ar-title{
+  font-family:var(--fs);
+  font-size:17px;font-weight:600;
+  letter-spacing:-.005em;
+  text-shadow:0 1px 3px rgba(0,0,0,.4);
+}
+#ar-subtitle{
+  font-family:var(--fm);
+  font-size:10px;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;
+  opacity:.85;margin-top:3px;
+  text-shadow:0 1px 2px rgba(0,0,0,.4);
+}
+
+/* ── STATUS BAR ──────────────────────────────────── */
+#ar-status{
+  position:fixed;bottom:0;left:0;right:0;
+  padding:16px 16px calc(18px + var(--sab));
+  display:flex;justify-content:center;
+  z-index:50;pointer-events:none;
+}
+#ar-status-pill{
+  background:rgba(255,255,255,.55);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:var(--r-pill);
+  padding:10px 18px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.7);
+  pointer-events:auto;
+}
+#ar-status-text{
+  font-size:13px;font-weight:600;color:var(--ink);
+  letter-spacing:-.005em;
+}
+#ar-status-dots{display:flex;gap:6px;}
+.status-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(23,23,25,.18);
+  transition:background .25s var(--ease);
+  position:relative;
+}
+.status-dot.ok{background:#3F7D58;box-shadow:0 0 6px rgba(63,125,88,.5);}
+.status-dot.pending{
+  background:#A8763B;
+  animation:pendingPulse 1.4s ease-in-out infinite;
+}
+.status-dot.err{background:#C0392B;}
+@keyframes pendingPulse{
+  0%,100%{opacity:1;}
+  50%{opacity:.4;}
+}
+
+/* ── DETAIL SHEET ────────────────────────────────── */
+#ar-sheet{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(255,255,255,.85);
+  backdrop-filter:saturate(140%) blur(28px);
+  -webkit-backdrop-filter:saturate(140%) blur(28px);
+  border-top:1px solid rgba(255,255,255,.7);
+  color:var(--ink);
+  border-radius:24px 24px 0 0;
+  z-index:60;
+  transform:translateY(100%);
+  opacity:0;
+  transition:transform .42s var(--ease), opacity .25s var(--ease);
+  padding:0 0 var(--sab);
+  max-height:75vh;overflow-y:auto;
+  box-shadow:0 -20px 60px rgba(0,0,0,.18);
+}
+#ar-sheet.open{transform:translateY(0);opacity:1;}
+#ar-sheet::-webkit-scrollbar{display:none;}
+.ar-sheet-handle{
+  padding:10px 0 4px;
+  display:flex;justify-content:center;
+}
+.ar-sheet-handle-bar{
+  width:42px;height:4px;
+  background:var(--line);
+  border-radius:var(--r-pill);
+}
+#ar-sheet-content{padding:14px 20px 24px;}
+#ar-sheet-cat{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 12px;
+  border-radius:var(--r-pill);
+  font-size:11px;font-weight:700;
+  letter-spacing:.5px;
+  background:rgba(168,118,59,.10);
+  color:var(--gold);
+  margin-bottom:10px;
+}
+#ar-sheet-cat .dot{width:7px;height:7px;border-radius:50%;background:var(--c,var(--gold));}
+#ar-sheet-name{
+  font-family:var(--fs);
+  font-size:24px;font-weight:600;
+  letter-spacing:-.01em;
+  color:var(--ink);margin-bottom:6px;
+  line-height:1.2;
+}
+#ar-sheet-meta{
+  display:flex;align-items:center;gap:14px;
+  font-size:13px;color:var(--ink-2);
+  margin-bottom:14px;
+}
+#ar-sheet-meta .item{display:flex;align-items:center;gap:6px;}
+#ar-sheet-meta i{font-size:15px;color:var(--gold);}
+#ar-sheet-desc{
+  font-size:15px;line-height:1.6;
+  color:var(--ink-2);
+  margin-bottom:20px;
+  text-wrap:pretty;
+}
+#ar-sheet-btns{display:flex;gap:10px;}
+.ar-sheet-btn{
+  flex:1;height:52px;
+  border-radius:var(--r-pill);
+  font-size:14px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .14s var(--ease);
+}
+.ar-sheet-btn:active{transform:scale(.97);}
+.ar-sheet-btn.primary{
+  background:var(--ink);color:#fff;
+  box-shadow:0 6px 20px rgba(0,0,0,.18);
+}
+.ar-sheet-btn.secondary{
+  background:rgba(23,23,25,.05);
+  color:var(--ink);
+  border:1px solid var(--line);
+}
+.ar-sheet-btn i{font-size:18px;}
+
+/* ── PERMISSION SCREEN ───────────────────────────── */
+#perm-screen{
+  position:fixed;inset:0;
+  background:linear-gradient(160deg,#FFFFFF 0%,#F6F6F8 100%);
+  color:var(--ink);
+  z-index:200;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:36px 28px;text-align:center;
+}
+#perm-screen.hidden{display:none;}
+.perm-icon{
+  width:84px;height:84px;
+  border-radius:24px;
+  background:rgba(168,118,59,.10);
+  border:1px solid rgba(168,118,59,.20);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:28px;
+  color:var(--gold);
+  font-size:36px;
+  box-shadow:0 12px 32px rgba(168,118,59,.18), inset 0 1px 0 rgba(255,255,255,.6);
+}
+#perm-eyebrow{
+  font-family:var(--fm);font-size:11px;font-weight:500;
+  letter-spacing:2.2px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:10px;
+}
+#perm-screen h2{
+  font-family:var(--fs);
+  font-size:30px;font-weight:600;
+  letter-spacing:-.01em;line-height:1.1;
+  margin-bottom:14px;color:var(--ink);
+}
+#perm-screen p{
+  font-size:15px;line-height:1.6;
+  color:var(--ink-2);
+  margin-bottom:32px;
+  max-width:340px;
+  text-wrap:pretty;
+}
+.perm-list{
+  display:flex;flex-direction:column;gap:10px;
+  margin-bottom:32px;width:100%;max-width:320px;
+}
+.perm-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;
+  background:#fff;border:1px solid var(--line);
+  border-radius:var(--r-md);
+  text-align:left;
+  box-shadow:0 1px 2px rgba(0,0,0,.03);
+}
+.perm-item i{font-size:22px;color:var(--gold);flex-shrink:0;}
+.perm-item-body{flex:1;}
+.perm-item-t{font-size:14px;font-weight:700;color:var(--ink);}
+.perm-item-s{font-size:12px;color:var(--ink-3);margin-top:2px;}
+#btn-start-ar{
+  width:100%;max-width:320px;height:56px;
+  background:var(--ink);color:#fff;
+  border-radius:var(--r-pill);
+  font-size:15px;font-weight:700;letter-spacing:.2px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 12px 32px rgba(0,0,0,.18);
+  transition:transform .14s var(--ease);
+}
+#btn-start-ar:active{transform:scale(.97);}
+#btn-start-ar i{font-size:18px;}
+</style>
 </head>
 <body>
 
-  <!-- PERMISSION SCREEN -->
-  <div id="perm-screen">
-    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:20px;opacity:0.7"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
-    <h2>Vue Réalité Augmentée</h2>
-    <p>L'application va demander l'accès à votre caméra, votre GPS et l'orientation de l'appareil pour afficher les bâtiments dans votre champ de vision.</p>
-    <button id="btn-start-ar">Activer la vue AR</button>
-  </div>
+<!-- PERMISSION SCREEN -->
+<div id="perm-screen">
+  <div class="perm-icon"><i class="ti ti-augmented-reality" aria-hidden="true"></i></div>
+  <div id="perm-eyebrow">Patrimoine communal · 77164</div>
+  <h2>Vue Réalité Augmentée</h2>
+  <p>Pointez votre appareil vers les bâtiments alentour pour les identifier en temps réel et lancer une navigation guidée.</p>
 
-  <!-- CAMERA FEED -->
-  <video id="camera" autoplay playsinline muted></video>
-
-  <!-- AR OVERLAY -->
-  <div id="ar-overlay"></div>
-
-  <!-- COMPASS (shown when navigating) -->
-  <div id="compass">
-    <div id="compass-ring">
-      <div id="compass-arrow"></div>
+  <div class="perm-list">
+    <div class="perm-item">
+      <i class="ti ti-camera" aria-hidden="true"></i>
+      <div class="perm-item-body">
+        <div class="perm-item-t">Caméra</div>
+        <div class="perm-item-s">Affichage du flux en arrière-plan</div>
+      </div>
     </div>
-    <div id="compass-dist-badge">— m</div>
-    <div id="compass-target">—</div>
-  </div>
-
-  <!-- HEADER -->
-  <div id="ar-header">
-    <button id="btn-ar-back" onclick="window.location.href='index.html'">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-    </button>
-    <div>
-      <div id="ar-title">Réalité Augmentée</div>
-      <div id="ar-subtitle">Pointez vers les bâtiments</div>
+    <div class="perm-item">
+      <i class="ti ti-current-location" aria-hidden="true"></i>
+      <div class="perm-item-body">
+        <div class="perm-item-t">Localisation</div>
+        <div class="perm-item-s">Calcul de la distance aux bâtiments</div>
+      </div>
     </div>
-  </div>
-
-  <!-- STATUS BAR -->
-  <div id="ar-status">
-    <div id="ar-status-text">Initialisation...</div>
-    <div id="ar-status-dots">
-      <div class="status-dot idle" id="dot-camera" title="Caméra"></div>
-      <div class="status-dot idle" id="dot-gps" title="GPS"></div>
-      <div class="status-dot idle" id="dot-orient" title="Orientation"></div>
-    </div>
-  </div>
-
-  <!-- DETAIL SHEET -->
-  <div id="ar-sheet">
-    <div class="ar-sheet-handle"><div class="ar-sheet-handle-bar"></div></div>
-    <div id="ar-sheet-content">
-      <div id="ar-sheet-name">—</div>
-      <div id="ar-sheet-cat"></div>
-      <div id="ar-sheet-desc">—</div>
-      <div id="ar-sheet-btns">
-        <button class="ar-sheet-btn secondary" onclick="closeArSheet()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-          Fermer
-        </button>
-        <button class="ar-sheet-btn primary" id="btn-ar-navigate">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-          Naviguer
-        </button>
+    <div class="perm-item">
+      <i class="ti ti-compass" aria-hidden="true"></i>
+      <div class="perm-item-body">
+        <div class="perm-item-t">Orientation</div>
+        <div class="perm-item-s">Détection de la direction visée</div>
       </div>
     </div>
   </div>
 
-  <script>
-  var AR = {
-    stream: null,
-    heading: 0,
-    lat: null,
-    lng: null,
-    watchId: null,
-    orientOk: false,
-    gpsOk: false,
-    cameraOk: false,
-    navTarget: null,
-    fov: 60
+  <button id="btn-start-ar"><i class="ti ti-camera" aria-hidden="true"></i>Activer la vue AR</button>
+</div>
+
+<!-- CAMERA -->
+<video id="camera" autoplay playsinline muted></video>
+<div id="camera-overlay"></div>
+
+<!-- AR OVERLAY -->
+<div id="ar-overlay"></div>
+
+<!-- COMPASS -->
+<div id="compass">
+  <div id="compass-ring">
+    <div id="compass-arrow"></div>
+  </div>
+  <div id="compass-dist-badge">— m</div>
+  <div id="compass-target">—</div>
+</div>
+
+<!-- HEADER -->
+<div id="ar-header">
+  <button id="btn-ar-back" onclick="window.location.href='index.html'" aria-label="Retour">
+    <i class="ti ti-arrow-left" aria-hidden="true"></i>
+  </button>
+  <div id="ar-head-info">
+    <div id="ar-title">Vue augmentée</div>
+    <div id="ar-subtitle">Pointez vers les bâtiments</div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div id="ar-status">
+  <div id="ar-status-pill">
+    <div id="ar-status-dots">
+      <div class="status-dot" id="dot-camera" title="Caméra"></div>
+      <div class="status-dot" id="dot-gps" title="GPS"></div>
+      <div class="status-dot" id="dot-orient" title="Orientation"></div>
+    </div>
+    <div id="ar-status-text">Initialisation…</div>
+  </div>
+</div>
+
+<!-- DETAIL SHEET -->
+<div id="ar-sheet">
+  <div class="ar-sheet-handle"><div class="ar-sheet-handle-bar"></div></div>
+  <div id="ar-sheet-content">
+    <div id="ar-sheet-cat"><span class="dot"></span><span class="lbl">—</span></div>
+    <div id="ar-sheet-name">—</div>
+    <div id="ar-sheet-meta">
+      <div class="item"><i class="ti ti-map-pin" aria-hidden="true"></i><span id="ar-sheet-dist">—</span></div>
+      <div class="item"><i class="ti ti-compass" aria-hidden="true"></i><span id="ar-sheet-bearing">—</span></div>
+    </div>
+    <div id="ar-sheet-desc">—</div>
+    <div id="ar-sheet-btns">
+      <button class="ar-sheet-btn secondary" onclick="closeArSheet()">
+        <i class="ti ti-x" aria-hidden="true"></i>Fermer
+      </button>
+      <button class="ar-sheet-btn primary" id="btn-ar-navigate">
+        <i class="ti ti-navigation" aria-hidden="true"></i>Naviguer
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+var AR = {
+  stream:null, heading:0, lat:null, lng:null, watchId:null,
+  orientOk:false, gpsOk:false, cameraOk:false,
+  navTarget:null, fov:60
+};
+
+function haversine(lat1,lng1,lat2,lng2){
+  var R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function bearing(lat1,lng1,lat2,lng2){
+  var dLng=(lng2-lng1)*Math.PI/180;
+  var y=Math.sin(dLng)*Math.cos(lat2*Math.PI/180);
+  var x=Math.cos(lat1*Math.PI/180)*Math.sin(lat2*Math.PI/180)-Math.sin(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.cos(dLng);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+function formatDist(m){return m<1000?Math.round(m)+" m":(m/1000).toFixed(1)+" km";}
+function bearingLabel(b){
+  var dirs=["N","NE","E","SE","S","SO","O","NO"];
+  return dirs[Math.round(b/45)%8];
+}
+
+function setDot(id,state){var el=document.getElementById("dot-"+id);if(el)el.className="status-dot "+state;}
+
+function updateStatus(){
+  var msgs=[];
+  if(!AR.cameraOk) msgs.push("Caméra");
+  if(!AR.gpsOk)    msgs.push("GPS");
+  if(!AR.orientOk) msgs.push("Boussole");
+  document.getElementById("ar-status-text").textContent =
+    msgs.length===0 ? "Vue active · "+BATIMENTS.length+" bâtiments" : "En attente : "+msgs.join(" · ");
+}
+
+function startCamera(){
+  setDot("camera","pending");
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}})
+    .then(function(stream){
+      AR.stream=stream;
+      document.getElementById("camera").srcObject=stream;
+      AR.cameraOk=true;setDot("camera","ok");updateStatus();
+    })
+    .catch(function(){setDot("camera","err");document.getElementById("ar-status-text").textContent="Caméra inaccessible";});
+}
+
+function startGPS(){
+  if(!navigator.geolocation){setDot("gps","err");return;}
+  setDot("gps","pending");
+  AR.watchId=navigator.geolocation.watchPosition(
+    function(pos){
+      AR.lat=pos.coords.latitude;AR.lng=pos.coords.longitude;
+      AR.gpsOk=true;setDot("gps","ok");updateStatus();
+      updateCompass();renderMarkers();
+    },
+    function(){setDot("gps","err");},
+    {enableHighAccuracy:true,maximumAge:2000,timeout:10000}
+  );
+}
+
+function startOrientation(){
+  setDot("orient","pending");
+  function onOrient(e){
+    var alpha=e.webkitCompassHeading||(e.alpha?(360-e.alpha):0);
+    AR.heading=alpha;AR.orientOk=true;setDot("orient","ok");
+    renderMarkers();updateCompass();updateStatus();
+  }
+  if(typeof DeviceOrientationEvent!=="undefined"&&typeof DeviceOrientationEvent.requestPermission==="function"){
+    DeviceOrientationEvent.requestPermission()
+      .then(function(p){p==="granted"?window.addEventListener("deviceorientation",onOrient,true):setDot("orient","err");})
+      .catch(function(){setDot("orient","err");});
+  } else {
+    window.addEventListener("deviceorientation",onOrient,true);
+  }
+}
+
+function renderMarkers(){
+  if(!AR.gpsOk||!AR.orientOk) return;
+  var overlay=document.getElementById("ar-overlay");
+  overlay.innerHTML="";
+  var vw=window.innerWidth, vh=window.innerHeight, halfFov=AR.fov/2;
+  for(var i=0;i<BATIMENTS.length;i++){
+    var b=BATIMENTS[i];
+    if(!b.lat||!b.lng) continue;
+    var dist=haversine(AR.lat,AR.lng,b.lat,b.lng);
+    if(dist>1500) continue;
+    var bear=bearing(AR.lat,AR.lng,b.lat,b.lng);
+    var diff=bear-AR.heading;
+    while(diff>180) diff-=360;
+    while(diff<-180) diff+=360;
+    if(Math.abs(diff)>halfFov+5) continue;
+
+    var x=vw/2+(diff/halfFov)*(vw/2);
+    var yFactor=Math.min(dist/400,1);
+    var y=vh*0.30+yFactor*vh*0.30;
+
+    var color=(CATEGORIES[b.categorie]&&CATEGORIES[b.categorie].color)||"#A8763B";
+    var label=(CATEGORIES[b.categorie]&&CATEGORIES[b.categorie].label)||b.categorie;
+    var opacity=Math.max(0.55,1-(dist/1500));
+
+    var el=document.createElement("div");
+    el.className="ar-marker";
+    el.style.left=x+"px";el.style.top=y+"px";
+    el.style.setProperty("--c",color);
+    el.style.setProperty("--op",opacity);
+    el.style.opacity=opacity;
+
+    el.innerHTML=
+      '<div class="ar-bubble">'+
+        '<div class="ar-cat"><span class="dot"></span>'+label+'</div>'+
+        '<div class="ar-name">'+b.nom+'</div>'+
+        '<div class="ar-dist"><i class="ti ti-route" aria-hidden="true"></i>'+formatDist(dist)+'</div>'+
+      '</div>'+
+      '<div class="ar-stem"></div>'+
+      '<div class="ar-tip"></div>';
+
+    (function(building,d,br){
+      el.addEventListener("click",function(){openArSheet(building,d,br);});
+    })(b,dist,bear);
+    overlay.appendChild(el);
+  }
+}
+
+function openArSheet(b,dist,bear){
+  var color=(CATEGORIES[b.categorie]&&CATEGORIES[b.categorie].color)||"#A8763B";
+  var label=(CATEGORIES[b.categorie]&&CATEGORIES[b.categorie].label)||b.categorie;
+  var cat=document.getElementById("ar-sheet-cat");
+  cat.style.setProperty("--c",color);
+  cat.querySelector(".lbl").textContent=label;
+  document.getElementById("ar-sheet-name").textContent=b.nom;
+  document.getElementById("ar-sheet-dist").textContent=dist!=null?formatDist(dist):"—";
+  document.getElementById("ar-sheet-bearing").textContent=bear!=null?bearingLabel(bear):"—";
+  document.getElementById("ar-sheet-desc").textContent=b.description||"Bâtiment public communal.";
+  document.getElementById("btn-ar-navigate").onclick=function(){
+    AR.navTarget=b;
+    document.getElementById("compass").classList.add("active");
+    document.getElementById("compass-target").textContent=b.nom;
+    updateCompass();closeArSheet();
   };
+  document.getElementById("ar-sheet").classList.add("open");
+}
+function closeArSheet(){document.getElementById("ar-sheet").classList.remove("open");}
 
-  // ── UTILS ──────────────────────────────────────────────────────
-  function haversine(lat1, lng1, lat2, lng2) {
-    var R = 6371000;
-    var dLat = (lat2 - lat1) * Math.PI / 180;
-    var dLng = (lng2 - lng1) * Math.PI / 180;
-    var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
-            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-            Math.sin(dLng/2)*Math.sin(dLng/2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+function updateCompass(){
+  if(!AR.navTarget||!AR.gpsOk) return;
+  var b=AR.navTarget;
+  var dist=haversine(AR.lat,AR.lng,b.lat,b.lng);
+  var bear=bearing(AR.lat,AR.lng,b.lat,b.lng);
+  var relBear=bear-AR.heading;
+  document.getElementById("compass-arrow").style.transform="rotate("+relBear+"deg)";
+  document.getElementById("compass-dist-badge").textContent=formatDist(dist);
+  if(dist<20){
+    document.getElementById("compass-target").textContent="Arrivé !";
+    setTimeout(function(){AR.navTarget=null;document.getElementById("compass").classList.remove("active");},3000);
   }
+}
 
-  function bearing(lat1, lng1, lat2, lng2) {
-    var dLng = (lng2 - lng1) * Math.PI / 180;
-    var y = Math.sin(dLng) * Math.cos(lat2 * Math.PI / 180);
-    var x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
-            Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLng);
-    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-  }
-
-  function formatDist(m) {
-    if (m < 1000) return Math.round(m) + " m";
-    return (m/1000).toFixed(1) + " km";
-  }
-
-  function hexToRgba(hex, alpha) {
-    var r = parseInt(hex.slice(1,3),16);
-    var g = parseInt(hex.slice(3,5),16);
-    var b = parseInt(hex.slice(5,7),16);
-    return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
-  }
-
-  // ── STATUS DOTS ────────────────────────────────────────────────
-  function setDot(id, state) {
-    var el = document.getElementById("dot-" + id);
-    if (!el) return;
-    el.className = "status-dot " + state;
-  }
-
-  function updateStatus() {
-    var msgs = [];
-    if (!AR.cameraOk) msgs.push("Caméra en attente");
-    if (!AR.gpsOk)    msgs.push("GPS en attente");
-    if (!AR.orientOk) msgs.push("Orientation en attente");
-    if (msgs.length === 0) {
-      document.getElementById("ar-status-text").textContent = "Vue AR active — " + BATIMENTS.length + " bâtiments";
-    } else {
-      document.getElementById("ar-status-text").textContent = msgs.join(" · ");
-    }
-  }
-
-  // ── CAMERA ────────────────────────────────────────────────────
-  function startCamera() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-      .then(function(stream) {
-        AR.stream = stream;
-        document.getElementById("camera").srcObject = stream;
-        AR.cameraOk = true;
-        setDot("camera", "ok");
-        updateStatus();
-      })
-      .catch(function() {
-        setDot("camera", "err");
-        document.getElementById("ar-status-text").textContent = "Caméra inaccessible";
-      });
-  }
-
-  // ── GPS ───────────────────────────────────────────────────────
-  function startGPS() {
-    if (!navigator.geolocation) {
-      setDot("gps", "err");
-      return;
-    }
-    setDot("gps", "pending");
-    AR.watchId = navigator.geolocation.watchPosition(
-      function(pos) {
-        AR.lat = pos.coords.latitude;
-        AR.lng = pos.coords.longitude;
-        AR.gpsOk = true;
-        setDot("gps", "ok");
-        updateStatus();
-        updateCompass();
-        renderMarkers();
-      },
-      function() { setDot("gps", "err"); },
-      { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
-    );
-  }
-
-  // ── ORIENTATION ───────────────────────────────────────────────
-  function startOrientation() {
-    function onOrient(e) {
-      var alpha = e.webkitCompassHeading || (e.alpha ? (360 - e.alpha) : 0);
-      AR.heading = alpha;
-      AR.orientOk = true;
-      setDot("orient", "ok");
-      renderMarkers();
-      updateCompass();
-    }
-
-    if (typeof DeviceOrientationEvent !== "undefined" &&
-        typeof DeviceOrientationEvent.requestPermission === "function") {
-      DeviceOrientationEvent.requestPermission()
-        .then(function(p) {
-          if (p === "granted") {
-            window.addEventListener("deviceorientation", onOrient, true);
-          } else {
-            setDot("orient", "err");
-          }
-        })
-        .catch(function() { setDot("orient", "err"); });
-    } else {
-      window.addEventListener("deviceorientation", onOrient, true);
-    }
-  }
-
-  // ── RENDER AR MARKERS ─────────────────────────────────────────
-  function renderMarkers() {
-    if (!AR.gpsOk || !AR.orientOk) return;
-
-    var overlay = document.getElementById("ar-overlay");
-    overlay.innerHTML = "";
-
-    var vw = window.innerWidth;
-    var vh = window.innerHeight;
-    var halfFov = AR.fov / 2;
-
-    for (var i = 0; i < BATIMENTS.length; i++) {
-      var b = BATIMENTS[i];
-      if (!b.lat || !b.lng) continue;
-
-      var dist = haversine(AR.lat, AR.lng, b.lat, b.lng);
-      if (dist > 1500) continue;
-
-      var bear = bearing(AR.lat, AR.lng, b.lat, b.lng);
-      var diff = bear - AR.heading;
-      while (diff > 180) diff -= 360;
-      while (diff < -180) diff += 360;
-
-      if (Math.abs(diff) > halfFov + 5) continue;
-
-      var x = vw / 2 + (diff / halfFov) * (vw / 2);
-      // Y: closer = lower on screen
-      var yFactor = Math.min(dist / 400, 1);
-      var y = vh * 0.25 + yFactor * vh * 0.35;
-
-      var color = (CATEGORIES[b.categorie] && CATEGORIES[b.categorie].color) || "#1A2540";
-      var opacity = Math.max(0.4, 1 - (dist / 1500));
-
-      var el = document.createElement("div");
-      el.className = "ar-marker";
-      el.style.left = x + "px";
-      el.style.top = y + "px";
-      el.style.opacity = opacity;
-
-      el.innerHTML =
-        '<div class="ar-bubble">' +
-          '<div class="ar-name">' + b.nom + '</div>' +
-          '<div class="ar-dist">' + formatDist(dist) + '</div>' +
-          '<div class="ar-dot" style="background:' + color + '"></div>' +
-        '</div>' +
-        '<div class="ar-stem"></div>' +
-        '<div class="ar-tip"></div>';
-
-      (function(building) {
-        el.addEventListener("click", function() {
-          openArSheet(building);
-        });
-      })(b);
-
-      overlay.appendChild(el);
-    }
-  }
-
-  // ── AR SHEET ──────────────────────────────────────────────────
-  function openArSheet(b) {
-    document.getElementById("ar-sheet-name").textContent = b.nom;
-
-    var color = (CATEGORIES[b.categorie] && CATEGORIES[b.categorie].color) || "#1A2540";
-    var catLabel = (CATEGORIES[b.categorie] && CATEGORIES[b.categorie].label) || b.categorie;
-    var catEl = document.getElementById("ar-sheet-cat");
-    catEl.style.background = hexToRgba(color, 0.12);
-    catEl.style.color = color;
-    catEl.textContent = catLabel;
-
-    document.getElementById("ar-sheet-desc").textContent = b.description || "Bâtiment public communal.";
-
-    document.getElementById("btn-ar-navigate").onclick = function() {
-      AR.navTarget = b;
-      document.getElementById("compass").classList.add("active");
-      document.getElementById("compass-target").textContent = b.nom;
-      updateCompass();
-      closeArSheet();
-    };
-
-    document.getElementById("ar-sheet").classList.add("open");
-  }
-
-  function closeArSheet() {
-    document.getElementById("ar-sheet").classList.remove("open");
-  }
-
-  // ── COMPASS (navigation) ──────────────────────────────────────
-  function updateCompass() {
-    if (!AR.navTarget || !AR.gpsOk) return;
-    var b = AR.navTarget;
-    var dist = haversine(AR.lat, AR.lng, b.lat, b.lng);
-    var bear = bearing(AR.lat, AR.lng, b.lat, b.lng);
-    var relBear = bear - AR.heading;
-
-    document.getElementById("compass-arrow").style.transform = "rotate(" + relBear + "deg)";
-    document.getElementById("compass-dist-badge").textContent = formatDist(dist);
-
-    if (dist < 20) {
-      document.getElementById("compass-target").textContent = "Arrivé !";
-      setTimeout(function() {
-        AR.navTarget = null;
-        document.getElementById("compass").classList.remove("active");
-      }, 3000);
-    }
-  }
-
-  // ── START ─────────────────────────────────────────────────────
-  document.getElementById("btn-start-ar").onclick = function() {
-    document.getElementById("perm-screen").classList.add("hidden");
-    startCamera();
-    startGPS();
-    startOrientation();
-    updateStatus();
-
-    // Render loop
-    setInterval(renderMarkers, 200);
-  };
-
-  window.closeArSheet = closeArSheet;
-
-  // Stop camera when leaving
-  window.addEventListener("pagehide", function() {
-    if (AR.stream) {
-      AR.stream.getTracks().forEach(function(t) { t.stop(); });
-    }
-    if (AR.watchId !== null) {
-      navigator.geolocation.clearWatch(AR.watchId);
-    }
-  });
-  </script>
+document.getElementById("btn-start-ar").onclick=function(){
+  document.getElementById("perm-screen").classList.add("hidden");
+  startCamera();startGPS();startOrientation();updateStatus();
+  setInterval(renderMarkers,200);
+};
+window.closeArSheet=closeArSheet;
+window.addEventListener("pagehide",function(){
+  if(AR.stream) AR.stream.getTracks().forEach(function(t){t.stop();});
+  if(AR.watchId!==null) navigator.geolocation.clearWatch(AR.watchId);
+});
+</script>
 </body>
 </html>

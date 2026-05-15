@@ -14,7 +14,7 @@ var CATEGORIES = {
   "seniors":           { label: "Séniors",           color: "#C2410C" },
   "services-publics":  { label: "Services publics",  color: "#0F766E" },
   "infrastructure":    { label: "Infrastructure",    color: "#6D28D9" },
-  "education":        { label: "Éducation",         color: "#0284C7" }
+  "education":         { label: "Éducation",         color: "#0284C7" }
 };
 
 /*
@@ -587,9 +587,8 @@ var BATIMENTS = [
     etat: "RAS",
     travaux_recents: null,
     travaux_a_prevoir: null
-  }
+  },
 
-,
   /* ── #21 ─ Groupe scolaire de la Taffarette ─────────── */
   {
     id: "groupe-scolaire-tafarette",
@@ -617,5 +616,4 @@ var BATIMENTS = [
     travaux_recents: null,
     travaux_a_prevoir: null
   }
-
 ];
