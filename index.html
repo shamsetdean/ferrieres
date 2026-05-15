@@ -38,9 +38,7 @@
 <link rel="stylesheet" href="design.css">
 <script src="data.js"></script>
 
-<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
 </head>
 <body data-variant="A">
 
@@ -160,76 +158,78 @@
 <script src="app.js"></script>
 
 <!-- Tweaks panel -->
-<script type="text/babel" src="tweaks-panel.jsx"></script>
-<script type="text/babel">
-const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "variant": "A",
-  "showGrid": true,
-  "showLabelsAlways": false
-}/*EDITMODE-END*/;
+<script>
+/* ── TWEAKS PANEL — vanilla JS, zéro dépendance ── */
+(function(){
+  var T={variant:"A",showGrid:true,showLabelsAlways:false};
 
-function FerrieresTweaks(){
-  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  function apply(){
+    document.body.dataset.variant=T.variant;
+    document.getElementById("texture").style.display=T.showGrid?"":"none";
+    document.body.classList.toggle("always-labels",T.showLabelsAlways);
+    document.querySelector(".twk-variant-desc").textContent=
+      T.variant==="A"?"Atelier — ivoire chaud, grain papier, sérif éditorial.":"Atlas — ivoire froid, grille technique, repères aux angles.";
+    document.querySelectorAll(".twk-radio-btn").forEach(function(b){
+      b.classList.toggle("on",b.dataset.val===T.variant);
+    });
+    document.getElementById("twk-grid-tog").classList.toggle("on",T.showGrid);
+    document.getElementById("twk-labels-tog").classList.toggle("on",T.showLabelsAlways);
+  }
 
-  React.useEffect(()=>{
-    document.body.dataset.variant = t.variant;
-  },[t.variant]);
+  var panel=document.createElement("div");
+  panel.id="twk-panel";
+  panel.innerHTML=
+    '<div id="twk-hd">'+
+      '<span style="font-size:11px;font-weight:700;letter-spacing:.05em;opacity:.6;text-transform:uppercase;">Tweaks</span>'+
+      '<button id="twk-close" aria-label="Fermer">✕</button>'+
+    '</div>'+
+    '<div class="twk-sect-lbl">Direction visuelle</div>'+
+    '<div class="twk-radio-group">'+
+      '<button class="twk-radio-btn on" data-val="A">Atelier</button>'+
+      '<button class="twk-radio-btn" data-val="B">Atlas</button>'+
+    '</div>'+
+    '<p class="twk-variant-desc">Atelier — ivoire chaud, grain papier, sérif éditorial.</p>'+
+    '<div class="twk-sect-lbl">Arrière-plan</div>'+
+    '<div class="twk-row-h"><span class="twk-lbl">Texture / grille</span><button class="twk-tog on" id="twk-grid-tog"></button></div>'+
+    '<div class="twk-sect-lbl">Marqueurs</div>'+
+    '<div class="twk-row-h"><span class="twk-lbl">Toujours afficher les noms</span><button class="twk-tog" id="twk-labels-tog"></button></div>';
 
-  React.useEffect(()=>{
-    document.getElementById("texture").style.display = t.showGrid ? "" : "none";
-  },[t.showGrid]);
+  var style=document.createElement("style");
+  style.textContent=
+    '#twk-panel{position:fixed;right:14px;bottom:14px;z-index:9999;width:240px;'+
+    'background:rgba(250,249,247,.88);color:#29261b;'+
+    'backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);'+
+    'border:1px solid rgba(255,255,255,.6);border-radius:14px;'+
+    'box-shadow:0 12px 40px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.5);'+
+    'font:12px/1.4 system-ui,sans-serif;padding:0 0 12px;overflow:hidden;}'+
+    '#twk-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 10px 14px;border-bottom:1px solid rgba(0,0,0,.06);margin-bottom:8px;}'+
+    '#twk-close{background:rgba(0,0,0,.06);border:none;width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:11px;color:rgba(0,0,0,.5);}'+
+    '.twk-sect-lbl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(0,0,0,.4);padding:6px 14px 4px;}'+
+    '.twk-radio-group{display:flex;gap:5px;padding:4px 14px;}'+
+    '.twk-radio-btn{flex:1;height:30px;border:1px solid rgba(0,0,0,.12);border-radius:7px;font-size:12px;font-weight:600;color:rgba(0,0,0,.5);background:transparent;cursor:pointer;transition:all .15s;}'+
+    '.twk-radio-btn.on{background:#29261b;color:#fff;border-color:#29261b;}'+
+    '.twk-variant-desc{font-size:11px;color:rgba(0,0,0,.45);padding:4px 14px 2px;line-height:1.5;}'+
+    '.twk-row-h{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;}'+
+    '.twk-lbl{font-size:12px;color:rgba(0,0,0,.65);font-weight:500;}'+
+    '.twk-tog{width:38px;height:22px;border-radius:99px;border:none;cursor:pointer;background:rgba(0,0,0,.15);position:relative;transition:background .2s;}'+
+    '.twk-tog::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}'+
+    '.twk-tog.on{background:#29261b;}.twk-tog.on::after{transform:translateX(16px);}';
 
-  React.useEffect(()=>{
-    document.body.classList.toggle("always-labels", t.showLabelsAlways);
-  },[t.showLabelsAlways]);
+  document.head.appendChild(style);
+  document.body.appendChild(panel);
 
-  return (
-    <TweaksPanel title="Tweaks · Refonte">
-      <TweakSection label="Direction visuelle">
-        <TweakRadio
-          label="Variante"
-          value={t.variant}
-          options={[
-            {value:"A", label:"Atelier"},
-            {value:"B", label:"Atlas"}
-          ]}
-          onChange={(v)=>setTweak("variant", v)}
-        />
-        <p style={{
-          fontSize:"12px", color:"rgba(0,0,0,.55)", lineHeight:1.5, padding:"4px 14px 8px"
-        }}>
-          {t.variant === "A"
-            ? "Atelier — ivoire chaud, grain papier, sérif éditorial."
-            : "Atlas — ivoire froid, grille technique, repères aux angles."}
-        </p>
-      </TweakSection>
+  panel.querySelectorAll(".twk-radio-btn").forEach(function(b){
+    b.onclick=function(){T.variant=b.dataset.val;apply();};
+  });
+  document.getElementById("twk-grid-tog").onclick=function(){T.showGrid=!T.showGrid;apply();};
+  document.getElementById("twk-labels-tog").onclick=function(){T.showLabelsAlways=!T.showLabelsAlways;apply();};
+  document.getElementById("twk-close").onclick=function(){panel.style.display="none";};
 
-      <TweakSection label="Arrière-plan">
-        <TweakToggle
-          label="Texture / grille"
-          value={t.showGrid}
-          onChange={(v)=>setTweak("showGrid", v)}
-        />
-      </TweakSection>
-
-      <TweakSection label="Marqueurs">
-        <TweakToggle
-          label="Toujours afficher les noms"
-          value={t.showLabelsAlways}
-          onChange={(v)=>setTweak("showLabelsAlways", v)}
-        />
-      </TweakSection>
-    </TweaksPanel>
-  );
-}
-
-const tweaksRoot = document.createElement("div");
-document.body.appendChild(tweaksRoot);
-ReactDOM.createRoot(tweaksRoot).render(<FerrieresTweaks />);
+  apply();
+})();
 </script>
 
 <style>
-  /* Always-labels mode */
   body.always-labels .pin-label{opacity:1 !important;}
 </style>
 
