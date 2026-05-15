@@ -35,6 +35,21 @@ var SUPER = [
 ];
 
 function catIcon(c){return (CAT_CFG[c]||{icon:"ti-building"}).icon;}
+
+/* Icône(s) d'un bâtiment — priorité au champ b.icon sur la catégorie */
+function buildingIcon(b){
+  return (b && b.icon) ? b.icon.split(' ')[0] : catIcon(b.categorie);
+}
+/* Rendu HTML des icônes (1 ou 2) dans une pastille */
+function buildingIconsHTML(b){
+  if(!b || !b.icon) return '<i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i>';
+  var icons = b.icon.split(' ');
+  if(icons.length===1) return '<i class="ti '+icons[0]+'" aria-hidden="true"></i>';
+  /* Double icône : deux <i> superposés en minuscule */
+  return icons.map(function(ic,idx){
+    return '<i class="ti '+ic+'" aria-hidden="true" style="font-size:'+(idx===0?'14px':'11px')+';'+(idx===1?'margin-left:2px':'')+'"></i>';
+  }).join('');
+}
 function catColor(c){return (CATEGORIES[c]||{color:"#8E6628"}).color;}
 function catLabel(c){return (CATEGORIES[c]||{label:c}).label;}
 function superOf(b){for(var i=1;i<SUPER.length;i++){if(SUPER[i].cats.indexOf(b.categorie)>=0)return SUPER[i].id;}return "all";}
@@ -131,7 +146,7 @@ function renderFallbackPins(){
     pin.style.top = pos.y + "px";
     pin.style.setProperty("--c", catColor(b.categorie));
     pin.innerHTML =
-      '<div class="pin-pill"><i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i></div>'+
+      '<div class="pin-pill">'+buildingIconsHTML(b)+'</div>'+
       '<div class="pin-tail"></div>'+
       '<div class="pin-label">'+b.nom+'</div>';
     pin.onclick = function(e){e.stopPropagation();openDetail(b.id);};
@@ -176,7 +191,7 @@ function renderMaptilerPins(){
     el.className = "pin";
     el.style.setProperty("--c", catColor(b.categorie));
     el.innerHTML =
-      '<div class="pin-pill"><i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i></div>'+
+      '<div class="pin-pill">'+buildingIconsHTML(b)+'</div>'+
       '<div class="pin-tail"></div>'+
       '<div class="pin-label">'+b.nom+'</div>';
     el.onclick = function(e){e.stopPropagation();openDetail(b.id);};
@@ -257,8 +272,8 @@ function buildShelf(){
           ? '<img class="sh-photo-img" src="'+url+'" alt="'+b.nom+'" loading="lazy"'+
             ' style="opacity:0;transition:opacity .3s;" onload="this.style.opacity=1"'+
             ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'+ 
-            '<div class="sh-photo-ph" style="display:none;position:absolute;inset:0;"><i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i></div>'
-          : '<div class="sh-photo-ph"><i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i></div>'
+            '<div class="sh-photo-ph" style="display:none;position:absolute;inset:0;">'+buildingIconsHTML(b)+'</div>'
+          : '<div class="sh-photo-ph">'+buildingIconsHTML(b)+'</div>'
         )+
       '</div>'+
       '<div class="sh-body">'+
@@ -376,7 +391,7 @@ function openDetail(id){
         ' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s;">'
       : '')+
     '<div class="dh-hero-ph"'+(url?' style="display:none"':'')+'>'+
-      '<i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i>'+
+      '<i class="ti '+buildingIcon(b)+'" aria-hidden="true"></i>'+
       '<span>Photo à venir · '+b.nom+'</span>'+
     '</div>'+
     '<div class="dh-hero-overlay">'+
@@ -414,7 +429,7 @@ function buildDpList(){
     var cap  = b.capacite && b.capacite!=="0 personne" ? b.capacite : "";
     return '<div class="dp-row" data-bid="'+b.id+'" onclick="openDetail(\''+b.id+'\')">'+
       '<div class="dp-row-thumb">'+
-        '<i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i>'+
+        '<i class="ti '+buildingIcon(b)+'" aria-hidden="true"></i>'+
         '<div class="dp-row-thumb-cat" style="background:'+catColor(b.categorie)+'"></div>'+
       '</div>'+
       '<div class="dp-row-body">'+
