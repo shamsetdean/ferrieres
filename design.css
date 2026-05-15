@@ -612,6 +612,7 @@ body[data-variant="B"] .dh-hero-cat .dot{border-radius:1px;}
   font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
   color:var(--ink-3);margin-bottom:8px;padding:0 4px;
   display:flex;align-items:center;gap:8px;
+  animation:eyebrowIn .32s var(--ease) both;
 }
 body[data-variant="B"] .det-section-eyebrow{font-family:var(--f-mono);font-weight:500;}
 .det-section-eyebrow::before{
@@ -626,7 +627,8 @@ body[data-variant="B"] .det-section-eyebrow{font-family:var(--f-mono);font-weigh
   border-radius:var(--r-lg);
   box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 28px rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.6);
   overflow:hidden;
-  animation:cardSettle .5s var(--ease) both;
+  /* animation déclenchée APRÈS l'ouverture du panel (0.42s) */
+  animation:cardSettle .38s var(--ease) both;
 }
 body[data-variant="B"] .det-card{
   background:rgba(255,255,255,.56);
@@ -636,14 +638,78 @@ body[data-variant="B"] .det-card{
   box-shadow:0 0 0 1px var(--line);
 }
 @keyframes cardSettle{
-  from{opacity:0;transform:translateY(8px) scale(.985);}
+  from{opacity:0;transform:translateY(10px) scale(.988);}
   to{opacity:1;transform:none;}
 }
-.det-section:nth-child(1) .det-card{animation-delay:.04s;}
-.det-section:nth-child(2) .det-card{animation-delay:.10s;}
-.det-section:nth-child(3) .det-card{animation-delay:.16s;}
-.det-section:nth-child(4) .det-card{animation-delay:.22s;}
-.det-section:nth-child(5) .det-card{animation-delay:.28s;}
+
+/* Eyebrow — glisse depuis la gauche, légèrement avant la card */
+@keyframes eyebrowIn{
+  from{opacity:0;transform:translateX(-8px);}
+  to{opacity:1;transform:none;}
+}
+
+/* Stagger : eyebrow + card par section, décalés après les 0.42s du panel */
+.det-section:nth-child(1) .det-section-eyebrow{animation-delay:.38s;}
+.det-section:nth-child(1) .det-card               {animation-delay:.44s;}
+.det-section:nth-child(2) .det-section-eyebrow{animation-delay:.50s;}
+.det-section:nth-child(2) .det-card               {animation-delay:.56s;}
+.det-section:nth-child(3) .det-section-eyebrow{animation-delay:.62s;}
+.det-section:nth-child(3) .det-card               {animation-delay:.68s;}
+.det-section:nth-child(4) .det-section-eyebrow{animation-delay:.74s;}
+.det-section:nth-child(4) .det-card               {animation-delay:.80s;}
+.det-section:nth-child(5) .det-section-eyebrow{animation-delay:.86s;}
+.det-section:nth-child(5) .det-card               {animation-delay:.92s;}
+
+/* Lignes det-row : entrent en cascade à l'intérieur de chaque card */
+.det-row{
+  animation:rowIn .28s var(--ease) both;
+}
+@keyframes rowIn{
+  from{opacity:0;transform:translateX(-6px);}
+  to{opacity:1;transform:none;}
+}
+/* Stagger des rows à l'intérieur d'une card (relatif au délai de la card) */
+.det-section:nth-child(1) .det-row:nth-child(1){animation-delay:.46s;}
+.det-section:nth-child(1) .det-row:nth-child(2){animation-delay:.50s;}
+.det-section:nth-child(1) .det-row:nth-child(3){animation-delay:.54s;}
+.det-section:nth-child(1) .det-row:nth-child(4){animation-delay:.58s;}
+.det-section:nth-child(2) .det-row:nth-child(1){animation-delay:.58s;}
+.det-section:nth-child(2) .det-row:nth-child(2){animation-delay:.62s;}
+.det-section:nth-child(2) .det-row:nth-child(3){animation-delay:.66s;}
+.det-section:nth-child(2) .det-row:nth-child(4){animation-delay:.70s;}
+.det-section:nth-child(3) .det-row:nth-child(1){animation-delay:.70s;}
+.det-section:nth-child(3) .det-row:nth-child(2){animation-delay:.74s;}
+.det-section:nth-child(3) .det-row:nth-child(3){animation-delay:.78s;}
+.det-section:nth-child(4) .det-row:nth-child(1){animation-delay:.82s;}
+.det-section:nth-child(4) .det-row:nth-child(2){animation-delay:.86s;}
+.det-section:nth-child(5) .det-row:nth-child(1){animation-delay:.94s;}
+.det-section:nth-child(5) .det-row:nth-child(2){animation-delay:.98s;}
+
+/* Chips équipements */
+.det-chip{
+  animation:chipPop .22s var(--ease) both;
+}
+@keyframes chipPop{
+  from{opacity:0;transform:scale(.8);}
+  to{opacity:1;transform:none;}
+}
+.det-chips .det-chip:nth-child(1){animation-delay:.72s;}
+.det-chips .det-chip:nth-child(2){animation-delay:.76s;}
+.det-chips .det-chip:nth-child(3){animation-delay:.80s;}
+.det-chips .det-chip:nth-child(4){animation-delay:.84s;}
+.det-chips .det-chip:nth-child(5){animation-delay:.88s;}
+.det-chips .det-chip:nth-child(6){animation-delay:.92s;}
+
+/* Bouton CTA — entre en dernier */
+.det-cta{
+  animation:ctaIn .32s var(--ease) both;
+  animation-delay:1.0s;
+}
+@keyframes ctaIn{
+  from{opacity:0;transform:translateY(8px);}
+  to{opacity:1;transform:none;}
+}
+
 body[data-variant="B"] .det-card{border-radius:6px;}
 
 .det-row{

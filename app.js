@@ -412,7 +412,14 @@ function openDetail(id){
       '<div class="dh-hero-cat"><span class="dot"></span>'+catLabel(b.categorie)+'</div>'+
     '</div>';
 
-  document.getElementById("det-info").innerHTML = infoHTML(b);
+  var detInfo = document.getElementById("det-info");
+  detInfo.innerHTML = infoHTML(b);
+  /* Force reflow pour relancer les animations CSS à chaque ouverture */
+  detInfo.querySelectorAll(".det-section,.det-card,.det-row,.det-chip,.det-cta").forEach(function(el){
+    el.style.animation="none";
+    void el.offsetWidth; /* reflow */
+    el.style.animation="";
+  });
 
   document.getElementById("det").classList.add("on");
 }
