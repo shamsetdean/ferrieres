@@ -26,12 +26,12 @@ var CAT_CFG = {
 };
 
 var SUPER = [
-  {id:"all",   label:"Tout",                    cats:null,         icon:"ti-layout-grid"},
-  {id:"mairie",label:"Mairie & Services",       cats:["administration","services-mun","ceremonies","education"],icon:"ti-building"},
-  {id:"assoc", label:"Culture",                 cats:["associations","evenements","culture","seniors"],icon:"ti-music"},
-  {id:"sport", label:"Sport",                   cats:["sport"],    icon:"ti-run"},
-  {id:"social",label:"Social",                  cats:["social"],   icon:"ti-heart"},
-  {id:"nature",label:"Nature & Patrimoine",     cats:["services-publics","infrastructure","environnement","patrimoine"],icon:"ti-leaf"}
+  {id:"all",    label:"Tout",                          cats:null,         icon:"ti-layout-grid"},
+  {id:"mairie", label:"Mairie & Services",             cats:["administration","services-mun","ceremonies","education"],icon:"ti-building"},
+  {id:"loisirs",label:"Loisirs",                      cats:["associations","evenements","culture","seniors"],icon:"ti-music"},
+  {id:"sport",  label:"Sport",                        cats:["sport"],    icon:"ti-run"},
+  {id:"social", label:"Social et intergénérationnel", cats:["social"],   icon:"ti-heart"},
+  {id:"nature", label:"Nature & Patrimoine",           cats:["services-publics","infrastructure","environnement","patrimoine"],icon:"ti-leaf"}
 ];
 
 function catIcon(c){return (CAT_CFG[c]||{icon:"ti-building"}).icon;}
@@ -52,7 +52,13 @@ function buildingIconsHTML(b){
 }
 function catColor(c){return (CATEGORIES[c]||{color:"#8E6628"}).color;}
 function catLabel(c){return (CATEGORIES[c]||{label:c}).label;}
-function superOf(b){for(var i=1;i<SUPER.length;i++){if(SUPER[i].cats.indexOf(b.categorie)>=0)return SUPER[i].id;}return "all";}
+/* Retourne le tableau des super-filtres d'un bâtiment
+   Priorité : champ superFiltres[] dans data.js > mapping par catégorie */
+function superOf(b){
+  if(b.superFiltres&&b.superFiltres.length)return b.superFiltres;
+  for(var i=1;i<SUPER.length;i++){if(SUPER[i].cats.indexOf(b.categorie)>=0)return [SUPER[i].id];}
+  return ["all"];
+}
 function skip(v){return v===null||v===undefined||v===""||v==="--"||v==="-";}
 
 function hav(a,b,c,d){
@@ -245,7 +251,10 @@ function setFilter(cat){
 }
 
 function getFiltered(){
-  var out = BATIMENTS.filter(function(b){return S.filter==="all" || superOf(b)===S.filter;});
+  var out = BATIMENTS.filter(function(b){
+    if(S.filter==="all") return true;
+    return superOf(b).indexOf(S.filter)>=0;
+  });
   if(S.lat !== null) out.sort(function(a,b){return hav(S.lat,S.lng,a.lat,a.lng) - hav(S.lat,S.lng,b.lat,b.lng);});
   return out;
 }
