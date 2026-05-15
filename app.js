@@ -414,10 +414,19 @@ function openDetail(id){
 
   var detInfo = document.getElementById("det-info");
   detInfo.innerHTML = infoHTML(b);
+
+  /* Bouton Naviguer — ouvre la vue AR avec ce bâtiment pré-sélectionné */
+  var cta = document.querySelector(".det-cta");
+  if(cta){
+    cta.onclick = function(){
+      window.location.href = "ar.html?id=" + encodeURIComponent(b.id);
+    };
+  }
+
   /* Force reflow pour relancer les animations CSS à chaque ouverture */
   detInfo.querySelectorAll(".det-section,.det-card,.det-row,.det-chip,.det-cta").forEach(function(el){
     el.style.animation="none";
-    void el.offsetWidth; /* reflow */
+    void el.offsetWidth;
     el.style.animation="";
   });
 
