@@ -878,3 +878,95 @@ body[data-variant="B"] .ab-stat .n{font-family:var(--f-serif);font-weight:500;}
   /* Hide filter rail on desktop, use sidebar chips instead */
   #filt-rail{display:none;}
 }
+
+/* ══ LANDSCAPE MOBILE ════════════════════════════════
+   max-height:500px cible les smartphones en paysage
+   (iPhone : ~375px de hauteur en landscape)
+═══════════════════════════════════════════════════ */
+@media(max-height:500px) and (orientation:landscape){
+
+  /* Header pill plus compact */
+  #hpill{
+    padding:6px 12px 6px 7px;
+    top:calc(8px + var(--sat));
+    left:8px;
+  }
+  #hp-ico{width:28px;height:28px;border-radius:8px;}
+  #hp-ico i{font-size:13px;}
+  .hp-t{font-size:11px;}
+  .hp-s{display:none;}
+
+  /* Boutons carte */
+  #map-btns{
+    top:calc(8px + var(--sat));
+    right:8px;
+    gap:5px;
+  }
+  .mab{width:36px;height:36px;border-radius:10px;}
+  .mab i{font-size:17px;}
+
+  /* Rail de filtres plus compact, horizontal en bas à gauche */
+  #filt-rail{
+    top:auto;
+    bottom:calc(8px + var(--sab));
+    right:auto;
+    left:8px;
+    flex-direction:row;
+    gap:5px;
+  }
+  .fr-btn{width:36px;height:36px;border-radius:10px;}
+  .fr-btn i{font-size:16px;}
+
+  /* Shelf : hauteur réduite, cartes plus petites */
+  #shelf{
+    padding:10px 0 calc(8px + var(--sab));
+    bottom:0;
+    /* Laisser de la place pour le rail de filtres à gauche */
+    left:58px;
+  }
+  #shelf-cards{
+    gap:8px;
+    padding:4px 10px 8px;
+  }
+  .sh-card{
+    width:200px;
+  }
+  .sh-photo{
+    height:80px;
+  }
+  .sh-body{
+    padding:8px 10px 10px;
+  }
+  .sh-name{
+    font-size:12px;
+    -webkit-line-clamp:1;
+  }
+  .sh-meta{font-size:11px;}
+
+  /* Écran de détail : layout horizontal */
+  #det-body{
+    display:flex;
+    flex-direction:row;
+    overflow:hidden;
+  }
+  .dh-hero{
+    width:200px;
+    height:100%;
+    flex-shrink:0;
+  }
+  .det-content{
+    flex:1;
+    overflow-y:auto;
+    padding-bottom:calc(8px + var(--sab));
+  }
+
+  /* Header détail compact */
+  #det-hdr{
+    padding:calc(8px + var(--sat)) 12px 8px;
+  }
+  .dh-title{font-size:14px;}
+  .dh-close,.dh-nav-btn{width:32px;height:32px;}
+
+  /* Toast */
+  #toast{bottom:calc(80px + var(--sab));}
+}
