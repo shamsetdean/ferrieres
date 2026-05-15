@@ -6,6 +6,8 @@
 
 var PHOTO_DIR = "./photos/";
 
+function getPhotoUrl(b){ return b.photo ? PHOTO_DIR + b.photo : null; }
+
 var CAT_CFG = {
   "administration":   {icon:"ti-building"},
   "services-mun":     {icon:"ti-tool"},
@@ -46,7 +48,7 @@ function hav(a,b,c,d){
 function fd(m){return m<1000?Math.round(m)+" m":(m/1000).toFixed(1)+" km";}
 function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},2800);}
 
-var S = {map:null, useFallback:false, lat:null, lng:null, filter:"all", cur:null, curIdx:0, pins:{}};
+var S = {map:null, useFallback:false, uMk:null, watchId:null, lat:null, lng:null, filter:"all", cur:null, curIdx:0, pins:{}};
 
 /* ── BOUNDS de Ferrières (approx du fichier original) ── */
 var BBOX = {minLng:2.640, minLat:48.790, maxLng:2.790, maxLat:48.860};
@@ -148,10 +150,16 @@ function initMapTiler(){
     container:"map",
     style:"https://api.maptiler.com/maps/streets-v2/style.json?key="+MAPTILER_KEY,
     center:[2.7050,48.8215], zoom:14.8,
-    attributionControl:false, navigationControl:false
+    attributionControl:false, navigationControl:false,
+    maxBounds:[2.640,48.790,2.790,48.860]
+  });
+  /* Éviter les warnings "Image X could not be loaded" */
+  S.map.on("styleimagemissing",function(e){
+    try{var c=document.createElement("canvas");c.width=2;c.height=2;
+      var id=c.getContext("2d").getImageData(0,0,2,2);
+      S.map.addImage(e.id,{data:id.data,width:2,height:2});}catch(err){}
   });
   S.map.on("load", function(){
-    /* atténuer labels par défaut */
     (S.map.getStyle().layers||[]).forEach(function(l){
       if(l.type==="symbol"){try{S.map.setLayoutProperty(l.id,"visibility","none");}catch(e){}}
     });
@@ -241,10 +249,17 @@ function buildShelf(){
     card.style.setProperty("--c", catColor(b.categorie));
     var cap = b.capacite && b.capacite !== "0 personne" ? b.capacite : null;
     var dist = S.lat!==null ? fd(hav(S.lat,S.lng,b.lat,b.lng)) : null;
+    var url = getPhotoUrl(b);
     card.innerHTML =
       '<div class="sh-photo">'+
         '<div class="sh-photo-cat"><span class="dot"></span>'+catLabel(b.categorie)+'</div>'+
-        '<div class="sh-photo-ph"><i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i></div>'+
+        (url
+          ? '<img class="sh-photo-img" src="'+url+'" alt="'+b.nom+'" loading="lazy"'+
+            ' style="opacity:0;transition:opacity .3s;" onload="this.style.opacity=1"'+
+            ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'+ 
+            '<div class="sh-photo-ph" style="display:none;position:absolute;inset:0;"><i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i></div>'
+          : '<div class="sh-photo-ph"><i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i></div>'
+        )+
       '</div>'+
       '<div class="sh-body">'+
         '<div class="sh-name">'+b.nom+'</div>'+
@@ -352,8 +367,18 @@ function openDetail(id){
   /* Hero */
   var hero = document.getElementById("det-hero");
   hero.style.setProperty("--c", catColor(b.categorie));
+  var url = getPhotoUrl(b);
   hero.innerHTML =
-    '<div class="dh-hero-ph"><i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i><span>Photo · '+b.nom+'</span></div>'+
+    (url
+      ? '<img class="dh-hero-img" src="'+url+'" alt="'+b.nom+'"'+
+        ' onload="this.style.opacity=1"'+
+        ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"'+
+        ' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s;">'
+      : '')+
+    '<div class="dh-hero-ph"'+(url?' style="display:none"':'')+'>'+
+      '<i class="ti '+catIcon(b.categorie)+'" aria-hidden="true"></i>'+
+      '<span>Photo à venir · '+b.nom+'</span>'+
+    '</div>'+
     '<div class="dh-hero-overlay">'+
       '<div class="dh-hero-cat"><span class="dot"></span>'+catLabel(b.categorie)+'</div>'+
     '</div>';
@@ -403,19 +428,67 @@ function buildDpList(){
   }).join("");
 }
 
-/* ────────────────────────────────────────────────
-   GEOLOC (simplifiée pour la revue design)
-──────────────────────────────────────────────── */
+/* ── Triangle doré directionnel ── */
+var TRI_SVG=
+  '<svg width="28" height="34" viewBox="0 0 28 34" fill="none" xmlns="http://www.w3.org/2000/svg">'+
+    '<defs>'+
+      '<linearGradient id="tg" x1="14" y1="0" x2="14" y2="34" gradientUnits="userSpaceOnUse">'+
+        '<stop offset="0%" stop-color="#F0C866"/>'+
+        '<stop offset="55%" stop-color="#C8963A"/>'+
+        '<stop offset="100%" stop-color="#9A6E20"/>'+
+      '</linearGradient>'+
+      '<linearGradient id="tspec" x1="6" y1="2" x2="18" y2="22" gradientUnits="userSpaceOnUse">'+
+        '<stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>'+
+        '<stop offset="100%" stop-color="rgba(255,255,255,0)"/>'+
+      '</linearGradient>'+
+    '</defs>'+
+    '<polygon points="14,3 26,31 14,24 2,31" fill="rgba(0,0,0,0.18)" transform="translate(0,2)"/>'+
+    '<polygon points="14,2 26,30 14,23 2,30" fill="url(#tg)" stroke="rgba(255,255,255,0.65)" stroke-width="1.2" stroke-linejoin="round"/>'+
+    '<polygon points="14,4 23,26 14,20" fill="url(#tspec)"/>'+
+  '</svg>';
+
 function locateMe(){
-  if(!navigator.geolocation){toast("Géolocalisation non disponible"); return;}
-  var btn = document.getElementById("btn-locate");
+  if(!navigator.geolocation){toast("Géolocalisation non disponible");return;}
+  var btn=document.getElementById("btn-locate");
   btn.classList.add("on");
-  /* Pour la revue design : simuler une position près du centre */
-  setTimeout(function(){
-    S.lat = 48.8210; S.lng = 2.7058;
-    toast("Position obtenue (simulation)");
-    buildShelf(); buildDpList();
-  }, 600);
+  if(S.watchId!==null){navigator.geolocation.clearWatch(S.watchId);S.watchId=null;}
+  S.watchId=navigator.geolocation.watchPosition(
+    function(p){
+      S.lat=p.coords.latitude;S.lng=p.coords.longitude;
+      var heading=p.coords.heading;
+      if(!S.uMk){
+        /* Marqueur HTML triangle */
+        var el=document.createElement("div");
+        el.style.cssText="position:relative;width:56px;height:56px;display:flex;align-items:center;justify-content:center;pointer-events:none;";
+        el.innerHTML=
+          '<div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(176,140,80,.16),rgba(176,140,80,.04));border:1px solid rgba(176,140,80,.22);animation:hpulse 3s ease-in-out infinite;"></div>'+
+          '<div style="position:absolute;width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(176,140,80,.55);animation:hring 2.4s ease-out infinite;"></div>'+
+          '<div class="user-tri" style="position:relative;z-index:2;filter:drop-shadow(0 0 8px rgba(176,140,80,.70)) drop-shadow(0 3px 10px rgba(176,140,80,.40)) drop-shadow(0 1px 3px rgba(0,0,0,.25));transition:transform .5s cubic-bezier(.32,.72,0,1);">'+TRI_SVG+'</div>';
+        if(!document.getElementById("tri-kf")){
+          var s=document.createElement("style");s.id="tri-kf";
+          s.textContent='@keyframes hpulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.08);opacity:1}}@keyframes hring{0%{transform:scale(1);opacity:.6}80%{transform:scale(2);opacity:0}100%{transform:scale(2);opacity:0}}';
+          document.head.appendChild(s);
+        }
+        if(S.useFallback){
+          /* fallback : positionner le marqueur HTML dans la carte SVG */
+          var fb=document.getElementById("fallback-map");
+          if(fb){var pos=projectFallback(S.lat,S.lng,fb);el.style.position="absolute";el.style.left=(pos.x-28)+"px";el.style.top=(pos.y-28)+"px";fb.appendChild(el);S.uMk=el;}
+        } else if(S.map&&window.maptilersdk){
+          S.uMk=new maptilersdk.Marker({element:el,anchor:"center"}).setLngLat([S.lng,S.lat]).addTo(S.map);
+        }
+        if(S.map&&!S.useFallback)S.map.flyTo({center:[S.lng,S.lat],zoom:15,duration:900});
+        toast("Position obtenue");
+      } else {
+        if(!S.useFallback&&S.uMk.setLngLat)S.uMk.setLngLat([S.lng,S.lat]);
+      }
+      /* Rotation selon le cap */
+      var tri=document.querySelector(".user-tri");
+      if(tri&&heading!==null&&heading!==undefined)tri.style.transform="rotate("+heading+"deg)";
+      buildShelf();buildDpList();
+    },
+    function(){btn.classList.remove("on");toast("Position indisponible");},
+    {enableHighAccuracy:true,timeout:10000,maximumAge:2000}
+  );
 }
 
 /* ────────────────────────────────────────────────
