@@ -1,4 +1,4 @@
-var MAPTILER_KEY = "AhQ10drEx79exZrx0qNv";
+var MAPTILER_KEY = "agCfodKobp4NXzXAGTCb";
 
 var CATEGORIES = {
   "administration":    { label: "Administration",    color: "#1E3A5F" },
